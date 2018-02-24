@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#00F5FF"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+<ImageView
+    android:layout_width="40dp"
+    android:layout_height="50dp"
+    android:id="@+id/backlast"
+    android:scaleType="centerInside"
+    android:src="@drawable/ic_back"/>
+
+    <TextView
+        android:id="@+id/sheet_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+
+       android:layout_gravity="center_horizontal|center_vertical"
+        />
+</FrameLayout>

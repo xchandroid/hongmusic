@@ -1,0 +1,498 @@
+package com.vaiyee.hongmusic;
+
+
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.vaiyee.hongmusic.Adapter.SearchAdapter;
+import com.vaiyee.hongmusic.Utils.HttpClinet;
+import com.vaiyee.hongmusic.Utils.NetUtils;
+import com.vaiyee.hongmusic.Utils.OnLoadSearchFinishListener;
+import com.vaiyee.hongmusic.Utils.SearchUtils;
+import com.vaiyee.hongmusic.bean.DownloadInfo;
+import com.vaiyee.hongmusic.bean.KugouMusic;
+import com.vaiyee.hongmusic.bean.KugouSearchResult;
+import com.vaiyee.hongmusic.bean.Music;
+import com.vaiyee.hongmusic.bean.OnlineMusic;
+import com.vaiyee.hongmusic.bean.SearchMusic;
+import com.vaiyee.hongmusic.http.HttpCallback;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
+
+public class SearchActivity extends SwipeBackActivity {
+
+    private ImageView back,delete;
+    private Button search;
+    private EditText editText;
+    public static ListView listView;
+    private  SearchAdapter adapter;
+    private TextView textView;
+    private String geshou,coverUrl,lrc;
+    public static String geming;
+    private int endtime;
+    private ProgressDialog progressDialog;
+    private static List<KugouSearchResult.lists> songs = new ArrayList<>();
+    private static List<KugouSearchResult.lists> resultList = new ArrayList<>();
+    private int mfirstvisibleItem = 0,size = 0;
+    private static String content = null;
+    private static View footer;
+    private boolean isLoding = false;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_search);
+        footer = LayoutInflater.from(SearchActivity.this).inflate(R.layout.loading_footer,null);
+        initView();
+    }
+    private void initView()
+    {
+        adapter = new SearchAdapter(SearchActivity.this,R.layout.search_listitem,songs);
+        back = (ImageView) findViewById(R.id.fanhui);
+        textView = (TextView)findViewById(R.id.Null);
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+        editText = (EditText) findViewById(R.id.sousuokuang);
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String txt = editText.getText().toString();
+                if (txt.length()>0) {
+                    delete.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    delete.setVisibility(View.INVISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+        search = (Button) findViewById(R.id.search_online_music);
+        search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                ShowProgress();
+                content = editText.getText().toString();
+                if (TextUtils.isEmpty(content))
+                {
+                   Toast toast= Toast.makeText(SearchActivity.this,"请输入搜索内容",Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP , 0, 200);
+                    toast.show();
+                    return;
+                }
+                size = 20;
+                loadMore();
+
+
+
+/*
+                HttpClinet.SearchMusic(content, new HttpCallback<SearchMusic>() {
+                    @Override
+                    public void onSuccess(SearchMusic searchMusic) {
+                        List<SearchMusic.Song> songList = searchMusic.getSong();
+                        songs.clear();
+                        if (songList!=null) {
+                            songs.addAll(songList);
+                            adapter.notifyDataSetChanged();
+                            listView.setVisibility(View.VISIBLE);
+                            textView.setVisibility(View.GONE);
+                        }
+                        else
+                        {
+                            listView.setVisibility(View.GONE);
+                            textView.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+
+                    }
+                });
+
+                */
+
+            }
+        });
+        listView = (ListView) findViewById(R.id.searched_online_music);
+         footer = LayoutInflater.from(SearchActivity.this).inflate(R.layout.loading_footer,null);
+        listView.addFooterView(footer);
+        listView.removeFooterView(footer);
+        listView.setAdapter(adapter);
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int i, int i1, int i2) {  // i 是第一个可见item，第二个是可见的总item, 第三个参数是总的item
+                boolean isPulldonw = i>mfirstvisibleItem;
+                int lastvisibleItem = i+i1;
+                if (isPulldonw && !isLoding)  //判断listview是否滑动到底部（isLoading为限制开关，防止滑动过程一直调用loadMore方法）
+                {
+                    if (lastvisibleItem==i2-1)  //滑动到最后一个Item调用loadMore加载更多，此时isLoading为true，也就是正在加载
+                    {
+                        loadMore();
+                        isLoding = true;
+                        listView.addFooterView(footer);
+                    }
+                }
+                mfirstvisibleItem = i;
+            }
+        });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+              KugouSearchResult.lists  song = songs.get(i);
+                String hash = song.getFileHash();
+                geming = song.getSongName();
+                geshou = song.getSingerName();
+                endtime = song.getDuration()*1000;
+                getSongUrl(hash);
+            }
+        });
+
+
+        delete = (ImageView) findViewById(R.id.delete);
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               editText.setText("");
+            }
+        });
+    }
+   //滑动到底部自动加载更多
+    private void loadMore() {
+        HttpClinet.KugouSearch(content,size, new HttpCallback<KugouSearchResult>() {
+            @Override
+            public void onSuccess(KugouSearchResult kugouSearchResult) {
+                songs.clear();if (kugouSearchResult!=null) {
+                    resultList = kugouSearchResult.getResultList();
+                }
+                if (resultList!=null)
+                {
+                    songs.addAll(resultList);
+                    adapter.notifyDataSetChanged();
+                    CloseProgress();
+                    listView.setVisibility(View.VISIBLE);
+                    textView.setVisibility(View.GONE);
+                    listView.removeFooterView(footer);
+                    size+=20;
+                    isLoding = false;
+                }
+                else
+                {
+                    listView.setVisibility(View.GONE);
+                    textView.setVisibility(View.VISIBLE);
+                }
+
+
+            }
+
+            @Override
+            public void onFail(Exception e) {
+                CloseProgress();
+                Toast.makeText(SearchActivity.this,"获取数据失败，请检查网络设置重试",Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+
+    Handler handler = new Handler()
+    {
+        @Override
+        public void handleMessage(Message msg) {
+           switch (msg.what)
+           {
+               case 1:
+                   if (songs!=null) {
+                       adapter.notifyDataSetChanged();
+                       listView.setVisibility(View.VISIBLE);
+                       textView.setVisibility(View.GONE);
+                   }
+                   else
+                   {
+                       listView.setVisibility(View.GONE);
+                       textView.setVisibility(View.VISIBLE);
+                   }
+                   break;
+
+           }
+        }
+    };
+
+    private void getSongUrl(final String hash)
+    {
+        AlertDialog.Builder builder;
+        switch (NetUtils.getNetType())
+        {
+            case NET_WIFI:
+                HttpClinet.KugouUrl(hash, new HttpCallback<KugouMusic>() {
+                    @Override
+                    public void onSuccess(KugouMusic kugouMusic) {
+                        String path = kugouMusic.getData().getPlay_url();
+                        if (path!=null) {
+                            Log.d("歌曲地址是", path);
+                            PlayMusic playMusic = new PlayMusic();
+                            playMusic.play(path, 0);
+                            coverUrl = kugouMusic.getData().getImg();
+                            lrc = kugouMusic.getData().getLyrics();
+                            creatLrc(lrc,geming);
+                            MainActivity mainActivity = new MainActivity();
+                            mainActivity.tongbuShow(geming,geshou,coverUrl,endtime,MainActivity.ONLINE);
+                        }
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+
+                    }
+                });
+                break;
+            case NET_4G:
+                builder = new AlertDialog.Builder(SearchActivity.this);
+                builder.setMessage("当前正在使用移动网络，是否使用数据流量播放在线音乐？");
+                builder.setTitle("提示");
+                builder.setIcon(R.drawable.tip);
+                builder.setPositiveButton("流量多",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                HttpClinet.KugouUrl(hash, new HttpCallback<KugouMusic>() {
+                                    @Override
+                                    public void onSuccess(KugouMusic kugouMusic) {
+                                        String path = kugouMusic.getData().getPlay_url();
+                                        if (path!=null) {
+                                            Log.d("歌曲地址是", path);
+                                            PlayMusic playMusic = new PlayMusic();
+                                            playMusic.play(path, 0);
+                                            coverUrl = kugouMusic.getData().getImg();
+                                            lrc = kugouMusic.getData().getLyrics();
+                                            creatLrc(lrc,geming);
+                                            MainActivity mainActivity = new MainActivity();
+                                            mainActivity.tongbuShow(geming,geshou,coverUrl,endtime,MainActivity.ONLINE);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFail(Exception e) {
+
+                                    }
+                                });
+                                dialog.dismiss();
+                            }
+                        });
+
+                builder.setNegativeButton("伤不起",
+                        new android.content.DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                builder.create().show();
+                break;
+            case NET_3G:
+                builder = new AlertDialog.Builder(SearchActivity.this);
+                builder.setMessage("当前正在使用移动网络，是否使用数据流量播放在线音乐？");
+                builder.setTitle("提示");
+                builder.setIcon(R.drawable.tip);
+                builder.setPositiveButton("流量多",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                HttpClinet.KugouUrl(hash, new HttpCallback<KugouMusic>() {
+                                    @Override
+                                    public void onSuccess(KugouMusic kugouMusic) {
+                                        String path = kugouMusic.getData().getPlay_url();
+                                        if (path!=null) {
+                                            Log.d("歌曲地址是", path);
+                                            PlayMusic playMusic = new PlayMusic();
+                                            playMusic.play(path, 0);
+                                            coverUrl = kugouMusic.getData().getImg();
+                                            lrc = kugouMusic.getData().getLyrics();
+                                            creatLrc(lrc,geming);
+                                            MainActivity mainActivity = new MainActivity();
+                                            mainActivity.tongbuShow(geming,geshou,coverUrl,endtime,MainActivity.ONLINE);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFail(Exception e) {
+
+                                    }
+                                });
+                                dialog.dismiss();
+                            }
+                        });
+
+                builder.setNegativeButton("伤不起",
+                        new android.content.DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                builder.create().show();
+                break;
+            case NET_2G:
+                builder = new AlertDialog.Builder(SearchActivity.this);
+                builder.setMessage("当前正在使用移动网络，是否使用数据流量播放在线音乐？");
+                builder.setTitle("提示");
+                builder.setIcon(R.drawable.tip);
+                builder.setPositiveButton("流量多",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                HttpClinet.KugouUrl(hash, new HttpCallback<KugouMusic>() {
+                                    @Override
+                                    public void onSuccess(KugouMusic kugouMusic) {
+                                        String path = kugouMusic.getData().getPlay_url();
+                                        if (path!=null) {
+                                            Log.d("歌曲地址是", path);
+                                            PlayMusic playMusic = new PlayMusic();
+                                            playMusic.play(path, 0);
+                                            coverUrl = kugouMusic.getData().getImg();
+                                            lrc = kugouMusic.getData().getLyrics();
+                                            creatLrc(lrc,geming);
+                                            MainActivity mainActivity = new MainActivity();
+                                            mainActivity.tongbuShow(geming,geshou,coverUrl,endtime,MainActivity.ONLINE);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFail(Exception e) {
+
+                                    }
+                                });
+                                dialog.dismiss();
+                            }
+                        });
+
+                builder.setNegativeButton("伤不起",
+                        new android.content.DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                builder.create().show();
+                break;
+
+        }
+
+
+        /*
+        HttpClinet.getMusicUrl(songId, new HttpCallback<DownloadInfo>() {
+            @Override
+            public void onSuccess(DownloadInfo downloadInfo) {
+                if(downloadInfo==null||downloadInfo.getBitrate()==null)
+                {
+                    onFail(null);
+                    return;
+                }
+                String path = downloadInfo.getBitrate().getFile_link();
+                int endtime = downloadInfo.getBitrate().getFile_duration()*1000;
+                PlayMusic playMusic = new PlayMusic();
+                playMusic.play(path,0);
+                MainActivity mainActivity = new MainActivity();
+                mainActivity.tongbuShow(geming,geshou,coverUrl,endtime,MainActivity.ONLINE);
+            }
+
+            @Override
+            public void onFail(Exception e) {
+
+            }
+        });
+        */
+    }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+   public static void creatLrc(String lrc, String geming)
+    {
+        String filePath = null;
+        boolean hasSDCard = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);//是否有外置SD卡
+        if (hasSDCard) {
+            filePath =Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator+"HonchenMusic"+File.separator+"Lrc"+"/"+geming+".lrc";
+        } else
+            filePath =Environment.getDownloadCacheDirectory().toString() + File.separator +geming+".txt";
+
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {   //如果文件不存在
+                File dir = new File(file.getParent());  //获取file文件在内置或外置SD卡  getParent()与getParentFile()的区别：getParentFile()的返回值是File型的。而getParent() 的返回值是String型的。mkdirs是File类里面的方法，所以当然得用f.getParentFile().mkdirs();getParentFile()的返回值是File型的。而getParent() 的返回值是String型的。mkdirs是File类里面的方法，所以当然得用f.getParentFile().mkdirs();
+                dir.mkdirs();  //先创建文件夹
+                file.createNewFile();//创建文件
+            }
+            FileOutputStream outStream = new FileOutputStream(file);//创建文件字节输出流对象，以字节形式写入所创建的文件中
+            outStream.write(lrc.getBytes());//开始写入文件（也就是把文件写入内存卡中）
+            Log.d("歌词路径",filePath);
+            Log.d("歌词内容是",lrc);
+            outStream.close();//关闭文件字节输出流
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    //显示正在加载数据对话框
+    private void ShowProgress()
+    {
+            progressDialog = new ProgressDialog(SearchActivity.this);
+            progressDialog.setMessage("正在加载数据");
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.show();
+    }
+    //关闭正在加载对话框
+    private  void CloseProgress()
+    {
+        if (progressDialog!=null)
+        {
+            progressDialog.dismiss();
+        }
+    }
+
+}

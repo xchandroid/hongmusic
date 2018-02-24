@@ -1,0 +1,9 @@
+<litepal>
+    <dbname value="MyMusic"/>
+    <version value = "1"/>
+    <list>
+        <mapping class="com.vaiyee.hongmusic.bean.Sheet"/>
+        <mapping class="com.vaiyee.hongmusic.bean.OnlineMusic"/>
+        <mapping class="com.vaiyee.hongmusic.bean.OnlineMusiclist"/>
+    </list>
+</litepal>

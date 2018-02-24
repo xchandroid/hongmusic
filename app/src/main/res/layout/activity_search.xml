@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.vaiyee.hongmusic.SearchActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#00F5FF">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/ripple_bg"
+            android:id="@+id/fanhui"
+            android:src="@drawable/ic_back"/>
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="50dp">
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:hint="输入歌手、歌名、专辑..."
+            android:textColor="#C71585"
+            android:id="@+id/sousuokuang"
+            android:gravity="center_horizontal|center_vertical"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:background="@drawable/edit_seletor" />
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginRight="10dp"
+                android:visibility="invisible"
+                android:id="@+id/delete"
+                android:layout_gravity="end|center_horizontal|center_vertical"
+                android:src="@drawable/delete"/>
+        </FrameLayout>
+        <Button
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:padding="0dp"
+            android:id="@+id/search_online_music"
+            android:background="@drawable/ripple_bg"
+            android:text="搜索"/>
+    </LinearLayout>
+<ListView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/searched_online_music"
+    android:background="@drawable/button_style">
+</ListView>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="很抱歉...没有搜索到相关信息"
+        android:textSize="25sp"
+        android:id="@+id/Null"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:textColor="#EE0000"
+        android:visibility="gone"/>
+</LinearLayout>

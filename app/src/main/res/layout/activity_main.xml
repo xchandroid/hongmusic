@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:zhy="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:fitsSystemWindows="true"
+    android:id="@+id/drawerlaout"
+    android:layout_height="match_parent">
+
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    android:layout_height="wrap_content">
+<android.support.design.widget.AppBarLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fitsSystemWindows="true"
+    android:id="@+id/appbar">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#00F5FF"
+        android:fitsSystemWindows="true"
+        tools:context="com.vaiyee.hongmusic.MainActivity">
+
+
+        <com.vaiyee.hongmusic.ColorTrackView
+            android:id="@+id/changeTextColorView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:padding="0dp"
+            app:layout_constraintEnd_toStartOf="@+id/guideline"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="MissingConstraints"
+            zhy:direction="left"
+            zhy:progress="0"
+            zhy:text="本地音乐"
+            zhy:text_change_color="#FFFFFF"
+            zhy:text_origin_color="#ff000000"
+            zhy:text_size="20sp" />
+
+        <com.vaiyee.hongmusic.ColorTrackView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:padding="0dp"
+            app:layout_constraintStart_toStartOf="@+id/guideline"
+            app:layout_constraintTop_toTopOf="parent"
+            zhy:direction="left"
+            zhy:progress="0"
+            zhy:text="在线音乐"
+            zhy:text_change_color="#ffff0000"
+            zhy:text_origin_color="#EEEE00"
+            zhy:text_size="20sp" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
+        <ImageButton
+            android:id="@+id/opendrawermenu"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:fitsSystemWindows="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_menu"
+            android:background="@drawable/ripple_bg"
+            app:layout_constraintBottom_toBottomOf="@+id/music_search"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <ImageButton
+            android:id="@+id/music_search"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="26dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/ripple_bg"
+            android:fitsSystemWindows="true"
+            android:scaleType="centerInside"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/ic_menu_search" />
+    </android.support.constraint.ConstraintLayout>
+</android.support.design.widget.AppBarLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <android.support.v4.view.ViewPager
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/viewpager">
+
+        </android.support.v4.view.ViewPager>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#00F5FF"
+            android:id="@+id/play_bar"
+            android:gravity="center_horizontal|center_vertical"
+            android:layout_gravity="bottom">
+
+            <ImageView
+                android:id="@+id/play_bar_cover"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/default_cover" />
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1">
+
+                <com.vaiyee.hongmusic.GradualTextView
+                    android:id="@+id/play_bar_geming"
+                    style="@style/AppTheme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:singleLine="true"
+                    android:text="想象之中"
+                    android:textSize="25sp"
+                    app:layout_constraintBottom_toTopOf="@+id/play_bar_geshou"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_chainStyle="spread" />
+
+                <TextView
+                    android:id="@+id/play_bar_geshou"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginTop="2dp"
+                    android:text="许嵩"
+                    android:textColor="#8B4500"
+                    android:textSize="15sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/play_bar_geming"
+                    app:layout_constraintTop_toBottomOf="@+id/play_bar_geming" />
+            </android.support.constraint.ConstraintLayout>
+
+            <ImageView
+                android:id="@+id/play_bar_star"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/play_bar_btn_play_pause_selector" />
+
+            <ImageView
+                android:id="@+id/play_bar_next"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_play_bar_btn_next"
+                />
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
+<android.support.design.widget.NavigationView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/navigation_view"
+    android:layout_gravity="right"
+    app:menu="@menu/left_item"
+    app:headerLayout="@layout/nav_header"
+    app:itemIconTint="@color/blue">
+
+</android.support.design.widget.NavigationView>
+</android.support.v4.widget.DrawerLayout>
