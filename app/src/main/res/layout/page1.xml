@@ -12,7 +12,7 @@
     <me.wcy.lrcview.LrcView
         android:id="@+id/lrc_view_single"
         android:layout_width="match_parent"
-        android:layout_height="25dp"
+        android:layout_height="20dp"
         lrc:lrcAnimationDuration="1000"
         lrc:lrcCurrentTextColor="@color/blue"
         lrc:lrcDividerHeight="10dp"
@@ -20,5 +20,5 @@
         lrc:lrcPadding="40dp"
         lrc:lrcTextSize="@dimen/text_size_common"
         android:layout_gravity="bottom"
-        android:layout_marginBottom="5dp"/>
+        android:layout_marginBottom="10dp"/>
 </FrameLayout>

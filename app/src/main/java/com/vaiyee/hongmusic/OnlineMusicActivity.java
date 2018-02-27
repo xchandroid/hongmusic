@@ -71,13 +71,12 @@ public class OnlineMusicActivity extends SwipeBackActivity{
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 final OnlineMusic onlineMusic = onlineMusics.get(i-1);
                 final String songID = onlineMusic.getSong_id();
+                final String geming = onlineMusic.getTitle();
                 HttpClinet.getLrc(songID, new HttpCallback<OnlineLrc>() {
                     @Override
                     public void onSuccess(OnlineLrc onlineLrc) {
                         Lrccontent = onlineLrc.getLrcContent();
-                        editor.clear();
-                        editor.putString("geci",Lrccontent);
-                        editor.commit();
+                        SearchActivity.creatLrc(Lrccontent,geming);
 
                     }
 
@@ -86,6 +85,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
 
                     }
                 });
+
                 AlertDialog.Builder builder;
                switch (NetUtils.getNetType())
                {

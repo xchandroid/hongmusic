@@ -4,14 +4,23 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -23,26 +32,41 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.vaiyee.hongmusic.Adapter.songsAdapter;
+import com.vaiyee.hongmusic.Utils.QuanjuUtils;
 import com.vaiyee.hongmusic.Utils.getAudio;
 import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.fragement.PlayMusicFragment;
 import com.vaiyee.hongmusic.fragement.fragement1;
 import com.vaiyee.hongmusic.fragement.fragment2;
+import com.vaiyee.hongmusic.service.MyService;
 
+import java.sql.BatchUpdateException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static org.litepal.LitePalApplication.getContext;
 
@@ -57,17 +81,34 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
     private List<ColorTrackView> mTabs = new ArrayList<ColorTrackView>();
     private PlayMusicFragment playMusicFragment;
     private List<Fragment> list = new ArrayList<Fragment>();
-    private Boolean isShowfragment =false,Pause=false;
-    public static ImageView cover;
-    private static ImageView play,next;
-    public static TextView songname,singer;
+    private Boolean isShowfragment =false,Pause=false,firstopen = true;
+    public static ImageView cover,play;
+    private static ImageView next;
+    public static TextView songname,singer,daojishi;
     public static final int LOCAL =0 ;
     public static final int ONLINE = 1;
-    private static String a=null,b=null;
+    private static String a=null,b=null,time = null;
     private PlayMusic playMusic = new PlayMusic();
     private fragement1 f= new fragement1();
-    private Boolean firstplay = true,isPause=false;
+    public static Boolean firstplay = true,isPause=false,Xiumian = false;
     public static SharedPreferences sharedPreferences;
+    public static MyService.MusicBinder musicBinder;
+    private EditText editText;
+    private static Timer timer,timer2;
+    private static diingShiTask task;
+    private static Showtask showtask;
+    private static int s;
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            musicBinder = (MyService.MusicBinder) iBinder;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
 
     @SuppressLint("ResourceAsColor")
     @Override
@@ -95,6 +136,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
                 .getExternalStorageDirectory().getAbsolutePath()}, null, null);
         songname = findViewById(R.id.play_bar_geming);
         singer =findViewById(R.id.play_bar_geshou);
+        daojishi = findViewById(R.id.daojishi);
         cover = findViewById(R.id.play_bar_cover);
         play = findViewById(R.id.play_bar_star);
         next = findViewById(R.id.play_bar_next);
@@ -185,23 +227,82 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
                         Toast.makeText(MainActivity.this, "点击了" + item.getTitle(), Toast.LENGTH_LONG).show();
                         break;
                     case R.id.action_timer:
-                        Toast.makeText(MainActivity.this, "点击了" + item.getTitle(), Toast.LENGTH_LONG).show();
+                        View contentview = LayoutInflater.from(MainActivity.this).inflate(R.layout.timerexit,null);
+                        final PopupWindow popupWindow = new PopupWindow(contentview, 800,ViewGroup.LayoutParams.WRAP_CONTENT);
+                        editText = contentview.findViewById(R.id.timeredit);
+                        Button sure = contentview.findViewById(R.id.sure);
+                        sure.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                 time = editText.getText().toString();
+                                if (TextUtils.isEmpty(time))
+                                {
+                                    Toast.makeText(MainActivity.this,"请输入时间",Toast.LENGTH_LONG).show();
+                                    return;
+                                }
+                                s = Integer.parseInt(time)*60*1000;  //倒计时，毫秒为单位
+                                atTiemToExit(Integer.parseInt(time));
+                                popupWindow.dismiss();
+                            }
+                        });
+                        Button cancel = contentview.findViewById(R.id.cancel);
+                        cancel.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                popupWindow.dismiss();
+                            }
+                        });
+
+                        popupWindow.setFocusable(true);
+                        popupWindow.setOutsideTouchable(true);
+                        popupWindow.setTouchable(true);
+
+                        popupWindow.setTouchInterceptor(new View.OnTouchListener() {
+                            @Override
+                            public boolean onTouch(View view, MotionEvent motionEvent) {
+                                if (motionEvent.getAction() == MotionEvent.ACTION_OUTSIDE &&!popupWindow.isFocusable())
+                                {
+                                    return true;  //点击弹窗外面拦截事件，是弹窗不能通过点击外面消失
+                                }
+                                return false;
+                            }
+                        });
+
+                        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                            @Override
+                            public void onDismiss() {
+                                WindowManager.LayoutParams params1 = getWindow().getAttributes();
+                                params1.alpha = 1.0f;
+                                getWindow().setAttributes(params1);
+                            }
+                        });
+                        if (!Xiumian)
+                        {
+                            final WindowManager.LayoutParams params = getWindow().getAttributes();
+                            params.alpha = 0.5f;
+                            getWindow().setAttributes(params);
+                            popupWindow.showAtLocation(getWindow().getDecorView(),Gravity.CENTER,0,0);
+                        }
+                        else
+                        {
+                            cancelExit();
+                        }
                         break;
                     case R.id.action_exit:
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                        builder.setMessage("听完这首再退出吧...？？？");
+                        builder.setMessage("确定要退出程序吗？");
                         builder.setTitle("提示");
                         builder.setIcon(R.drawable.tip);
-                        builder.setPositiveButton("我不",
+                        builder.setPositiveButton("确定",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         dialog.dismiss();
-                                        android.os.Process.killProcess(android.os.Process
-                                                .myPid());
+                                        android.os.Process.killProcess(android.os.Process.myPid());
+                                        musicBinder.CancelNotification();
                                     }
                                 });
 
-                        builder.setNegativeButton("好吧",
+                        builder.setNegativeButton("再等等",
                                 new android.content.DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         dialog.dismiss();
@@ -229,6 +330,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         playMusic.getInstanse();
         showfragment();
         hidefragment();
+        bindService();
     }
 
     //同步播放条显示
@@ -236,6 +338,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
     {
         a = String.valueOf(Html.fromHtml(geming));
         b = String.valueOf(Html.fromHtml(geshou));
+        loadAsBitmap(coverUrl);
         if (playMusicFragment==null)
         {
             playMusicFragment = new PlayMusicFragment();
@@ -248,6 +351,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
            Glide.with(MyApplication.getQuanjuContext())
                    .load(coverUrl)
                    .placeholder(R.drawable.music_ic)
+                   .error(R.drawable.music_ic)
                    .into(cover);
                 playMusicFragment.setplayInfo(a,b,time,coverUrl,MainActivity.LOCAL);
             break;
@@ -257,6 +361,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
                 Glide.with(MyApplication.getQuanjuContext())
                         .load(coverUrl)
                         .placeholder(R.drawable.music_ic)
+                        .error(R.drawable.music_ic)
                         .into(cover);
                 playMusicFragment.setplayInfo(a,b,time,coverUrl,MainActivity.ONLINE);
                 break;
@@ -265,7 +370,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
     }
 
    //显示播放界面
-    private void showfragment() {
+    public void showfragment() {
         if (isShowfragment)
         {
             return;
@@ -361,23 +466,29 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
                     playMusic.play(path,0);
                     MainActivity mainActivity = new MainActivity();
                     mainActivity.tongbuShow(geming,geshou,path,endtime,MainActivity.LOCAL);
-                    playMusicFragment.setPause();
+                   // playMusicFragment.setPause();
                     isPause = false;
                     firstplay = false;
                 }
                 else {
                     playMusic.pause();
                 }
-                setpause();
-                break;
+                //setpause();
+                 break;
             case R.id.play_bar_next:
                 playMusic.playnext();
-                setpause();
+               // setpause();
                 break;
         }
 
     }
-
+    //绑定通知栏服务
+    private void bindService()
+    {
+        Intent intent = new Intent(this,MyService.class);
+        bindService(intent,serviceConnection,BIND_AUTO_CREATE);
+        startService(intent);//启动服务
+    }
     public void setpause()
     {
         if (!Pause)
@@ -390,6 +501,124 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
             play.setImageResource(R.drawable.play_bar_btn_play_pause_selector);
             Pause=false;
         }
+
+    }
+    //显示播放音乐的信息在通知栏
+    public void sendNotification()
+    {
+        musicBinder.sendNotification();
+    }
+    //同步通知栏歌曲播放信息
+    public void tongbuNoti(Bitmap url, String geming, String geshou)
+    {
+        musicBinder.tongbuShow(url,geming,geshou);
+    }
+    //同步通知栏播放按钮为暂停图标
+    public void setplayButtonpause()
+    {
+        musicBinder.setpause();
+    }
+    //同步通知栏播放按钮为开始播放图标
+    public void setplayButtonplay()
+    {
+        musicBinder.setplay();
+    }
+
+
+    @Override
+    protected void onResume() {
+        if (!firstopen)
+        {
+            showfragment();
+        }
+        super.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        firstopen =false;
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Intent intent = new Intent(this,MyService.class);
+        stopService(intent);
+        unbindService(serviceConnection);
+        super.onDestroy();
+    }
+
+    private void loadAsBitmap(String url)
+    {
+        Glide.with(MyApplication.getQuanjuContext())
+                .load(url)
+                .asBitmap()
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                        tongbuNoti(resource,a,b);
+                    }
+                });
+
+    }
+    //定时退出
+   private class diingShiTask extends TimerTask
+    {
+
+        @Override
+        public void run() {
+            Intent intent = new Intent(MainActivity.this,MyService.class);
+            stopService(intent);
+            unbindService(serviceConnection);
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }
+    }
+    private void atTiemToExit(int time)
+    {
+            timer = new Timer();
+            task = new diingShiTask();
+            timer.schedule(task, time * 60 * 1000);
+            Toast.makeText(MainActivity.this,"程序将于"+time+"分钟后退出",Toast.LENGTH_LONG).show();
+            showdaojishi();
+            Xiumian = true;
+    }
+    private void cancelExit()
+    {
+        task.cancel();
+        timer.cancel();
+        showtask.cancel();
+        timer2.cancel();
+        Toast.makeText(MainActivity.this,"取消了定时休眠",Toast.LENGTH_LONG).show();
+        Xiumian = false;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                daojishi.setText("");
+            }
+        });
+    }
+   private class Showtask extends TimerTask {
+        int totaltime;
+        public Showtask(int totaltime)
+        {
+            this.totaltime = totaltime;
+        }
+        @Override
+        public void run() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                   daojishi.setText("倒计时 "+ QuanjuUtils.formatTime("mm:ss",totaltime)+" 退出程序");
+                  totaltime = totaltime -1000;
+                }
+            });
+        }
+    }
+    private void showdaojishi()
+    {
+        timer2 = new Timer();
+        showtask = new Showtask(s);
+        timer2.schedule(showtask,200,1000);
 
     }
 }

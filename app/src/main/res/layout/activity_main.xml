@@ -185,6 +185,7 @@
     </LinearLayout>
 </LinearLayout>
 <android.support.design.widget.NavigationView
+    android:background="@drawable/menu_bg"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/navigation_view"
@@ -192,6 +193,13 @@
     app:menu="@menu/left_item"
     app:headerLayout="@layout/nav_header"
     app:itemIconTint="@color/blue">
-
+ <TextView
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:id="@+id/daojishi"
+     android:textColor="#FF4500"
+     android:layout_marginRight="10dp"
+     android:layout_marginBottom="5dp"
+     android:layout_gravity="center_vertical|end"/>
 </android.support.design.widget.NavigationView>
 </android.support.v4.widget.DrawerLayout>

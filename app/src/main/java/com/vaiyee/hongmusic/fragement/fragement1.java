@@ -20,6 +20,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.vaiyee.hongmusic.ColorTrackView;
 import com.vaiyee.hongmusic.MainActivity;
@@ -28,6 +29,7 @@ import com.vaiyee.hongmusic.PlayMusic;
 import com.vaiyee.hongmusic.R;
 import com.vaiyee.hongmusic.SearchActivity;
 import com.vaiyee.hongmusic.Utils.HttpClinet;
+import com.vaiyee.hongmusic.Utils.NetUtils;
 import com.vaiyee.hongmusic.bean.KugouMusic;
 import com.vaiyee.hongmusic.bean.KugouSearchResult;
 import com.vaiyee.hongmusic.bean.Song;
@@ -47,19 +49,21 @@ public class fragement1 extends Fragment {
 
     private TextView textView;
   private ListView listView;
- private static List<Song> songs;
+public static List<Song> songs;
  private  List<ColorTrackView> mTabs = new ArrayList<ColorTrackView>();
  private ColorTrackView t,tt;
-public static String coverUrl,geming;
+public static String coverUrl,geming,geshou;
+public static songsAdapter adapter;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment1_layout,null);
        // textView = view.findViewById(R.id.textView4);
-        songs =  getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        //songs =  getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        //  final songsAdapter adapter = new songsAdapter(getContext(),R.layout.localmusi_listitem,songs);
         listView = view.findViewById(R.id.localmusic_list);
-        final songsAdapter adapter = new songsAdapter(getContext(),R.layout.localmusi_listitem,songs);
-        listView.setAdapter(adapter);
+        updateSonglist();
+       // listView.setAdapter(adapter);
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int i) {
@@ -196,6 +200,10 @@ public static String coverUrl,geming;
             public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
                 final Song song = songs.get(i);
                 geming = song.getTitle().toString();
+                geshou = song.getSinger().toString();
+                PlayMusic playMusic = new PlayMusic();
+                final String path = song.getFileUrl();
+                playMusic.play(path,i);
                 getLrc(geming,song,i);
             }
         });
@@ -203,6 +211,15 @@ public static String coverUrl,geming;
     }
 
     private void getLrc(final String geming, final Song song, final int i) {
+        switch (NetUtils.getNetType())
+        {
+            case NET_NONE:
+                int time = song.getDuration();
+                MainActivity mainActivity = new MainActivity();
+                mainActivity.tongbuShow(geming,geshou,coverUrl,time,MainActivity.LOCAL);
+                Toast.makeText(MyApplication.getQuanjuContext(),"获取歌手写真失败，请检查网络再试",Toast.LENGTH_LONG).show();
+                return;
+        }
         HttpClinet.KugouSearch(geming, 5, new HttpCallback<KugouSearchResult>() {
             @Override
             public void onSuccess(KugouSearchResult kugouSearchResult) {
@@ -218,19 +235,19 @@ public static String coverUrl,geming;
                         String lrc = kugouMusic.getData().getLyrics();
                         SearchActivity.creatLrc(lrc,geming);
                         coverUrl = kugouMusic.getData().getImg();
-                        String geshou = song.getSinger().toString();
-                        final String path = song.getFileUrl();
                         int time = song.getDuration();
-                        PlayMusic playMusic = new PlayMusic();
-                        playMusic.play(path,i);
+                        //PlayMusic playMusic = new PlayMusic();
+                       // playMusic.play(path,i);
                         MainActivity mainActivity = new MainActivity();
                         mainActivity.tongbuShow(geming,geshou,coverUrl,time,MainActivity.LOCAL);
-                        mainActivity.setpause();
                     }
 
                     @Override
                     public void onFail(Exception e) {
-
+                        int time = song.getDuration();
+                        MainActivity mainActivity = new MainActivity();
+                        mainActivity.tongbuShow(geming,geshou,coverUrl,time,MainActivity.LOCAL);
+                        Toast.makeText(MyApplication.getQuanjuContext(),"获取歌词失败，请检查网络再试",Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -240,6 +257,15 @@ public static String coverUrl,geming;
 
             }
         });
+    }
+
+    //刷新音乐列表
+    public void updateSonglist()
+    {
+        getAudio.updateMedia();
+        songs = getAudio.getAllSongs(MyApplication.getQuanjuContext()) ;
+        adapter = new songsAdapter(MyApplication.getQuanjuContext(),R.layout.localmusi_listitem,songs);
+        listView.setAdapter(adapter);
     }
 
     @Override

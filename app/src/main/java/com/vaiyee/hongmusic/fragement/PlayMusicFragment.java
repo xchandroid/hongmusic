@@ -1,6 +1,7 @@
 package com.vaiyee.hongmusic.fragement;
 
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -72,10 +73,11 @@ import me.wcy.lrcview.LrcView;
  * A simple {@link Fragment} subclass.
  */
 public class PlayMusicFragment extends Fragment implements View.OnClickListener,View.OnTouchListener,SeekBar.OnSeekBarChangeListener, LyricView.OnPlayerClickListener{
-private static ImageView play,pre,next,playmode,hide,playmusicibg;
-public static ImageView playbg;
+private static ImageView pre,next,playmode,hide,playmusicibg;
+public static ImageView playbg,play;
 private OnBacktoMainActiviListener listener;
-private Boolean isPause=false,firstplay=true;
+private boolean isPause=false;
+public static boolean firstplay=true;
 public static PlayMusic playMusic;
 private static TextView geming=null,geshou=null,startTime=null,endTime = null;
 private static SeekBar seekBar;
@@ -86,6 +88,7 @@ private ImageView one,tow;
 public static LrcView singlelrc;
 private static LyricView lyricView;
 private boolean isFirstpager = true;
+private int mode = 0;
 private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
 
     public PlayMusicFragment() {
@@ -213,21 +216,21 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
                         int time = song.getDuration();
                         playMusic.play(path,0);
                         mainActivity.tongbuShow(geming,geshou,path,time,MainActivity.LOCAL);
-                        setPause();
-                        mainActivity.setpause();
+                       // setPause();
+                       // mainActivity.setpause();
                         isPause = false;
                         firstplay = false;
                         return;
                     }
                     playMusic.pause();
-                    play.setImageResource(R.drawable.play_btn_play_pause_selector);
+                  //  play.setImageResource(R.drawable.play_btn_play_pause_selector);
                     isPause = true;
                 }
                 else
                 {
                     playMusic.pause();
-                   setPause();
-                   mainActivity.setpause();
+                  // setPause();
+                   //ainActivity.setpause();
                 }
                 break;
             case R.id.pre:
@@ -237,7 +240,30 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
                 playMusic.playnext();
                 break;
             case R.id.playmode:
-                Toast.makeText(getContext(),"播放模式算法正在构思中",Toast.LENGTH_LONG).show();
+                switch (mode) {
+                    case 0:
+                        Intent intent = new Intent("com.vaiyee.playmode");
+                        intent.putExtra("mode",1); //随机播放
+                        getActivity().sendBroadcast(intent);
+                        playmode.setImageResource(R.drawable.play_btn_shuffle_selector);
+                        mode+=1;
+                        break;
+                    case 1:
+                        Intent intent1 = new Intent("com.vaiyee.playmode");
+                        intent1.putExtra("mode",0); //顺序播放
+                        getActivity().sendBroadcast(intent1);
+                        playmode.setImageResource(R.drawable.play_btn_loop_selector);
+                        mode = mode+1;
+                        break;
+                    case 2:
+                        Intent intent2 = new Intent("com.vaiyee.playmode");
+                        intent2.putExtra("mode",2); //单曲循环
+                        getActivity().sendBroadcast(intent2);
+                        playmode.setImageResource(R.drawable.play_btn_one_selector);
+                        mode = mode-2;
+                        break;
+
+                }
                 break;
             case R.id.hidefragment:
                 listener.hide();
@@ -246,7 +272,7 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
                 viewPager.setCurrentItem(0);
                 break;
             case R.id.second:
-                viewPager.setCurrentItem(2);
+                viewPager.setCurrentItem(1);
                 break;
         }
     }
@@ -287,11 +313,7 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
    {
        void hide();
    }
-   public void setPause()
-   {
-       play.setImageResource(R.drawable.ic_play_btn_pause);
-       isPause =false;
-   }
+
    public void setplayInfo(String a,String b,int endtime,String coverUrl,int type)
    {
        switch (type)
@@ -314,8 +336,6 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
 
                Glide.with(MyApplication.getQuanjuContext())
                        .load(coverUrl)
-                       .placeholder(R.drawable.music_ic)
-                       .error(R.drawable.music_ic)
                        .crossFade(1000)
                        .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),15,1))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
                        .into(playmusicibg);
@@ -349,14 +369,7 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
                        .crossFade(1000)
                        .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),15,1))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
                         .into(playmusicibg);
-
-
-
-             File  filee = new File("/storage/emulated/0/HonchenMusic/Lrc/" + SearchActivity.geming+".lrc");
-               if(filee.exists()) {
-                   lyricView.setLyricFile(filee);
-                   singlelrc.loadLrc(filee);
-               }
+               locatetoLrc(a);
                break;
        }
    }

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/edit_seletor"
+    android:gravity = "center">
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:layout_margin="15dp"
+        android:hint="请输入定时休眠时间(分钟)"
+        android:textColor="#C71585"
+        android:id="@+id/timeredit"
+        android:gravity="center_horizontal|center_vertical"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:background="@drawable/edit_seletor" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:id="@+id/sure"
+            android:layout_margin="10dp"
+            android:background="@drawable/button_style1"
+            android:textSize="15sp"
+            android:text="确定" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@drawable/button_style1"
+            android:layout_margin="10dp"
+            android:text="取消"
+            android:id="@+id/cancel"
+            android:textSize="15sp"/>
+    </LinearLayout>
+</LinearLayout>

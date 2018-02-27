@@ -4,6 +4,7 @@ import android.media.MediaPlayer;
 import android.widget.Toast;
 
 import com.vaiyee.hongmusic.Utils.HttpClinet;
+import com.vaiyee.hongmusic.Utils.NetUtils;
 import com.vaiyee.hongmusic.Utils.getAudio;
 import com.vaiyee.hongmusic.bean.KugouMusic;
 import com.vaiyee.hongmusic.bean.KugouSearchResult;
@@ -24,10 +25,10 @@ public class PlayMusic {
     public   static MediaPlayer mediaPlayer;
     public static Boolean isPause=false;
     private static int playposition;
-    private fragement1 fragement = new fragement1();
     private  List<Song>songList = new ArrayList<>();
     private  PlayMusicFragment p = new PlayMusicFragment();
     public static String geming;
+    private static MainActivity mainActivity;
     public void getInstanse()
     {
         mediaPlayer = new MediaPlayer();
@@ -36,11 +37,21 @@ public class PlayMusic {
     {
         if (PlayMusicFragment.timerTask!=null)
         {
-            PlayMusicFragment.timerTask.cancel();
+            PlayMusicFragment.timerTask.cancel();  //取消定时任务，不然每次点击列表播放音乐会跳播
             PlayMusicFragment.timer.cancel();
         }
+        if (mainActivity == null)
+        {
+            mainActivity = new MainActivity();
+        }
+        mainActivity.sendNotification();
+        mainActivity.setplayButtonpause();
 
         p.zhuanquanuqna();
+        PlayMusicFragment.play.setImageResource(R.drawable.ic_play_btn_pause);
+        MainActivity.play.setImageResource(R.drawable.ic_play_bar_btn_pause);
+        MainActivity.firstplay = false;
+        PlayMusicFragment.firstplay = false;
       if (mediaPlayer==null)
       {
           mediaPlayer = new MediaPlayer();
@@ -79,7 +90,20 @@ public class PlayMusic {
               p.resetLrcview();
               PlayMusicFragment.singlelrc.setLabel("暂无歌词");
               mediaPlayer.reset();
-              playnext();
+              playMode playMode = new playMode();
+              switch (playMode.getMode())
+              {
+                  case 0:
+                      playnext();
+                      break;
+                  case 1:
+                      SuijiPlay();
+                      break;
+                  case 2:
+                      danqu();
+                      break;
+              }
+
 
           }
       });
@@ -95,6 +119,12 @@ public class PlayMusic {
         {
             mediaPlayer.pause();
             p.stop();
+            PlayMusicFragment. play.setImageResource(R.drawable.play_btn_play_pause_selector);
+            MainActivity.play.setImageResource(R.drawable.play_bar_btn_play_pause_selector);
+
+                mainActivity.setplayButtonplay();
+
+
             isPause = true;
             return;
         }
@@ -102,6 +132,12 @@ public class PlayMusic {
         {
             mediaPlayer.start();
             p.zhuanquanuqna();
+            PlayMusicFragment.play.setImageResource(R.drawable.ic_play_btn_pause);
+            MainActivity.play.setImageResource(R.drawable.ic_play_bar_btn_pause);
+
+                mainActivity.setplayButtonpause();
+
+
             isPause=false;
         }
     }
@@ -124,6 +160,7 @@ public class PlayMusic {
         {
             mediaPlayer.reset();
         }
+        play(path,playposition);
         getLrc(path,geming,geshou,endtime);
 
     }
@@ -141,19 +178,70 @@ public class PlayMusic {
         String path = song.getFileUrl();
         String geming = song.getTitle();
         String geshou = song.getSinger();
-        String coverUrl = song.getFileUrl();
+       // String coverUrl = song.getFileUrl();
         int endtime = song.getDuration();
         if (isPause)
         {
             mediaPlayer.reset();
         }
         play(path,playposition);
-        MainActivity mainActivity = new MainActivity();
-        mainActivity.tongbuShow(geming,geshou,coverUrl,endtime,MainActivity.LOCAL);
+        getLrc(path,geming,geshou,endtime);
+    }
+
+    public void SuijiPlay()
+    {
+          songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+          playposition = getRandom();
+          Song song = songList.get(playposition);
+        String path = song.getFileUrl();
+        String geming = song.getTitle();
+        String geshou = song.getSinger();
+        // String coverUrl = song.getFileUrl();
+        int endtime = song.getDuration();
+        if (isPause)
+        {
+            mediaPlayer.reset();
+        }
+        play(path,playposition);
+        getLrc(path,geming,geshou,endtime);
+    }
+
+    public void danqu()
+    {
+        songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        Song song = songList.get(playposition);
+        String path = song.getFileUrl();
+        String geming = song.getTitle();
+        String geshou = song.getSinger();
+        // String coverUrl = song.getFileUrl();
+        int endtime = song.getDuration();
+        if (isPause)
+        {
+            mediaPlayer.reset();
+        }
+        play(path,playposition);
+        getLrc(path,geming,geshou,endtime);
+    }
+
+    private int getRandom()
+    {
+        songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        int size = songList.size();
+        int randomshu = (int)(Math.random()*size+1);
+        return randomshu;
     }
 
     private void getLrc(final String path, final String geming, final String geshou, final int endtime)
     {
+        switch (NetUtils.getNetType())
+        {
+            case NET_NONE:
+                MainActivity mainActivity = new MainActivity();
+                mainActivity.tongbuShow(geming,geshou,path,endtime,MainActivity.LOCAL);
+                Toast.makeText(MyApplication.getQuanjuContext(),"当前无网络，获取歌手写真失败",Toast.LENGTH_LONG).show();
+                return;
+        }
+
         HttpClinet.KugouSearch(geming, 5, new HttpCallback<KugouSearchResult>() {
             @Override
             public void onSuccess(KugouSearchResult kugouSearchResult) {
@@ -164,15 +252,17 @@ public class PlayMusic {
                     public void onSuccess(KugouMusic kugouMusic) {
                         String coverUrl = kugouMusic.getData().getImg();
                         String Lrc = kugouMusic.getData().getLyrics();
-                        SearchActivity.creatLrc(Lrc,geming);
-                        play(path,playposition);
+                        SearchActivity.creatLrc(Lrc,geming);  //创建歌词文件，为了在Playmusicfragemet中能够定位歌词显示到Lrcview中
+                        // play(path,playposition);
                         MainActivity mainActivity = new MainActivity();
                         mainActivity.tongbuShow(geming,geshou,coverUrl,endtime,MainActivity.LOCAL);
                     }
 
                     @Override
                     public void onFail(Exception e) {
-
+                        MainActivity mainActivity = new MainActivity();
+                        mainActivity.tongbuShow(geming,geshou,path,endtime,MainActivity.LOCAL);
+                        Toast.makeText(MyApplication.getQuanjuContext(),"获取歌词失败，请检查网络再试",Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -184,5 +274,18 @@ public class PlayMusic {
             }
         });
 
+    }
+
+    public static class playMode
+    {
+       static int mode=6;
+
+        public int getMode() {
+            return mode;
+        }
+
+        public void setMode(int mode) {
+            this.mode = mode;
+        }
     }
 }

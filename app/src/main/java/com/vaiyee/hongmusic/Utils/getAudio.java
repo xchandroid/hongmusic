@@ -2,10 +2,14 @@ package com.vaiyee.hongmusic.Utils;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.media.MediaScannerConnection;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 
+import com.vaiyee.hongmusic.MyApplication;
 import com.vaiyee.hongmusic.bean.Song;
 
 import java.util.ArrayList;
@@ -92,5 +96,10 @@ public class getAudio {
         }
         Collections.reverse(songs);
         return songs;
+    }
+    public static void updateMedia()
+    {
+        MediaScannerConnection.scanFile(MyApplication.getQuanjuContext(),new String[]{Environment.getExternalStorageDirectory().getAbsolutePath()},null,null);
+
     }
 }

@@ -3,18 +3,21 @@ package com.vaiyee.hongmusic;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -78,7 +81,7 @@ public class SearchActivity extends SwipeBackActivity {
     }
     private void initView()
     {
-        adapter = new SearchAdapter(SearchActivity.this,R.layout.search_listitem,songs);
+        adapter = new SearchAdapter(SearchActivity.this,this,R.layout.search_listitem,songs);
         back = (ImageView) findViewById(R.id.fanhui);
         textView = (TextView)findViewById(R.id.Null);
         back.setOnClickListener(new View.OnClickListener() {
@@ -209,6 +212,13 @@ public class SearchActivity extends SwipeBackActivity {
     }
    //滑动到底部自动加载更多
     private void loadMore() {
+        switch (NetUtils.getNetType())
+        {
+            case NET_NONE:
+                Toast.makeText(SearchActivity.this,"当前无网络，请检查网络设置再试",Toast.LENGTH_LONG).show();
+                CloseProgress();
+                return;
+        }
         HttpClinet.KugouSearch(content,size, new HttpCallback<KugouSearchResult>() {
             @Override
             public void onSuccess(KugouSearchResult kugouSearchResult) {
@@ -232,7 +242,7 @@ public class SearchActivity extends SwipeBackActivity {
                     textView.setVisibility(View.VISIBLE);
                 }
 
-
+                      hintKeyboard();
             }
 
             @Override
@@ -291,13 +301,14 @@ public class SearchActivity extends SwipeBackActivity {
 
                     @Override
                     public void onFail(Exception e) {
-
+                        CloseProgress();
+                        Toast.makeText(SearchActivity.this,"获取在线音乐失败！请检查网络设置",Toast.LENGTH_LONG).show();
                     }
                 });
                 break;
             case NET_4G:
                 builder = new AlertDialog.Builder(SearchActivity.this);
-                builder.setMessage("当前正在使用移动网络，是否使用数据流量播放在线音乐？");
+                builder.setMessage("当前正在使用4G网络，是否使用数据流量播放在线音乐？");
                 builder.setTitle("提示");
                 builder.setIcon(R.drawable.tip);
                 builder.setPositiveButton("流量多",
@@ -321,7 +332,8 @@ public class SearchActivity extends SwipeBackActivity {
 
                                     @Override
                                     public void onFail(Exception e) {
-
+                                        CloseProgress();
+                                        Toast.makeText(SearchActivity.this,"获取在线音乐失败！请检查网络设置",Toast.LENGTH_LONG).show();
                                     }
                                 });
                                 dialog.dismiss();
@@ -338,7 +350,7 @@ public class SearchActivity extends SwipeBackActivity {
                 break;
             case NET_3G:
                 builder = new AlertDialog.Builder(SearchActivity.this);
-                builder.setMessage("当前正在使用移动网络，是否使用数据流量播放在线音乐？");
+                builder.setMessage("当前正在使用3G网络，是否使用数据流量播放在线音乐？");
                 builder.setTitle("提示");
                 builder.setIcon(R.drawable.tip);
                 builder.setPositiveButton("流量多",
@@ -362,7 +374,8 @@ public class SearchActivity extends SwipeBackActivity {
 
                                     @Override
                                     public void onFail(Exception e) {
-
+                                        CloseProgress();
+                                        Toast.makeText(SearchActivity.this,"获取在线音乐失败！请检查网络设置",Toast.LENGTH_LONG).show();
                                     }
                                 });
                                 dialog.dismiss();
@@ -379,7 +392,7 @@ public class SearchActivity extends SwipeBackActivity {
                 break;
             case NET_2G:
                 builder = new AlertDialog.Builder(SearchActivity.this);
-                builder.setMessage("当前正在使用移动网络，是否使用数据流量播放在线音乐？");
+                builder.setMessage("当前正在使用2G网络，缓冲较慢，确定是否播放在线音乐？");
                 builder.setTitle("提示");
                 builder.setIcon(R.drawable.tip);
                 builder.setPositiveButton("流量多",
@@ -403,7 +416,8 @@ public class SearchActivity extends SwipeBackActivity {
 
                                     @Override
                                     public void onFail(Exception e) {
-
+                                        CloseProgress();
+                                        Toast.makeText(SearchActivity.this,"获取在线音乐失败！请检查网络设置",Toast.LENGTH_LONG).show();
                                     }
                                 });
                                 dialog.dismiss();
@@ -418,6 +432,7 @@ public class SearchActivity extends SwipeBackActivity {
                         });
                 builder.create().show();
                 break;
+
 
         }
 
@@ -451,14 +466,15 @@ public class SearchActivity extends SwipeBackActivity {
         super.onBackPressed();
     }
 
-   public static void creatLrc(String lrc, String geming)
+   public static void creatLrc(String lrc, String geming)         //创建歌词文件，为了在Playmusicfragemet中能够定位歌词显示到Lrcview中
     {
+        String name = String.valueOf(Html.fromHtml(geming));
         String filePath = null;
         boolean hasSDCard = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);//是否有外置SD卡
         if (hasSDCard) {
-            filePath =Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator+"HonchenMusic"+File.separator+"Lrc"+"/"+geming+".lrc";
+            filePath =Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator+"HonchenMusic"+File.separator+"Lrc"+"/"+name+".lrc";
         } else
-            filePath =Environment.getDownloadCacheDirectory().toString() + File.separator +geming+".txt";
+            filePath =Environment.getDownloadCacheDirectory().toString() + File.separator +name+".lrc";
 
         try {
             File file = new File(filePath);
@@ -494,5 +510,17 @@ public class SearchActivity extends SwipeBackActivity {
             progressDialog.dismiss();
         }
     }
+
+    private void hintKeyboard() {
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        if(imm.isActive()&&getCurrentFocus()!=null)
+        {
+            if (getCurrentFocus().getWindowToken()!=null)
+        {
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS); }
+        }
+    }
+
+
 
 }
