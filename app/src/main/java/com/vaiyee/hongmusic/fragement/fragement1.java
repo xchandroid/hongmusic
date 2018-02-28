@@ -223,11 +223,16 @@ public static songsAdapter adapter;
         HttpClinet.KugouSearch(geming, 5, new HttpCallback<KugouSearchResult>() {
             @Override
             public void onSuccess(KugouSearchResult kugouSearchResult) {
-                List<KugouSearchResult.lists> resultList= kugouSearchResult.getResultList();
-                if (resultList==null)
+                if (kugouSearchResult==null)
                 {
+                    int time = song.getDuration();
+                    MainActivity mainActivity = new MainActivity();
+                    mainActivity.tongbuShow(geming,geshou,coverUrl,time,MainActivity.LOCAL);
+                    Toast.makeText(MyApplication.getQuanjuContext(),"获取歌词失败，请检查网络再试",Toast.LENGTH_LONG).show();
                     return;
                 }
+                List<KugouSearchResult.lists> resultList= kugouSearchResult.getResultList();
+
                 String hash = resultList.get(0).getFileHash();
                 HttpClinet.KugouUrl(hash, new HttpCallback<KugouMusic>() {
                     @Override
@@ -262,7 +267,7 @@ public static songsAdapter adapter;
     //刷新音乐列表
     public void updateSonglist()
     {
-        getAudio.updateMedia();
+       // getAudio.updateMedia();
         songs = getAudio.getAllSongs(MyApplication.getQuanjuContext()) ;
         adapter = new songsAdapter(MyApplication.getQuanjuContext(),R.layout.localmusi_listitem,songs);
         listView.setAdapter(adapter);

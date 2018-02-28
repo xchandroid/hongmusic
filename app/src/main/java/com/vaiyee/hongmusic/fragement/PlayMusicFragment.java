@@ -252,7 +252,7 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
                         Intent intent1 = new Intent("com.vaiyee.playmode");
                         intent1.putExtra("mode",0); //顺序播放
                         getActivity().sendBroadcast(intent1);
-                        playmode.setImageResource(R.drawable.play_btn_loop_selector);
+                        playmode.setImageResource(R.drawable.shunxu);
                         mode = mode+1;
                         break;
                     case 2:
@@ -260,7 +260,14 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
                         intent2.putExtra("mode",2); //单曲循环
                         getActivity().sendBroadcast(intent2);
                         playmode.setImageResource(R.drawable.play_btn_one_selector);
-                        mode = mode-2;
+                        mode = mode+1;
+                        break;
+                    case 3:
+                        Intent intent3 = new Intent("com.vaiyee.playmode");
+                        intent3.putExtra("mode",3); //列表循环
+                        getActivity().sendBroadcast(intent3);
+                        playmode.setImageResource(R.drawable.play_btn_loop_selector);
+                        mode = mode-3;
                         break;
 
                 }

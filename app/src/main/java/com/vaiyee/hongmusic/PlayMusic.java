@@ -1,5 +1,6 @@
 package com.vaiyee.hongmusic;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.widget.Toast;
 
@@ -12,6 +13,7 @@ import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.fragement.PlayMusicFragment;
 import com.vaiyee.hongmusic.fragement.fragement1;
 import com.vaiyee.hongmusic.http.HttpCallback;
+import com.vaiyee.hongmusic.service.MyService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ public class PlayMusic {
     private  List<Song>songList = new ArrayList<>();
     private  PlayMusicFragment p = new PlayMusicFragment();
     public static String geming;
-    private static MainActivity mainActivity;
+    private  MainActivity mainActivity;
     public void getInstanse()
     {
         mediaPlayer = new MediaPlayer();
@@ -40,12 +42,11 @@ public class PlayMusic {
             PlayMusicFragment.timerTask.cancel();  //取消定时任务，不然每次点击列表播放音乐会跳播
             PlayMusicFragment.timer.cancel();
         }
-        if (mainActivity == null)
-        {
+        if (mainActivity ==null) {
             mainActivity = new MainActivity();
         }
         mainActivity.sendNotification();
-        mainActivity.setplayButtonpause();
+        MyService.noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_pause);
 
         p.zhuanquanuqna();
         PlayMusicFragment.play.setImageResource(R.drawable.ic_play_btn_pause);
@@ -102,6 +103,7 @@ public class PlayMusic {
                   case 2:
                       danqu();
                       break;
+                  case 3:xunhuanplay();
               }
 
 
@@ -121,10 +123,11 @@ public class PlayMusic {
             p.stop();
             PlayMusicFragment. play.setImageResource(R.drawable.play_btn_play_pause_selector);
             MainActivity.play.setImageResource(R.drawable.play_bar_btn_play_pause_selector);
-
-                mainActivity.setplayButtonplay();
-
-
+            if (mainActivity ==null) {
+                mainActivity = new MainActivity();
+            }
+            mainActivity.sendNotification();
+            MyService.noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_play);
             isPause = true;
             return;
         }
@@ -134,15 +137,23 @@ public class PlayMusic {
             p.zhuanquanuqna();
             PlayMusicFragment.play.setImageResource(R.drawable.ic_play_btn_pause);
             MainActivity.play.setImageResource(R.drawable.ic_play_bar_btn_pause);
-
-                mainActivity.setplayButtonpause();
-
-
+            if (mainActivity ==null) {
+                mainActivity = new MainActivity();
+            }
+            mainActivity.sendNotification();
+            MyService.noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_pause);
             isPause=false;
         }
     }
     public void playnext()
     {
+        playMode playMode = new playMode();
+        switch (playMode.getMode())
+        {
+            case 1:
+                SuijiPlay();
+                return;
+        }
         songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
         if (playposition>=songList.size()-1)
         {
@@ -165,8 +176,38 @@ public class PlayMusic {
 
     }
 
+    public void xunhuanplay()
+    {
+
+        songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        if (playposition>=songList.size()-1)
+        {
+           playposition = -1;
+        }
+        Song song = songList.get(playposition+1);
+        playposition = playposition+1;
+        String path = song.getFileUrl();
+        geming = song.getTitle();
+        String geshou = song.getSinger();
+        // String coverUrl = song.getFileUrl();
+        int endtime = song.getDuration();
+        if (isPause)
+        {
+            mediaPlayer.reset();
+        }
+        play(path,playposition);
+        getLrc(path,geming,geshou,endtime);
+    }
+
     public void playPre()
     {
+        playMode playMode = new playMode();
+        switch (playMode.getMode())
+        {
+            case 1:
+                SuijiPlay();
+                return;
+        }
         songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
         if (playposition==0)
         {
@@ -245,6 +286,13 @@ public class PlayMusic {
         HttpClinet.KugouSearch(geming, 5, new HttpCallback<KugouSearchResult>() {
             @Override
             public void onSuccess(KugouSearchResult kugouSearchResult) {
+                if (kugouSearchResult==null)
+                {
+                    MainActivity mainActivity = new MainActivity();
+                    mainActivity.tongbuShow(geming,geshou,path,endtime,MainActivity.LOCAL);
+                    Toast.makeText(MyApplication.getQuanjuContext(),"获取歌词失败，请检查网络再试",Toast.LENGTH_LONG).show();
+                    return;
+                }
                 List<KugouSearchResult.lists> lists = kugouSearchResult.getResultList();
                 String hash = lists.get(0).getFileHash();
                 HttpClinet.KugouUrl(hash, new HttpCallback<KugouMusic>() {
@@ -278,7 +326,7 @@ public class PlayMusic {
 
     public static class playMode
     {
-       static int mode=6;
+       static int mode=3;
 
         public int getMode() {
             return mode;

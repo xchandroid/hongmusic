@@ -9,19 +9,20 @@
 >
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="100dp"
+    android:layout_width="250dp"
     android:layout_height="235dp"
     android:background="@drawable/menu_bg"
     android:orientation="vertical"
     android:gravity="center_horizontal"
     android:paddingBottom="2dp">
 
-
     <Button
         android:id="@+id/pop_xq"
         android:layout_width="match_parent"
         android:layout_height="33dp"
        android:layout_margin="3dp"
+        android:textColor="#00FFFF"
+        android:textSize="20sp"
         android:background="@drawable/button_style1"
         android:text="标题"/>
 
@@ -29,7 +30,7 @@
 
     <Button
         android:id="@+id/pop_xg"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_margin="3dp"
         android:background="@drawable/button_style1"
         android:layout_height="33dp"
@@ -39,7 +40,7 @@
 
     <Button
         android:id="@+id/pop_wx"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="33dp"
         android:layout_margin="3dp"
         android:background="@drawable/button_style1"
@@ -48,7 +49,7 @@
 
     <Button
         android:id="@+id/pop_qq"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="33dp"
         android:background="@drawable/button_style1"
         android:layout_margin="3dp"
@@ -56,7 +57,7 @@
 
     <Button
         android:id="@+id/pop_s"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="33dp"
         android:layout_margin="3dp"
         android:background="@drawable/button_style1"
@@ -64,7 +65,7 @@
 
     <Button
         android:id="@+id/pop_lol"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="33dp"
         android:background="@drawable/button_style1"
         android:layout_margin="3dp"

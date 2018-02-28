@@ -50,7 +50,7 @@ public class MyService extends Service {
     public IBinder onBind(Intent intent) {
         return binder;       //当服务与活动绑定时返回binder对象，在活动中通过binder对象调用服务中的方法，在这里是发起通知或关闭通知
     }
-    static RemoteViews noti;
+  public  static RemoteViews noti;
     public  class MusicBinder extends Binder {
         //RemoteViews noti;
         Notification notification;

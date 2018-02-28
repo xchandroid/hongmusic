@@ -32,6 +32,11 @@ public class playModeReceiver extends BroadcastReceiver {
          case 2:
              playMode.setMode(2); //单曲循环
              Toast.makeText(context,"单曲循环",Toast.LENGTH_LONG).show();
+             break;
+         case 3:
+             playMode.setMode(3);
+             Toast.makeText(context,"列表循环",Toast.LENGTH_LONG).show();
+             break;
      }
 
     }

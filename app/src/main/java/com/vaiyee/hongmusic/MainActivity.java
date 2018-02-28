@@ -7,7 +7,9 @@ import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -81,7 +83,8 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
     private List<ColorTrackView> mTabs = new ArrayList<ColorTrackView>();
     private PlayMusicFragment playMusicFragment;
     private List<Fragment> list = new ArrayList<Fragment>();
-    private Boolean isShowfragment =false,Pause=false,firstopen = true;
+    private Boolean isShowfragment =false,Pause=false;
+    public static boolean firstopen = false;
     public static ImageView cover,play;
     private static ImageView next;
     public static TextView songname,singer,daojishi;
@@ -508,18 +511,23 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
     {
         musicBinder.sendNotification();
     }
+    //关闭通知栏服务
+    public void cancelNOti()
+    {
+        musicBinder.CancelNotification();
+    }
     //同步通知栏歌曲播放信息
     public void tongbuNoti(Bitmap url, String geming, String geshou)
     {
         musicBinder.tongbuShow(url,geming,geshou);
     }
     //同步通知栏播放按钮为暂停图标
-    public void setplayButtonpause()
+    public static void setplayButtonpause()
     {
         musicBinder.setpause();
     }
     //同步通知栏播放按钮为开始播放图标
-    public void setplayButtonplay()
+    public static void setplayButtonplay()
     {
         musicBinder.setplay();
     }
@@ -527,7 +535,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 
     @Override
     protected void onResume() {
-        if (!firstopen)
+        if (firstopen)
         {
             showfragment();
         }
@@ -621,6 +629,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         timer2.schedule(showtask,200,1000);
 
     }
+
 }
 
 

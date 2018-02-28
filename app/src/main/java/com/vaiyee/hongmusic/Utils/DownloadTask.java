@@ -1,7 +1,11 @@
 package com.vaiyee.hongmusic.Utils;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -18,6 +22,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -30,6 +37,8 @@ import okhttp3.Response;
 public class DownloadTask extends AsyncTask<String,Void,Integer> {
     private static String songName,geshou,path,ablumName;
     private static int time;
+    private static final String ScanIntent = "android.intent.action.MEDIA_SCANNER_SCAN_DIR";
+
     @Override
     protected Integer doInBackground(String... strings) {
         String url  = strings[0];
@@ -131,11 +140,25 @@ public class DownloadTask extends AsyncTask<String,Void,Integer> {
                 song.setDuration(time);
                 fragement1.songs.add(0,song);
                 fragement1.adapter.notifyDataSetChanged();
+                scanFile(MyApplication.getQuanjuContext(),path);
                 Toast.makeText(MyApplication.getQuanjuContext(),"下载成功",Toast.LENGTH_LONG).show();
                 break;
             case 1:
                 Toast.makeText(MyApplication.getQuanjuContext(),"歌曲已下载过啦",Toast.LENGTH_LONG).show();
                 break;
         }
+    }
+
+    //更新媒体库
+    /**
+     * 通知媒体库更新文件
+     * @param context
+     * @param filePath 文件全路径
+     *
+     * */
+    public void scanFile(Context context, String filePath) {
+        Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        scanIntent.setData(Uri.fromFile(new File(filePath)));
+        context.sendBroadcast(scanIntent);
     }
 }

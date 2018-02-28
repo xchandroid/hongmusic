@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:background="#00F5FF"
+    android:background="@drawable/profile_bg"
     android:layout_height="wrap_content">
     <LinearLayout
         android:layout_width="match_parent"
@@ -69,6 +69,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="#000000"
             android:text="宏晨音乐--by:"/>
         <ImageView
             android:layout_width="wrap_content"

@@ -283,7 +283,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
         footerView = LayoutInflater.from(OnlineMusicActivity.this).inflate(R.layout.online_musiclist_footer,null);
         onlineMusicList.addHeaderView(HeaderView);
         onlineMusicList.addFooterView(footerView);
-        onlineMusicAdapter =new OnlineMusicAdapter(OnlineMusicActivity.this,R.layout.localmusi_listitem,onlineMusics);
+        onlineMusicAdapter =new OnlineMusicAdapter(OnlineMusicActivity.this,R.layout.localmusi_listitem,onlineMusics,this);
         onlineMusicList.setAdapter(onlineMusicAdapter);
     }
     //获取传过来的intent中的Sheet对象

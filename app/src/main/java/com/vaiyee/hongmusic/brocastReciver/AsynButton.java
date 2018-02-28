@@ -18,13 +18,13 @@ public class AsynButton extends BroadcastReceiver {
         switch (type)
         {
             case 1:
-                playMusic.pause();
+                playMusic.pause();  //播放、暂停
                 break;
             case 2:
-                playMusic.playnext();
+                playMusic.playnext();  //下一首
                 break;
             case 3:
-                playMusic.playPre();
+                playMusic.playPre();  //上一首
                 break;
         }
 

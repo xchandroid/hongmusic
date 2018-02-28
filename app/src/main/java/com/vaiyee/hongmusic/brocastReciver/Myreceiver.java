@@ -14,7 +14,7 @@ import com.vaiyee.hongmusic.MyApplication;
 public class Myreceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        MainActivity mainActivity = new MainActivity();
+        MainActivity.firstopen = true;
         context.startActivity(new Intent(context,MainActivity.class));
     }
 }
