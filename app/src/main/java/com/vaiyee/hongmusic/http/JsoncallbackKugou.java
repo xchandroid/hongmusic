@@ -1,12 +1,10 @@
-package com.vaiyee.hongmusic.bean;
+package com.vaiyee.hongmusic.http;
 
 /**
  * Created by Administrator on 2018/2/20.
  */
 
 import android.os.Environment;
-import android.telecom.Call;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.zhy.http.okhttp.callback.Callback;

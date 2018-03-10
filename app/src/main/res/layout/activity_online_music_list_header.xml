@@ -9,11 +9,6 @@
         android:layout_height="150dp"
         android:scaleType="centerCrop"
         android:src="@drawable/profile_bg" />
-    <ImageView
-        android:layout_width="250dp"
-        android:layout_height="150dp"
-        android:src="@drawable/me"
-        android:layout_gravity="end"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -49,13 +44,12 @@
                 android:id="@+id/tv_update_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="最近更新：2016-01-03"
+                android:text="最近更新：2018-6-1"
                 android:textColor="@color/white"
                 android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/tv_comment"
-                android:background="#A6FFFFFF"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"

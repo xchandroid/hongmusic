@@ -9,10 +9,11 @@
     </style>
     <style name="AppTheme.Text" parent="TextAppearance.AppCompat" />
 
-    <style name="MyAPPtheme" parent="AppTheme">
+    <style name="MyAPPtheme" parent="Theme.AppCompat.Light.DarkActionBar">
     </style>
     <style name="popuAnim">
         <item name="android:windowEnterAnimation">@anim/popup_enter</item>
         <item name="android:windowExitAnimation">@anim/popup_exit</item>
     </style>
+
 </resources>

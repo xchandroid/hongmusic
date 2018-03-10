@@ -1,15 +1,21 @@
 package com.vaiyee.hongmusic;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.widget.Toast;
 
+import com.vaiyee.hongmusic.Utils.AudioFocusManager;
 import com.vaiyee.hongmusic.Utils.HttpClinet;
+import com.vaiyee.hongmusic.Utils.MediaSessionManager;
 import com.vaiyee.hongmusic.Utils.NetUtils;
 import com.vaiyee.hongmusic.Utils.getAudio;
 import com.vaiyee.hongmusic.bean.KugouMusic;
 import com.vaiyee.hongmusic.bean.KugouSearchResult;
 import com.vaiyee.hongmusic.bean.Song;
+import com.vaiyee.hongmusic.brocastReciver.MediaButtonReceiver;
 import com.vaiyee.hongmusic.fragement.PlayMusicFragment;
 import com.vaiyee.hongmusic.fragement.fragement1;
 import com.vaiyee.hongmusic.http.HttpCallback;
@@ -25,90 +31,97 @@ import java.util.List;
 
 public class PlayMusic {
     public   static MediaPlayer mediaPlayer;
-    public static Boolean isPause=false;
+    public static Boolean isPause=false,isRest = false;
     private static int playposition;
     private  List<Song>songList = new ArrayList<>();
     private  PlayMusicFragment p = new PlayMusicFragment();
     public static String geming;
+    private MediaSessionManager mediaSessionManager;
     private  MainActivity mainActivity;
+    public AudioFocusManager audioFocusManager;
     public void getInstanse()
     {
         mediaPlayer = new MediaPlayer();
     }
-    public  void play(String path, final int position)
-    {
-        if (PlayMusicFragment.timerTask!=null)
-        {
+    public  void play(String path, final int position) {
+        if (PlayMusicFragment.timerTask != null) {
             PlayMusicFragment.timerTask.cancel();  //取消定时任务，不然每次点击列表播放音乐会跳播
             PlayMusicFragment.timer.cancel();
         }
-        if (mainActivity ==null) {
+       // mediaSessionManager = new MediaSessionManager(this);
+        audioFocusManager = new AudioFocusManager(this);
+        if (audioFocusManager.requestAudioFocus())
+        {
+
+        if (mainActivity == null) {
             mainActivity = new MainActivity();
         }
         mainActivity.sendNotification();
-        MyService.noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_pause);
-
+        // MyService.noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_pause);
+        MainActivity.setplayButtonpause();
         p.zhuanquanuqna();
-        PlayMusicFragment.play.setImageResource(R.drawable.ic_play_btn_pause);
+        PlayMusicFragment.play.setImageResource(R.drawable.play_btn_pause_selector);
         MainActivity.play.setImageResource(R.drawable.ic_play_bar_btn_pause);
         MainActivity.firstplay = false;
         PlayMusicFragment.firstplay = false;
-      if (mediaPlayer==null)
-      {
-          mediaPlayer = new MediaPlayer();
-          try {
-              mediaPlayer.setDataSource(path);
-              mediaPlayer.prepare();
-              mediaPlayer.start();
-              playposition = position;
-          } catch (IOException e) {
-              e.printStackTrace();
-          }
-      }
-      else
-      {
-          if (mediaPlayer.isPlaying()||isPause)
-          {
-              mediaPlayer.stop();
-              mediaPlayer.reset();
-          }
-          try {
-              mediaPlayer.setDataSource(path);
-              mediaPlayer.prepare();
-              mediaPlayer.start();
-              playposition = position;
-          } catch (IOException e) {
-              e.printStackTrace();
-          }
-      }
+        if (mediaPlayer == null) {
+            mediaPlayer = new MediaPlayer();
+            try {
+                mediaPlayer.setDataSource(path);
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+                //isRest = false;
+                playposition = position;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            if (mediaPlayer.isPlaying() || isPause) {
+                mediaPlayer.stop();
+                mediaPlayer.reset();
+                //isRest = true;
+
+            }
+            try {
+                mediaPlayer.setDataSource(path);
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+               // isRest = false;
+                playposition = position;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
 
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-          @Override
-          public void onCompletion(MediaPlayer mediaPlayer) {
-              PlayMusicFragment.timer.cancel();
-              PlayMusicFragment .timerTask.cancel();
-              p.resetLrcview();
-              PlayMusicFragment.singlelrc.setLabel("暂无歌词");
-              mediaPlayer.reset();
-              playMode playMode = new playMode();
-              switch (playMode.getMode())
-              {
-                  case 0:
-                      playnext();
-                      break;
-                  case 1:
-                      SuijiPlay();
-                      break;
-                  case 2:
-                      danqu();
-                      break;
-                  case 3:xunhuanplay();
-              }
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                PlayMusicFragment.timer.cancel();
+                PlayMusicFragment.timerTask.cancel();
+                p.resetLrcview();
+                PlayMusicFragment.singlelrc.setLabel("暂无歌词");
+                mediaPlayer.reset();
+                playMode playMode = new playMode();
+                switch (playMode.getMode()) {
+                    case 0:
+                        playnext();
+                        break;
+                    case 1:
+                        SuijiPlay();
+                        break;
+                    case 2:
+                        danqu();
+                        break;
+                    case 3:
+                        xunhuanplay();
+                }
 
 
-          }
-      });
+            }
+        });
+
+    }
     }
 
     public void pause()
@@ -127,7 +140,8 @@ public class PlayMusic {
                 mainActivity = new MainActivity();
             }
             mainActivity.sendNotification();
-            MyService.noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_play);
+            //MyService.noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_play);
+            MainActivity.setplayButtonplay();
             isPause = true;
             return;
         }
@@ -135,13 +149,14 @@ public class PlayMusic {
         {
             mediaPlayer.start();
             p.zhuanquanuqna();
-            PlayMusicFragment.play.setImageResource(R.drawable.ic_play_btn_pause);
+            PlayMusicFragment.play.setImageResource(R.drawable.play_btn_pause_selector);
             MainActivity.play.setImageResource(R.drawable.ic_play_bar_btn_pause);
             if (mainActivity ==null) {
                 mainActivity = new MainActivity();
             }
             mainActivity.sendNotification();
-            MyService.noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_pause);
+            //MyService.noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_pause);
+            MainActivity.setplayButtonpause();
             isPause=false;
         }
     }

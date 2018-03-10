@@ -97,7 +97,7 @@ public class OnlineMusicAdapter extends ArrayAdapter {
                 .placeholder(R.drawable.music_ic)
                 .error(R.drawable.music_ic)
                 .into(viewHolder.ablumCover);
-        viewHolder.songaName.setText(onlineMusic.getTitle());
+        viewHolder.songaName.setText(1+position+"."+onlineMusic.getTitle());
         viewHolder.singger.setText(onlineMusic.getArtist_name());
         viewHolder.ablum.setText("《"+onlineMusic.getAlbum_title()+"》");
         return view;
@@ -138,6 +138,13 @@ public class OnlineMusicAdapter extends ArrayAdapter {
                 getdownLoadUrl(sonId,songName,geshou,ablumName);
             }
         });
+        Button desmiss = view.findViewById(R.id.pop_lol);
+        desmiss.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupWindow.dismiss();
+            }
+        });
     }
 
     private void getdownLoadUrl(String songId, final String songName, final String geshou, final String ablumName) {
@@ -148,7 +155,7 @@ public class OnlineMusicAdapter extends ArrayAdapter {
                     onFail(null);
                     return;
                 }
-                String path = downloadInfo.getBitrate().getFile_link();
+
                 String time = String.valueOf(downloadInfo.getBitrate().getFile_duration() * 1000);
                 url = downloadInfo.getBitrate().getFile_link();
                 DownloadTask downloadTask = new DownloadTask();

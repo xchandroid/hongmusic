@@ -38,6 +38,8 @@ import com.vaiyee.hongmusic.http.HttpCallback;
 
 import org.jsoup.helper.StringUtil;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -105,7 +107,7 @@ public class SearchAdapter extends BaseAdapter {
        String songname = song.getSongName();
        String songname1 = songname.replace("<em>","");
        String songname2 = songname1.replace("</em>","");
-        viewHolder.geming.setText(songname2);
+        viewHolder.geming.setText(1+i+"."+songname2);
         viewHolder.geshou.setText(name2);
         return view;
     }
@@ -162,6 +164,14 @@ public class SearchAdapter extends BaseAdapter {
         HttpClinet.KugouUrl(hash, new HttpCallback<KugouMusic>() {
             @Override
             public void onSuccess(KugouMusic kugouMusic) {
+               String path = "/storage/emulated/0/HonchenMusic/download/" + subname+".mp3";
+                File file = new File(path);
+                if (file.exists())
+                {
+                    Toast.makeText(MyApplication.getQuanjuContext(),"该歌曲已下载过啦",Toast.LENGTH_LONG).show();
+                    popupWindow.dismiss();
+                    return;
+                }
                 url = kugouMusic.getData().getPlay_url();
                 DownloadTask task = new DownloadTask();
                 task.execute(url,subname,subgeshou,subablumName,time);

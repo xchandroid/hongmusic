@@ -58,7 +58,7 @@ public class MyService extends Service {
         public void sendNotification() {
             //NotificationManager manager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);   //获取NotificationManager实例
             notification = new Notification();
-            notification.icon = R.drawable.music_ic;
+            notification.icon = R.drawable.huakuai;
             notification.when = System.currentTimeMillis();
             notification.priority =Notification.PRIORITY_HIGH;
             notification.flags = Notification.FLAG_FOREGROUND_SERVICE;  //设置当前通知为前台通知
@@ -108,12 +108,13 @@ public class MyService extends Service {
         }
 
         public void setpause() {
-            noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_pause);
+            noti.setImageViewResource(R.id.noti_play, R.drawable.play_btn_pause_selector);
+            startForeground(1, notification);
         }
 
         public void setplay() {
-            noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_play);
-
+            noti.setImageViewResource(R.id.noti_play,R.drawable.play_btn_play_pause_selector);
+            startForeground(1, notification);
         }
     }
 }

@@ -92,17 +92,17 @@ public class Onlinesheet extends BaseAdapter{
                      {
                          musicviewHolder = new MusicviewHolder();
                          convertView = LayoutInflater.from(context).inflate(R.layout.view_holder_sheet, parent, false);
+                         musicviewHolder.cover = convertView.findViewById(R.id.iv_cover);
+                         musicviewHolder.s1 = convertView.findViewById(R.id.tv_music_1);
+                         musicviewHolder.s2 = convertView.findViewById(R.id.tv_music_2);
+                         musicviewHolder.s3 = convertView.findViewById(R.id.tv_music_3);
+                         musicviewHolder.divider = convertView.findViewById(R.id.v_divider);
                          convertView.setTag(musicviewHolder);
                      }
                      else
                      {
                          musicviewHolder = (MusicviewHolder)convertView.getTag();
                      }
-                         musicviewHolder.cover = convertView.findViewById(R.id.iv_cover);
-                         musicviewHolder.s1 = convertView.findViewById(R.id.tv_music_1);
-                         musicviewHolder.s2 = convertView.findViewById(R.id.tv_music_2);
-                         musicviewHolder.s3 = convertView.findViewById(R.id.tv_music_3);
-                         musicviewHolder.divider = convertView.findViewById(R.id.v_divider);
                          getsongInfo(sheet,musicviewHolder);
                          musicviewHolder.divider.setVisibility(isShowDivider(position) ? View.VISIBLE : View.GONE);
                      break;

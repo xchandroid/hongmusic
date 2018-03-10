@@ -3,59 +3,68 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:fitsSystemWindows="true"
     android:layout_height="180dp"
-    android:background="#00F5FF">
+    android:background="@drawable/profile_bg"
+    android:fitsSystemWindows="true">
 
     <ImageView
         android:id="@+id/weather_ico"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="36dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="16dp"
         android:src="@drawable/ic_weather_rain"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/weinfo"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/tmp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="208dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="44dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="32dp"
         android:text="5℃"
         android:textSize="40sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.057"
         app:layout_constraintStart_toEndOf="@+id/weather_ico"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/city"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="11dp"
-        android:text="钦州市"
+        android:text="点击天气设置选择一个地区"
         app:layout_constraintStart_toStartOf="@+id/weather_ico"
         app:layout_constraintTop_toBottomOf="@+id/weather_ico" />
 
     <TextView
-        android:id="@+id/textView7"
+        android:id="@+id/wind"
         android:layout_width="wrap_content"
         android:layout_height="18dp"
         android:layout_marginTop="8dp"
-        android:text="北风七级"
-        app:layout_constraintStart_toStartOf="@+id/textView6"
-        app:layout_constraintTop_toBottomOf="@+id/textView6" />
+        android:text=""
+        app:layout_constraintStart_toStartOf="@+id/city"
+        app:layout_constraintTop_toBottomOf="@+id/city" />
 
     <TextView
-        android:id="@+id/textView8"
+        android:id="@+id/wind_speed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="13dp"
-        android:text="湿度87%"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView7"
-        app:layout_constraintStart_toEndOf="@+id/textView7" />
+        android:text=""
+        app:layout_constraintBaseline_toBaselineOf="@+id/wind"
+        app:layout_constraintStart_toEndOf="@+id/wind" />
+
+    <TextView
+        android:id="@+id/weinfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="44dp"
+        android:text=""
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
 </android.support.constraint.ConstraintLayout>

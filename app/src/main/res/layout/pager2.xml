@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 <com.vaiyee.hongmusic.CustomView.LyricView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/lrcview"/>
-
+<ImageView
+    android:layout_width="50dp"
+    android:layout_height="50dp"
+    android:id="@+id/ci"
+    android:src="@drawable/ci"
+    android:layout_margin="10dp"
+    android:layout_gravity="end|bottom"/>
 </FrameLayout>

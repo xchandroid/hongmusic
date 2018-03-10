@@ -2,13 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/action_setting"
+            android:id="@+id/weather_setting"
             android:icon="@drawable/ic_menu_settings"
-            android:title="功能设置" />
+            android:title="天气设置" />
         <item
             android:id="@+id/action_night"
             android:icon="@drawable/ic_menu_night"
-            android:title="夜间模式" />
+            android:title="更换主题" />
         <item
             android:id="@+id/action_timer"
             android:icon="@drawable/ic_menu_timer"
@@ -20,6 +20,10 @@
         <item
             android:id="@+id/action_about"
             android:icon="@drawable/ic_menu_about"
-            android:title="关于宏音乐" />
+            android:title="关于宏晨音乐" />
+        <item
+            android:id="@+id/myqq"
+            android:icon="@drawable/ic_qq"
+            android:title="作者QQ"/>
     </group>
 </menu>

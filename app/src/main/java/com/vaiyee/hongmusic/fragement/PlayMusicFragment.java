@@ -23,6 +23,7 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -30,7 +31,9 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +47,7 @@ import com.vaiyee.hongmusic.Adapter.ViewPagerAdapter;
 import com.vaiyee.hongmusic.Adapter.songsAdapter;
 import com.vaiyee.hongmusic.CircleImageView;
 import com.vaiyee.hongmusic.CustomView.LyricView;
+import com.vaiyee.hongmusic.CustomView.MyCircleView;
 import com.vaiyee.hongmusic.CustomView.NoScrollViewPager;
 import com.vaiyee.hongmusic.GlideRoundTransform;
 import com.vaiyee.hongmusic.MainActivity;
@@ -73,8 +77,9 @@ import me.wcy.lrcview.LrcView;
  * A simple {@link Fragment} subclass.
  */
 public class PlayMusicFragment extends Fragment implements View.OnClickListener,View.OnTouchListener,SeekBar.OnSeekBarChangeListener, LyricView.OnPlayerClickListener{
-private static ImageView pre,next,playmode,hide,playmusicibg;
+private static ImageView pre,next,playmode,hide,playmusicibg,ci;
 public static ImageView playbg,play;
+private static MyCircleView bantouming;
 private OnBacktoMainActiviListener listener;
 private boolean isPause=false;
 public static boolean firstplay=true;
@@ -89,6 +94,7 @@ public static LrcView singlelrc;
 private static LyricView lyricView;
 private boolean isFirstpager = true;
 private int mode = 0;
+private PopupWindow popupWindow;
 private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
 
     public PlayMusicFragment() {
@@ -132,8 +138,11 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
         View page2 = LayoutInflater.from(MyApplication.getQuanjuContext()).inflate(R.layout.pager2,null);
         viewPager = view.findViewById(R.id.viewpager);
         playbg = page1.findViewById(R.id.play_bg);
+        bantouming = page1.findViewById(R.id.bantouming);
         singlelrc = page1.findViewById(R.id.lrc_view_single);
         lyricView = page2.findViewById(R.id.lrcview);
+        ci = page2.findViewById(R.id.ci);
+        ci.setOnClickListener(this);
         int color = Color.rgb(0 ,255, 255);
         lyricView.setHighLightTextColor(color);
         lyricView.setTextSize(20);
@@ -281,8 +290,91 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
             case R.id.second:
                 viewPager.setCurrentItem(1);
                 break;
+            case R.id.ci:
+                ShowpopupWindow();
+                break;
+            case R.id.blue:
+                lyricView.setHighLightTextColor(Color.parseColor("#00F5FF"));
+                break;
+            case R.id.red:
+                lyricView.setHighLightTextColor(Color.parseColor("#FF0000"));
+                break;
+            case R.id.fen_red:
+                lyricView.setHighLightTextColor(Color.parseColor("#FF1493"));
+                break;
+            case R.id.green:
+                lyricView.setHighLightTextColor(Color.parseColor("#00FF7F"));
+                break;
+            case R.id.dark_blue:
+                lyricView.setHighLightTextColor(Color.parseColor("#9400D3"));
+                break;
+            case R.id.yellow:
+                lyricView.setHighLightTextColor(Color.parseColor("#EEEE00"));
+                break;
+            case R.id.s_blue:
+                lyricView.setmDefaultColor(Color.parseColor("#FFFFFF"));
+                break;
+            case R.id.s_red:
+                lyricView.setmDefaultColor(Color.parseColor("#FAEBD7"));
+                break;
+            case R.id.s_fen_red:
+                lyricView.setmDefaultColor(Color.parseColor("#CDC8B1"));
+                break;
+            case R.id.s_green:
+                lyricView.setmDefaultColor(Color.parseColor("#CAFF70"));
+                break;
+            case R.id.s_dark_blue:
+                lyricView.setmDefaultColor(Color.parseColor("#EEAEEE"));
+                break;
+            case R.id.s_yellow:
+                lyricView.setmDefaultColor(Color.parseColor("#545454"));
+                break;
+            case R.id.finish:
+                popupWindow.dismiss();
+                break;
+
         }
     }
+
+    private void ShowpopupWindow() {
+        View contentView = LayoutInflater.from(getContext()).inflate(R.layout.geci_edit,null);
+        initcontentView(contentView);
+        popupWindow = new PopupWindow(contentView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        popupWindow.setTouchable(true);
+        popupWindow.setFocusable(true);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.showAtLocation(getActivity().getWindow().getDecorView(), Gravity.BOTTOM,0,0);
+    }
+
+    private void initcontentView(View view) {
+        ImageView blue = view.findViewById(R.id.blue);
+        ImageView red = view.findViewById(R.id.red);
+        ImageView fenred = view.findViewById(R.id.fen_red);
+        ImageView green = view.findViewById(R.id.green);
+        ImageView darkblue = view.findViewById(R.id.dark_blue);
+        ImageView yellow = view.findViewById(R.id.yellow);
+        ImageView sblue = view.findViewById(R.id.s_blue);
+        ImageView sred = view.findViewById(R.id.s_red);
+        ImageView sfenred = view.findViewById(R.id.s_fen_red);
+        ImageView sgreen = view.findViewById(R.id.s_green);
+        ImageView syellow = view.findViewById(R.id.s_yellow);
+        ImageView sdarkblue = view.findViewById(R.id.s_dark_blue);
+        Button finish = view.findViewById(R.id.finish);
+        finish.setOnClickListener(this);
+        blue.setOnClickListener(this);
+        sblue.setOnClickListener(this);
+        red.setOnClickListener(this);
+        sred.setOnClickListener(this);
+        fenred.setOnClickListener(this);
+        sfenred.setOnClickListener(this);
+        green.setOnClickListener(this);
+        sgreen.setOnClickListener(this);
+        darkblue.setOnClickListener(this);
+        sdarkblue.setOnClickListener(this);
+        yellow.setOnClickListener(this);
+        syellow.setOnClickListener(this);
+    }
+
     public void setListener(OnBacktoMainActiviListener listener)
     {
         this.listener = listener;
@@ -341,6 +433,7 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
                        .placeholder(R.drawable.music_ic)
                        .transform(new GlideRoundTransform(getContext(),100)).into(playbg);
 
+
                Glide.with(MyApplication.getQuanjuContext())
                        .load(coverUrl)
                        .crossFade(1000)
@@ -363,18 +456,13 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
                        .error(R.drawable.music_ic)
                        .placeholder(R.drawable.music_ic)
                        .transform(new GlideRoundTransform(getContext(),100)).into(playbg);
-               //SharedPreferences s = MainActivity.sharedPreferences;
-               //String lrc = s.getString("geci","");
-               //onlineMusicActivity.editor.remove("geci");
-               //onlineMusicActivity.editor.commit();
-              //createLrc(lrc);
+
+
 
                Glide.with(MyApplication.getQuanjuContext())
                        .load(coverUrl)
-                       .placeholder(R.drawable.music_ic)
-                       .error(R.drawable.music_ic)
                        .crossFade(1000)
-                       .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),15,1))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
+                       .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),25,1))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
                         .into(playmusicibg);
                locatetoLrc(a);
                break;
@@ -438,11 +526,13 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
         LinearInterpolator interpolator = new LinearInterpolator();//匀速旋转
         animation.setInterpolator(interpolator);
         playbg.startAnimation(animation);
+        //bantouming.startAnimation(animation);
 
     }
     public void stop()
     {
         playbg.clearAnimation();
+        //bantouming.clearAnimation();
     }
 
     //画圆

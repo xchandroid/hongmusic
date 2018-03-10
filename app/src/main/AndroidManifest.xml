@@ -17,8 +17,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:theme="@style/MyAPPtheme"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:theme="@style/MyAPPtheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,33 +27,46 @@
         </activity>
         <activity android:name=".OnlineMusicActivity" />
         <activity android:name=".SearchActivity" />
+        <activity
+            android:name=".WeatherActivity"
+            android:launchMode="singleTask" />
+        <activity android:name=".WetMainActivity"></activity>
 
+        <service
+            android:name=".service.AutoUpdateServise"
+            android:enabled="true"
+            android:exported="true"></service>
         <service
             android:name=".service.MyService"
             android:enabled="true"
-            android:exported="true">
-        </service>
-        <receiver android:name=".brocastReciver.Myreceiver"
+            android:exported="true"></service>
+
+        <receiver
+            android:name=".brocastReciver.Myreceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.vaiyee.showplayfragment"/>
+                <action android:name="com.vaiyee.showplayfragment" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".brocastReciver.AsynButton"
+        <receiver
+            android:name=".brocastReciver.AsynButton"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.vaiyee.asynbutton"></action>
+                <action android:name="com.vaiyee.asynbutton" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".brocastReciver.playModeReceiver"
+        <receiver
+            android:name=".brocastReciver.playModeReceiver"
             android:directBootAware="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.vaiyee.playmode"/>
+                <action android:name="com.vaiyee.playmode" />
             </intent-filter>
         </receiver>
+
+        <activity android:name=".WangyiBangActivity"></activity>
     </application>
 
 </manifest>

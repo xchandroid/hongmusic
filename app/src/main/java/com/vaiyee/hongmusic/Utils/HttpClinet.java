@@ -4,15 +4,18 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.vaiyee.hongmusic.bean.DownloadInfo;
-import com.vaiyee.hongmusic.bean.JsoncallbackKugou;
+import com.vaiyee.hongmusic.bean.WangyiLrc;
+import com.vaiyee.hongmusic.http.JsoncallbackKugou;
 import com.vaiyee.hongmusic.bean.KugouMusic;
 import com.vaiyee.hongmusic.bean.KugouSearchResult;
 import com.vaiyee.hongmusic.bean.OnlineLrc;
 import com.vaiyee.hongmusic.bean.OnlineMusiclist;
 import com.vaiyee.hongmusic.bean.SearchMusic;
+import com.vaiyee.hongmusic.bean.WangyiBang;
 import com.vaiyee.hongmusic.http.HttpCallback;
 import com.vaiyee.hongmusic.http.HttpInterceptor;
 import com.vaiyee.hongmusic.http.JsonCallback;
+import com.vaiyee.hongmusic.http.WangyiJsoncallback;
 import com.zhy.http.okhttp.OkHttpUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -44,6 +47,8 @@ public class HttpClinet {
  private static final String KUGOUURL = "&page=1&pagesize=";
  private static final String KUGOUEND = "&userid=-1&clientver=&platform=WebFilter&tag=em&filter=2&iscorrection=1&privilege_filter=0&_=1489023388641";
 private static final String  KUGO = "http://www.kugou.com/yy/index.php?r=play/getdata&hash=";
+ private static final String WANGYI = "http://musicapi.leanapp.cn/top/list?idx=";
+ private static final String WYLRC = "http://musicapi.leanapp.cn/lyric?id=";
 
  static {
   OkHttpClient okHttpClient = new OkHttpClient.Builder()
@@ -54,7 +59,7 @@ private static final String  KUGO = "http://www.kugou.com/yy/index.php?r=play/ge
           .build();
   OkHttpUtils.initClient(okHttpClient);
  }
- //获取相应Type的在线音乐列表
+ //获取相应Type的在线音乐列表,这是百度在线列表
  public static void getOnlineMusicList(String type,int size,int offset,@NonNull final HttpCallback<OnlineMusiclist>callback)
  {
          OkHttpUtils.get().url(BASE_URL)
@@ -143,7 +148,7 @@ private static final String  KUGO = "http://www.kugou.com/yy/index.php?r=play/ge
                 });
     }
 
-
+   //调用酷狗的api进行音乐搜索
     public static void KugouSearch(String key,int size,final HttpCallback<KugouSearchResult> callback)
     {
         OkHttpUtils.get().url(KUGOU+key+KUGOUURL+size+KUGOUEND)
@@ -160,7 +165,7 @@ private static final String  KUGO = "http://www.kugou.com/yy/index.php?r=play/ge
                     }
                 });
     }
-
+    //获取酷狗的单曲信息
     public static void KugouUrl(String hash, final HttpCallback<KugouMusic>callback)
     {
         OkHttpUtils.get().url(KUGO+hash)
@@ -174,6 +179,41 @@ private static final String  KUGO = "http://www.kugou.com/yy/index.php?r=play/ge
                     @Override
                     public void onResponse(KugouMusic response, int id) {
                           callback.onSuccess(response);
+                    }
+                });
+    }
+
+
+    public static void WangyiBang(String type, final HttpCallback<WangyiBang> callback)
+    {
+            OkHttpUtils.get().url(WANGYI+type)
+                    .build()
+                   .execute(new JsonCallback<WangyiBang>(WangyiBang.class) {
+                       @Override
+                       public void onError(Call call, Exception e, int id) {
+                           callback.onFail(e);
+                       }
+
+                       @Override
+                       public void onResponse(WangyiBang response, int id) {
+                               callback.onSuccess(response);
+                       }
+                   });
+    }
+
+    public static void WangyiLrc(String id, final HttpCallback<WangyiLrc> callback)
+    {
+        OkHttpUtils.get().url(WYLRC+id)
+                .build()
+                .execute(new JsonCallback<WangyiLrc>(WangyiLrc.class) {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        callback.onFail(e);
+                    }
+
+                    @Override
+                    public void onResponse(WangyiLrc response, int id) {
+                            callback.onSuccess(response);
                     }
                 });
     }

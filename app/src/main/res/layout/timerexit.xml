@@ -8,6 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="35dp"
         android:layout_margin="15dp"
+        android:digits="1234567890"
+        android:maxLength="3"
         android:hint="请输入定时休眠时间(分钟)"
         android:textColor="#C71585"
         android:id="@+id/timeredit"

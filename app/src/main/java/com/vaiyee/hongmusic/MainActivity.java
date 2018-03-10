@@ -14,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -35,13 +36,16 @@ import android.support.v4.widget.DrawerLayout;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -60,6 +64,7 @@ import com.vaiyee.hongmusic.Utils.QuanjuUtils;
 import com.vaiyee.hongmusic.Utils.getAudio;
 import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.fragement.PlayMusicFragment;
+import com.vaiyee.hongmusic.fragement.WangyiFragment;
 import com.vaiyee.hongmusic.fragement.fragement1;
 import com.vaiyee.hongmusic.fragement.fragment2;
 import com.vaiyee.hongmusic.service.MyService;
@@ -97,10 +102,13 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
     public static SharedPreferences sharedPreferences;
     public static MyService.MusicBinder musicBinder;
     private EditText editText;
+    private boolean showpopwindow = false;
     private static Timer timer,timer2;
     private static diingShiTask task;
     private static Showtask showtask;
     private static int s;
+    private static ImageView wether_ic;
+    private static TextView city,wind,wind_speed,tmp,weinfo;
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -125,15 +133,9 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
-        // 申请权限
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-        {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-        }
-        else
-        {
-            Toast.makeText(MainActivity.this,"授权通过",Toast.LENGTH_LONG).show();
-        }
+
+
+
          //强制更新媒体库
         MediaScannerConnection.scanFile(this, new String[]{Environment
                 .getExternalStorageDirectory().getAbsolutePath()}, null, null);
@@ -145,6 +147,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         next = findViewById(R.id.play_bar_next);
         play.setOnClickListener(this);
         next.setOnClickListener(this);
+        initNav();
         t = findViewById(R.id.changeTextColorView);
         tt = findViewById(R.id.textView2);
         tt.setOnClickListener(new View.OnClickListener() {
@@ -186,14 +189,14 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 if (positionOffset > 0) {
+
                     ColorTrackView left = mTabs.get(position);
                     ColorTrackView right = mTabs.get(position + 1);
-
                     left.setDirection(1);
                     right.setDirection(0);
-                    //Log.e("TAG", positionOffset+"");
                     left.setProgress(1 - positionOffset);
                     right.setProgress(positionOffset);
+
                 }
             }
 
@@ -223,11 +226,8 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.action_setting:
-                        Toast.makeText(MainActivity.this, "点击了" + item.getTitle(), Toast.LENGTH_LONG).show();
-                        break;
                     case R.id.action_night:
-                        Toast.makeText(MainActivity.this, "点击了" + item.getTitle(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "更换主题将在下个版本推出", Toast.LENGTH_LONG).show();
                         break;
                     case R.id.action_timer:
                         View contentview = LayoutInflater.from(MainActivity.this).inflate(R.layout.timerexit,null);
@@ -245,6 +245,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
                                 }
                                 s = Integer.parseInt(time)*60*1000;  //倒计时，毫秒为单位
                                 atTiemToExit(Integer.parseInt(time));
+                                hintKeyboard();
                                 popupWindow.dismiss();
                             }
                         });
@@ -265,7 +266,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
                             public boolean onTouch(View view, MotionEvent motionEvent) {
                                 if (motionEvent.getAction() == MotionEvent.ACTION_OUTSIDE &&!popupWindow.isFocusable())
                                 {
-                                    return true;  //点击弹窗外面拦截事件，是弹窗不能通过点击外面消失
+                                    return true;  //点击弹窗外面拦截事件，是弹窗不能通过点击外面消失，貌似没效果
                                 }
                                 return false;
                             }
@@ -315,8 +316,22 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
                         builder.create().show();
                         break;
                     case R.id.action_about:
-                        Toast.makeText(MainActivity.this, "点击了" + item.getTitle(), Toast.LENGTH_LONG).show();
+                        showAbout();
                         break;
+                    case R.id.myqq:
+                       if(checkApkExist(MainActivity.this,"com.tencent.mobileqq"))
+                       {
+                           startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("mqqwpa://im/chat?chat_type=wpa&uin="+String.valueOf("1208718872")+"&version=1")));
+                       }
+                       else
+                       {
+                           Toast.makeText(MainActivity.this,"本机未安装QQ",Toast.LENGTH_LONG).show();
+                       }
+                        break;
+                       case R.id.weather_setting:
+                           Intent intent = new Intent(MainActivity.this,WetMainActivity.class);
+                           startActivity(intent);
+                           break;
                     default:
                         break;
                 }
@@ -334,6 +349,35 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         showfragment();
         hidefragment();
         bindService();
+    }
+
+    //弹出关于的窗口
+    private void showAbout()
+    {
+        View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.aboutthis,null);
+        Button desmiss = view.findViewById(R.id.desmiss);
+        final PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        desmiss.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupWindow.dismiss();
+            }
+        });
+        popupWindow.setFocusable(true);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setTouchable(true);
+        final WindowManager.LayoutParams params = getWindow().getAttributes();
+        params.alpha =0.5f;
+        getWindow().setAttributes(params);
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                params.alpha = 1.0f;
+                getWindow().setAttributes(params);
+            }
+        });
+        popupWindow.showAtLocation(getWindow().getDecorView(),Gravity.CENTER,0,0);
+
     }
 
     //同步播放条显示
@@ -410,20 +454,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
        fragmentTransaction.commitAllowingStateLoss();
        isShowfragment =false;
     }
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-         switch (requestCode)
-         {
-             case 1:
-                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                     Toast.makeText(MainActivity.this,"授权通过",Toast.LENGTH_LONG).show();
-                 } else {
-                     // 权限被用户拒绝了，洗洗睡吧。
-                     Toast.makeText(MainActivity.this,"拒绝了授权",Toast.LENGTH_LONG).show();
-                 }
-                 return;
-         }
-         }
+
 
     @Override
     public void onBackPressed() {
@@ -539,12 +570,19 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         {
             showfragment();
         }
+        if (showpopwindow)
+        {
+            Timer timer = new Timer();
+            showabouttask showabouttask = new showabouttask();
+            timer.schedule(showabouttask,2000);
+        }
         super.onResume();
     }
 
     @Override
     protected void onStop() {
         firstopen =false;
+        showpopwindow = false;
         super.onStop();
     }
 
@@ -553,7 +591,30 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         Intent intent = new Intent(this,MyService.class);
         stopService(intent);
         unbindService(serviceConnection);
+        playMusic.audioFocusManager.abandonAudioFocus();
         super.onDestroy();
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // 获取到Activity下的Fragment
+        List<Fragment> fragments = getSupportFragmentManager().getFragments();
+        if (fragments == null)
+        {
+            return;
+        }
+        // 查找在Fragment中onRequestPermissionsResult方法并调用
+        for (Fragment fragment : fragments)
+        {
+            if (fragment != null)
+            {
+                // 这里就会调用我们Fragment中的onRequestPermissionsResult方法
+                fragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            }
+        }
+
     }
 
     private void loadAsBitmap(String url)
@@ -578,6 +639,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
             Intent intent = new Intent(MainActivity.this,MyService.class);
             stopService(intent);
             unbindService(serviceConnection);
+            playMusic.audioFocusManager.abandonAudioFocus();
             android.os.Process.killProcess(android.os.Process.myPid());
         }
     }
@@ -629,7 +691,114 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         timer2.schedule(showtask,200,1000);
 
     }
+    private class showabouttask extends TimerTask
+    {
 
+        @Override
+        public void run() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showAbout();
+                }
+            });
+        }
+    }
+
+
+    private void initNav()
+    {
+        NavigationView navigationView = (NavigationView)findViewById(R.id.navigation_view);
+        View view = navigationView.getHeaderView(0);
+        wether_ic = view.findViewById(R.id.weather_ico);
+        city = view.findViewById(R.id.city);
+        wind = view.findViewById(R.id.wind);
+        tmp = view.findViewById(R.id.tmp);
+        wind_speed = view.findViewById(R.id.wind_speed);
+        weinfo = view.findViewById(R.id.weinfo);
+    }
+
+    public void setWeatherInfo(int code,String chengshi,String feng,String windLi,String windSpeed,String wendu,String info)
+    {
+        switch (code)
+        {
+            case 100:
+                wether_ic.setImageResource(R.drawable.qing);
+                break;
+            case 101:
+                wether_ic.setImageResource(R.drawable.duoyun);
+                break;
+            case 102:
+                wether_ic.setImageResource(R.drawable.shaoyun);
+                break;
+            case 103:
+                wether_ic.setImageResource(R.drawable.qingjianduoyun);
+                break;
+            case 104:
+                wether_ic.setImageResource(R.drawable.yin);
+                break;
+            case 200:
+                wether_ic.setImageResource(R.drawable.youfeng);
+                break;
+        }
+        city.setText(chengshi);
+        wind.setText(feng +windLi+"级");
+        wind_speed.setText("风速"+windSpeed+"km/h");
+        tmp.setText(wendu);
+        weinfo.setText(info);
+    }
+
+    //判断用户是否安装了QQ,参数packageName为包名
+    public boolean checkApkExist(Context context, String packageName) {
+        if (packageName == null || "".equals(packageName))
+            return false;
+        try {
+            ApplicationInfo info = context.getPackageManager().getApplicationInfo(packageName,
+                    PackageManager.GET_UNINSTALLED_PACKAGES);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    //隐藏软键盘
+    private void hintKeyboard() {
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        if(imm.isActive()&&getCurrentFocus()!=null)
+        {
+            if (getCurrentFocus().getWindowToken()!=null)
+            {
+                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS); }
+        }
+    }
+/*
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (KeyEvent.KEYCODE_HEADSETHOOK == keyCode) { //按下了耳机键
+            if (event.getRepeatCount() == 0) {  //如果长按的话，getRepeatCount值会一直变大
+                //短按,暂停播放
+                playMusic.pause();
+                return true;
+            } else if (event.getRepeatCount()==1)
+            {
+                //双击，下一首
+                playMusic.playnext();
+                return true;
+            }
+            else {
+                //长按，上一首
+                playMusic.playPre();
+                return true;
+            }
+        }
+        if (KeyEvent.KEYCODE_BACK==keyCode)
+        {
+            onBackPressed();
+            return true;
+        }
+        return false;
+    }
+    */
 }
 
 

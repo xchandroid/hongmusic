@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:background="@drawable/edit_seletor"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_height="wrap_content">
+
+<com.vaiyee.hongmusic.GradualTextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textSize="15sp"
+    android:layout_gravity="center"
+    android:text="本程序由 "/>
+        <ImageView
+            android:layout_width="70dp"
+            android:layout_height="30dp"
+            android:src="@drawable/qianming"/>
+        <com.vaiyee.hongmusic.GradualTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:layout_gravity="center"
+            android:text="本人"/>
+    </LinearLayout>
+    <com.vaiyee.hongmusic.GradualTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_gravity="center"
+        android:text="独立编写制作完成的处女作"
+        android:textSize="15sp"/>
+    <com.vaiyee.hongmusic.GradualTextView
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:textSize="15sp"
+        android:layout_marginTop="5dp"
+        android:layout_height="wrap_content"
+        android:text="仅供学习交流，不作商业用途"/>
+    <com.vaiyee.hongmusic.GradualTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textSize="15sp"
+        android:layout_gravity="center"
+        android:text="使用过程遇到bug或者有什么需要改进的建议"/>
+    <com.vaiyee.hongmusic.GradualTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:layout_marginTop="5dp"
+        android:layout_gravity="center"
+        android:text="欢迎联系我本人QQ"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:id="@+id/desmiss"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/button_style1"
+        android:text="知道了"/>
+</LinearLayout>

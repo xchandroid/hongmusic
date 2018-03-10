@@ -125,6 +125,7 @@ public class SearchActivity extends SwipeBackActivity {
                    Toast toast= Toast.makeText(SearchActivity.this,"请输入搜索内容",Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.TOP , 0, 200);
                     toast.show();
+                    CloseProgress();
                     return;
                 }
                 size = 20;

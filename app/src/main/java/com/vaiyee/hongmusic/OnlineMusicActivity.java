@@ -54,14 +54,11 @@ public class OnlineMusicActivity extends SwipeBackActivity{
     private TextView sheetTitle;
     private ImageView back;
     private static String Lrccontent = null;
-    public static SharedPreferences.Editor editor ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_online_music);
         Init();
-        editor = getSharedPreferences("data",0).edit();
-        editor.remove("geci");
         getOnlineMusiclist(sheet);
         onlineMusicList = (ListView) findViewById(R.id.online_music_list);
         onlineMusicList.setVisibility(View.GONE);
@@ -123,7 +120,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                        break;
                    case NET_4G:
                        builder = new AlertDialog.Builder(OnlineMusicActivity.this);
-                       builder.setMessage("当前正在使用移动网络，是否使用数据流量播放在线音乐？");
+                       builder.setMessage("当前正在使用4G网络，是否使用数据流量播放在线音乐？");
                        builder.setTitle("提示");
                        builder.setIcon(R.drawable.tip);
                        builder.setPositiveButton("流量多",
@@ -174,7 +171,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                        break;
                    case NET_3G:
                        builder = new AlertDialog.Builder(OnlineMusicActivity.this);
-                       builder.setMessage("当前正在使用移动网络，是否使用数据流量播放在线音乐？");
+                       builder.setMessage("当前正在使用3G网络，是否使用数据流量播放在线音乐？");
                        builder.setTitle("提示");
                        builder.setIcon(R.drawable.tip);
                        builder.setPositiveButton("流量多",
@@ -225,7 +222,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                        break;
                    case NET_2G:
                        builder = new AlertDialog.Builder(OnlineMusicActivity.this);
-                       builder.setMessage("当前正在使用移动网络，是否使用数据流量播放在线音乐？");
+                       builder.setMessage("当前正在使用2G网络，播放在线音乐会卡顿哟");
                        builder.setTitle("提示");
                        builder.setIcon(R.drawable.tip);
                        builder.setPositiveButton("流量多",

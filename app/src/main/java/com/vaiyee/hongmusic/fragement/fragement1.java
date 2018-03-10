@@ -1,12 +1,20 @@
 package com.vaiyee.hongmusic.fragement;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -54,15 +62,24 @@ public static List<Song> songs;
  private ColorTrackView t,tt;
 public static String coverUrl,geming,geshou;
 public static songsAdapter adapter;
+private TextView tips;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment1_layout,null);
-       // textView = view.findViewById(R.id.textView4);
-        //songs =  getAudio.getAllSongs(MyApplication.getQuanjuContext());
-        //  final songsAdapter adapter = new songsAdapter(getContext(),R.layout.localmusi_listitem,songs);
+        tips = view.findViewById(R.id.tips);
         listView = view.findViewById(R.id.localmusic_list);
-        updateSonglist();
+        // 申请权限
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
+        }
+        else
+        {
+           updateSonglist();  //已授过权了直接扫面音乐
+        }
+
        // listView.setAdapter(adapter);
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -210,6 +227,25 @@ public static songsAdapter adapter;
         return view;
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode)
+        {
+            case 2:
+                if (grantResults.length>0&&grantResults[0] ==PackageManager.PERMISSION_GRANTED)
+                {
+                    updateSonglist();
+                    Toast.makeText(getContext(),"授权通过",Toast.LENGTH_LONG).show();
+                    tips.setVisibility(View.GONE);
+                }
+                else
+                {
+                    Toast.makeText(getContext(),"拒绝授权将不能扫描本地音乐",Toast.LENGTH_LONG).show();
+                    tips.setVisibility(View.VISIBLE);
+                }
+        }
+    }
+
     private void getLrc(final String geming, final Song song, final int i) {
         switch (NetUtils.getNetType())
         {
@@ -264,12 +300,13 @@ public static songsAdapter adapter;
         });
     }
 
+
     //刷新音乐列表
     public void updateSonglist()
     {
        // getAudio.updateMedia();
         songs = getAudio.getAllSongs(MyApplication.getQuanjuContext()) ;
-        adapter = new songsAdapter(MyApplication.getQuanjuContext(),R.layout.localmusi_listitem,songs);
+        adapter = new songsAdapter(MyApplication.getQuanjuContext(),R.layout.localmusi_listitem,songs,getActivity());
         listView.setAdapter(adapter);
     }
 

@@ -804,6 +804,13 @@ public class LyricView extends View {
             invalidateView();
         }
     }
+    public void setmDefaultColor(int color){
+        if (mDefaultColor!=color)
+        {
+            mDefaultColor = color;
+            invalidateView();
+        }
+    }
 
     /**
      * 设置歌词内容行间距

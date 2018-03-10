@@ -2,8 +2,10 @@ package com.vaiyee.hongmusic.Utils;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -140,7 +142,8 @@ public class DownloadTask extends AsyncTask<String,Void,Integer> {
                 song.setDuration(time);
                 fragement1.songs.add(0,song);
                 fragement1.adapter.notifyDataSetChanged();
-                scanFile(MyApplication.getQuanjuContext(),path);
+                scanFile(MyApplication.getQuanjuContext(), Environment.getExternalStorageDirectory().getAbsolutePath());
+                MediaScannerConnection.scanFile(MyApplication.getQuanjuContext(), new String[]{path}, null, null);
                 Toast.makeText(MyApplication.getQuanjuContext(),"下载成功",Toast.LENGTH_LONG).show();
                 break;
             case 1:
@@ -156,7 +159,7 @@ public class DownloadTask extends AsyncTask<String,Void,Integer> {
      * @param filePath 文件全路径
      *
      * */
-    public void scanFile(Context context, String filePath) {
+    public static void scanFile(Context context, String filePath) {
         Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         scanIntent.setData(Uri.fromFile(new File(filePath)));
         context.sendBroadcast(scanIntent);
