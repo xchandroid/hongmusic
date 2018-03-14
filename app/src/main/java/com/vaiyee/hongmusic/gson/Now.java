@@ -11,21 +11,18 @@ public class Now {
     public String temperature;
     @SerializedName("cond")
     public More more;
-    @SerializedName("wind")
-    public Wind wind;
+
     public class More{
         @SerializedName("txt")        //天气状态
         public String info;
         @SerializedName("code")     //天气状态代码
         public int code;
     }
-    public class Wind
-    {
-      @SerializedName("dir")      //风向
+      @SerializedName("wind_dir")      //风向
         public String dir;
-      @SerializedName("sc")       //风力
+      @SerializedName("wind_sc")       //风力
         public String sc;
-      @SerializedName("spd")      //风速
+      @SerializedName("wind_spd")      //风速
         public String spd;
-    }
+
 }

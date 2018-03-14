@@ -177,7 +177,7 @@ public class SearchActivity extends SwipeBackActivity {
             public void onScroll(AbsListView absListView, int i, int i1, int i2) {  // i 是第一个可见item，第二个是可见的总item, 第三个参数是总的item
                 boolean isPulldonw = i>mfirstvisibleItem;
                 int lastvisibleItem = i+i1;
-                if (isPulldonw && !isLoding)  //判断listview是否滑动到底部（isLoading为限制开关，防止滑动过程一直调用loadMore方法）
+                if (isPulldonw && !isLoding)  //判断listview是否滑动到底部（isLoading为限制开关,防止滑动到底部一直调用loadMore方法造成listview反应不过来导致程序崩溃）
                 {
                     if (lastvisibleItem==i2-1)  //滑动到最后一个Item调用loadMore加载更多，此时isLoading为true，也就是正在加载
                     {
@@ -486,8 +486,8 @@ public class SearchActivity extends SwipeBackActivity {
             }
             FileOutputStream outStream = new FileOutputStream(file);//创建文件字节输出流对象，以字节形式写入所创建的文件中
             outStream.write(lrc.getBytes());//开始写入文件（也就是把文件写入内存卡中）
-            Log.d("歌词路径",filePath);
-            Log.d("歌词内容是",lrc);
+           // Log.d("歌词路径",filePath);
+          //  Log.d("歌词内容是",lrc);
             outStream.close();//关闭文件字节输出流
         } catch (Exception e) {
             e.printStackTrace();

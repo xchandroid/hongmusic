@@ -30,16 +30,16 @@
         <activity
             android:name=".WeatherActivity"
             android:launchMode="singleTask" />
-        <activity android:name=".WetMainActivity"></activity>
+        <activity android:name=".WetMainActivity" />
 
         <service
             android:name=".service.AutoUpdateServise"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
         <service
             android:name=".service.MyService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <receiver
             android:name=".brocastReciver.Myreceiver"
@@ -66,7 +66,8 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".WangyiBangActivity"></activity>
+        <activity android:name=".WangyiBangActivity" />
+        <activity android:name=".KugoubangActivity"></activity>
     </application>
 
 </manifest>

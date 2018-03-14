@@ -20,7 +20,7 @@
             android:layout_height="60dp"
             android:layout_marginStart="10dp"
             android:layout_marginTop="2dp"
-            android:src="@drawable/ic_launcher"
+            android:src="@drawable/music_ic"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </LinearLayout>
@@ -46,7 +46,7 @@
         android:id="@+id/geshou"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="许嵩"
+        android:text=""
         android:ellipsize="end"
         android:maxEms="5"
         android:singleLine="true"
@@ -73,7 +73,7 @@
         android:ellipsize="end"
         android:maxEms="10"
         android:singleLine="true"
-        android:text="TextView"
+        android:text=""
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/geshou" />

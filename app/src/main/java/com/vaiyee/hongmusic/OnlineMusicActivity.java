@@ -104,6 +104,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                                int time = downloadInfo.getBitrate().getFile_duration()*1000;
                                MainActivity mainActivity = new MainActivity();
                                mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+
                            }
 
                            @Override

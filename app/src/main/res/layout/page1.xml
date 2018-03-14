@@ -18,7 +18,7 @@
         android:id="@+id/lrc_view_single"
         android:layout_width="match_parent"
         android:layout_height="20dp"
-        lrc:lrcAnimationDuration="1000"
+        lrc:lrcAnimationDuration="500"
         lrc:lrcCurrentTextColor="@color/blue"
         lrc:lrcDividerHeight="10dp"
         lrc:lrcNormalTextColor="@color/white"

@@ -191,9 +191,9 @@ public class WeatherActivity extends AppCompatActivity {
         String degree = weather.now.temperature+"℃";
         String weatherInfo = weather.now.more.info;
         int code = weather.now.more.code;    //用来显示对应的天气图标
-        String fengX = weather.now.wind.dir;   //风向
-        String fengL = weather.now.wind.sc;     //风力
-        String fengS = weather.now.wind.spd;     //风速
+        String fengX = weather.now.dir;   //风向
+        String fengL = weather.now.sc;     //风力
+        String fengS = weather.now.spd;     //风速
         if (mainActivity ==null)
         {
             mainActivity = new MainActivity();

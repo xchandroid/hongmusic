@@ -36,7 +36,7 @@
                 android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="百度热歌榜"
+                android:text=""
                 android:textColor="@color/white"
                 android:textSize="18sp" />
 
@@ -44,7 +44,7 @@
                 android:id="@+id/tv_update_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="最近更新：2018-6-1"
+                android:text=""
                 android:textColor="@color/white"
                 android:textSize="12sp" />
 

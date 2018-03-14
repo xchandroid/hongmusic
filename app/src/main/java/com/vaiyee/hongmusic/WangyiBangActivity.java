@@ -78,13 +78,127 @@ public class WangyiBangActivity extends SwipeBackActivity{
                 final Tracks onlineMusic = onlineMusics.get(i-1);
                 final String songID = onlineMusic.Id;
                 final String geming = onlineMusic.songname;
-
                 HttpClinet.WangyiLrc(songID, new HttpCallback<WangyiLrc>() {
                     @Override
                     public void onSuccess(WangyiLrc wangyiLrc) {
                         String lrcContent = wangyiLrc.lrc.lyric;
                         Log.d("歌词内容是",lrcContent);
                         SearchActivity.creatLrc(lrcContent,geming);
+                        AlertDialog.Builder builder;
+                        switch (NetUtils.getNetType())
+                        {
+                            case NET_WIFI:
+
+                                String path = Path + songID + ".mp3";
+                                PlayMusic playMusic =new PlayMusic();
+                                playMusic.play(path,0);
+                                String songname = onlineMusic.songname;
+                                String geshou = onlineMusic.artist.get(0).artistName;
+                                String coverUrl = onlineMusic.abulum.pic;
+                                Log.d("路径是",path);
+                                int time = onlineMusic.duration;
+                                MainActivity mainActivity = new MainActivity();
+                                mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+
+                                break;
+                            case NET_4G:
+                                builder = new AlertDialog.Builder(WangyiBangActivity.this);
+                                builder.setMessage("当前正在使用4G网络，是否使用数据流量播放在线音乐？");
+                                builder.setTitle("提示");
+                                builder.setIcon(R.drawable.tip);
+                                builder.setPositiveButton("流量多",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+
+                                                String path = Path + songID + ".mp3";
+                                                PlayMusic playMusic =new PlayMusic();
+                                                playMusic.play(path,0);
+                                                String songname = onlineMusic.songname;
+                                                String geshou = onlineMusic.artist.get(0).artistName;
+                                                String coverUrl = onlineMusic.abulum.pic;
+                                                Log.d("路径是",path);
+                                                int time = onlineMusic.duration;
+                                                MainActivity mainActivity = new MainActivity();
+                                                mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+                                                dialog.dismiss();
+                                            }
+                                        });
+
+                                builder.setNegativeButton("伤不起",
+                                        new android.content.DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                builder.create().show();
+
+                                break;
+                            case NET_3G:
+                                builder = new AlertDialog.Builder(WangyiBangActivity.this);
+                                builder.setMessage("当前正在使用3G网络，是否使用数据流量播放在线音乐？");
+                                builder.setTitle("提示");
+                                builder.setIcon(R.drawable.tip);
+                                builder.setPositiveButton("流量多",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                String path = Path + songID + ".mp3";
+                                                PlayMusic playMusic =new PlayMusic();
+                                                playMusic.play(path,0);
+                                                String songname = onlineMusic.songname;
+                                                String geshou = onlineMusic.artist.get(0).artistName;
+                                                String coverUrl = onlineMusic.abulum.pic;
+                                                Log.d("路径是",path);
+                                                int time = onlineMusic.duration;
+                                                MainActivity mainActivity = new MainActivity();
+                                                mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+                                                dialog.dismiss();
+                                            }
+                                        });
+
+                                builder.setNegativeButton("伤不起",
+                                        new android.content.DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                builder.create().show();
+
+                                break;
+                            case NET_2G:
+                                builder = new AlertDialog.Builder(WangyiBangActivity.this);
+                                builder.setMessage("当前正在使用2G网络，播放在线音乐会卡顿哟");
+                                builder.setTitle("提示");
+                                builder.setIcon(R.drawable.tip);
+                                builder.setPositiveButton("流量多",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+
+                                                String path = Path + songID + ".mp3";
+                                                PlayMusic playMusic =new PlayMusic();
+                                                playMusic.play(path,0);
+                                                String songname = onlineMusic.songname;
+                                                String geshou = onlineMusic.artist.get(0).artistName;
+                                                String coverUrl = onlineMusic.abulum.pic;
+                                                Log.d("路径是",path);
+                                                int time = onlineMusic.duration;
+                                                MainActivity mainActivity = new MainActivity();
+                                                mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+                                                dialog.dismiss();
+                                            }
+                                        });
+
+                                builder.setNegativeButton("伤不起",
+                                        new android.content.DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                builder.create().show();
+
+                                break;
+                            default:
+                                break;
+                        }
                     }
 
                     @Override
@@ -93,121 +207,6 @@ public class WangyiBangActivity extends SwipeBackActivity{
                     }
                 });
 
-                AlertDialog.Builder builder;
-                switch (NetUtils.getNetType())
-                {
-                    case NET_WIFI:
-
-                                String path = Path + songID + ".mp3";
-                                PlayMusic playMusic =new PlayMusic();
-                                playMusic.play(path,0);
-
-                                String geshou = onlineMusic.artist.get(0).artistName;
-                                String coverUrl = onlineMusic.abulum.pic;
-                                Log.d("路径是",path);
-                                int time = onlineMusic.duration;
-                                MainActivity mainActivity = new MainActivity();
-                                mainActivity.tongbuShow(geming,geshou,coverUrl,time,MainActivity.ONLINE);
-
-                        break;
-                    case NET_4G:
-                        builder = new AlertDialog.Builder(WangyiBangActivity.this);
-                        builder.setMessage("当前正在使用4G网络，是否使用数据流量播放在线音乐？");
-                        builder.setTitle("提示");
-                        builder.setIcon(R.drawable.tip);
-                        builder.setPositiveButton("流量多",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                        String path = Path + songID + ".mp3";
-                                        PlayMusic playMusic =new PlayMusic();
-                                        playMusic.play(path,0);
-
-                                        String geshou = onlineMusic.artist.get(0).artistName;
-                                        String coverUrl = onlineMusic.abulum.pic;
-                                        Log.d("路径是",path);
-                                        int time = onlineMusic.duration;
-                                        MainActivity mainActivity = new MainActivity();
-                                        mainActivity.tongbuShow(geming,geshou,coverUrl,time,MainActivity.ONLINE);
-                                        dialog.dismiss();
-                                    }
-                                });
-
-                        builder.setNegativeButton("伤不起",
-                                new android.content.DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                        builder.create().show();
-
-                        break;
-                    case NET_3G:
-                        builder = new AlertDialog.Builder(WangyiBangActivity.this);
-                        builder.setMessage("当前正在使用3G网络，是否使用数据流量播放在线音乐？");
-                        builder.setTitle("提示");
-                        builder.setIcon(R.drawable.tip);
-                        builder.setPositiveButton("流量多",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        String path = Path + songID + ".mp3";
-                                        PlayMusic playMusic =new PlayMusic();
-                                        playMusic.play(path,0);
-
-                                        String geshou = onlineMusic.artist.get(0).artistName;
-                                        String coverUrl = onlineMusic.abulum.pic;
-                                        Log.d("路径是",path);
-                                        int time = onlineMusic.duration;
-                                        MainActivity mainActivity = new MainActivity();
-                                        mainActivity.tongbuShow(geming,geshou,coverUrl,time,MainActivity.ONLINE);
-                                        dialog.dismiss();
-                                    }
-                                });
-
-                        builder.setNegativeButton("伤不起",
-                                new android.content.DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                        builder.create().show();
-
-                        break;
-                    case NET_2G:
-                        builder = new AlertDialog.Builder(WangyiBangActivity.this);
-                        builder.setMessage("当前正在使用2G网络，播放在线音乐会卡顿哟");
-                        builder.setTitle("提示");
-                        builder.setIcon(R.drawable.tip);
-                        builder.setPositiveButton("流量多",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                        String path = Path + songID + ".mp3";
-                                        PlayMusic playMusic =new PlayMusic();
-                                        playMusic.play(path,0);
-
-                                        String geshou = onlineMusic.artist.get(0).artistName;
-                                        String coverUrl = onlineMusic.abulum.pic;
-                                        Log.d("路径是",path);
-                                        int time = onlineMusic.duration;
-                                        MainActivity mainActivity = new MainActivity();
-                                        mainActivity.tongbuShow(geming,geshou,coverUrl,time,MainActivity.ONLINE);
-                                        dialog.dismiss();
-                                    }
-                                });
-
-                        builder.setNegativeButton("伤不起",
-                                new android.content.DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                        builder.create().show();
-
-                        break;
-                    default:
-                        break;
-                }
             }
         });
         HeaderView = LayoutInflater.from(WangyiBangActivity.this).inflate(R.layout.activity_online_music_list_header,null);
@@ -242,13 +241,13 @@ public class WangyiBangActivity extends SwipeBackActivity{
         updateTime = headerView.findViewById(R.id.tv_update_date);
         content = headerView.findViewById(R.id.tv_comment);
 
-        /*
-        Glide.with(OnlineMusicActivity.this)
-                .load(onlineMusiclistcallback.getBillboard().getPic_s640())
+
+        Glide.with(WangyiBangActivity.this)
+                .load(wangyiBang.result.coverImgUrl)
                 .placeholder(R.drawable.default_cover)
                 .error(R.drawable.default_cover)
                 .into(Cover);
-        */
+
         String time = getMilliToDate(wangyiBang.result.updatatime);
         title.setText(wangyiBang.result.bangName);
         updateTime.setText("更新于："+time+ "\n"+" 播放次数："+wangyiBang.result.playCount);
@@ -256,7 +255,7 @@ public class WangyiBangActivity extends SwipeBackActivity{
 
     }
 
-    //将服务器返回的Json时间（如：1520590668002）解析为日期
+    //将服务器返回的Json时间（如：1520590668002）解析为具体日期
     public static String getMilliToDate(String time){
         Date date = new Date(Long.valueOf(time));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

@@ -443,6 +443,7 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
 
                break;
            case MainActivity.ONLINE:
+               locatetoLrc(a);
                geming.setText(a);
                geshou.setText(b);
                seekBar.setMax(endtime);
@@ -455,7 +456,7 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
                        .dontAnimate()//防止设置placeholder导致第一次不显示网络图片,只显示默认图片的问题
                        .error(R.drawable.music_ic)
                        .placeholder(R.drawable.music_ic)
-                       .transform(new GlideRoundTransform(getContext(),100)).into(playbg);
+                       .transform(new GlideRoundTransform(getContext(),300)).into(playbg);
 
 
 
@@ -464,7 +465,6 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
                        .crossFade(1000)
                        .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),25,1))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
                         .into(playmusicibg);
-               locatetoLrc(a);
                break;
        }
    }

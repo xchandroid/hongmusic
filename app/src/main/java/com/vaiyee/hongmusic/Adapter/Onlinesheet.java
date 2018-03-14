@@ -187,8 +187,7 @@ public class Onlinesheet extends BaseAdapter{
         musicviewHolder.s3.setText(sheet.getMusic3());
         Glide.with(context)
                 .load(sheet.getCoverUrl())
-                .placeholder(R.drawable.ic_launcher)
-                .error(R.drawable.ic_launcher)
+                .placeholder(R.drawable.music_ic)
                 .into(musicviewHolder.cover);
     }
     //最后一个位置不显示分割线

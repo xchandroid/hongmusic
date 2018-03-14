@@ -120,7 +120,7 @@ public class songsAdapter extends ArrayAdapter<Song> {
         } else //滑动状态时加载的是本地图片
         {
             //拖动过程显示的图片
-            viewholder.zjview.setImageResource(R.drawable.ic_launcher);
+            viewholder.zjview.setImageResource(R.drawable.music_ic);
             //将数据image_url保存在Tag当中
             viewholder.zjview.setTag(url);
 

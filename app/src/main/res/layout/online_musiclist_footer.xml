@@ -7,6 +7,6 @@
     android:layout_height="match_parent"
     android:text="已经到底啦"
     android:textSize="20sp"
-    android:textColor="#00FFFF"
+    android:textColor="@color/red"
     android:gravity="center_horizontal"/>
 </LinearLayout>

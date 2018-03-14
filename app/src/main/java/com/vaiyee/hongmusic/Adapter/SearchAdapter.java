@@ -108,7 +108,7 @@ public class SearchAdapter extends BaseAdapter {
        String songname1 = songname.replace("<em>","");
        String songname2 = songname1.replace("</em>","");
         viewHolder.geming.setText(1+i+"."+songname2);
-        viewHolder.geshou.setText(name2);
+        viewHolder.geshou.setText(name2+"-"+"《"+Html.fromHtml(song.getAlbumName())+"》");
         return view;
     }
 

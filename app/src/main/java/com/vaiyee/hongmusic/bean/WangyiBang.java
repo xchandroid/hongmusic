@@ -27,6 +27,8 @@ public class WangyiBang {
         @SerializedName("description")
         public String description;
 
+        @SerializedName("coverImgUrl")
+        public String coverImgUrl;
         @SerializedName("playCount")
         public String  playCount;
 

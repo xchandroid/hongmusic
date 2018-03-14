@@ -4,6 +4,8 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.vaiyee.hongmusic.bean.DownloadInfo;
+import com.vaiyee.hongmusic.bean.KugouBang;
+import com.vaiyee.hongmusic.bean.Sheet;
 import com.vaiyee.hongmusic.bean.WangyiLrc;
 import com.vaiyee.hongmusic.http.JsoncallbackKugou;
 import com.vaiyee.hongmusic.bean.KugouMusic;
@@ -49,6 +51,7 @@ public class HttpClinet {
 private static final String  KUGO = "http://www.kugou.com/yy/index.php?r=play/getdata&hash=";
  private static final String WANGYI = "http://musicapi.leanapp.cn/top/list?idx=";
  private static final String WYLRC = "http://musicapi.leanapp.cn/lyric?id=";
+ private static final String KUGOUBANG = "http://m.kugou.com/rank/info/?rankid=";
 
  static {
   OkHttpClient okHttpClient = new OkHttpClient.Builder()
@@ -214,6 +217,24 @@ private static final String  KUGO = "http://www.kugou.com/yy/index.php?r=play/ge
                     @Override
                     public void onResponse(WangyiLrc response, int id) {
                             callback.onSuccess(response);
+                    }
+                });
+    }
+
+    public static void getKugoubang(String rankid,int page, final HttpCallback<KugouBang> callback)
+    {
+        OkHttpUtils.get().url(KUGOUBANG+rankid+"&page="+page+"&json=true")
+                .build()
+                .execute(new JsonCallback<KugouBang>(KugouBang.class) {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        callback.onFail(e);
+                    }
+
+                    @Override
+                    public void onResponse(KugouBang response, int id) {
+
+                        callback.onSuccess(response);
                     }
                 });
     }
