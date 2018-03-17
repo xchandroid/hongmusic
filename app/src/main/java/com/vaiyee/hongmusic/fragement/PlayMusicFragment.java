@@ -28,11 +28,14 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -43,6 +46,7 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.vaiyee.hongmusic.Adapter.PlayListAdapter;
 import com.vaiyee.hongmusic.Adapter.ViewPagerAdapter;
 import com.vaiyee.hongmusic.Adapter.songsAdapter;
 import com.vaiyee.hongmusic.CircleImageView;
@@ -56,9 +60,18 @@ import com.vaiyee.hongmusic.OnlineMusicActivity;
 import com.vaiyee.hongmusic.PlayMusic;
 import com.vaiyee.hongmusic.R;
 import com.vaiyee.hongmusic.SearchActivity;
+import com.vaiyee.hongmusic.Utils.HttpClinet;
 import com.vaiyee.hongmusic.Utils.QuanjuUtils;
 import com.vaiyee.hongmusic.Utils.getAudio;
+import com.vaiyee.hongmusic.bean.DownloadInfo;
+import com.vaiyee.hongmusic.bean.KugouMusic;
+import com.vaiyee.hongmusic.bean.OnlineLrc;
+import com.vaiyee.hongmusic.bean.OnlineMusic;
 import com.vaiyee.hongmusic.bean.Song;
+import com.vaiyee.hongmusic.bean.WangyiLrc;
+import com.vaiyee.hongmusic.http.HttpCallback;
+
+import org.apache.http.params.HttpParams;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -77,7 +90,7 @@ import me.wcy.lrcview.LrcView;
  * A simple {@link Fragment} subclass.
  */
 public class PlayMusicFragment extends Fragment implements View.OnClickListener,View.OnTouchListener,SeekBar.OnSeekBarChangeListener, LyricView.OnPlayerClickListener{
-private static ImageView pre,next,playmode,hide,playmusicibg,ci;
+private static ImageView pre,next,playmode,hide,playmusicibg,ci,playlist;
 public static ImageView playbg,play;
 private static MyCircleView bantouming;
 private OnBacktoMainActiviListener listener;
@@ -95,6 +108,8 @@ private static LyricView lyricView;
 private boolean isFirstpager = true;
 private int mode = 0;
 private PopupWindow popupWindow;
+private static final String Path = "http://music.163.com/song/media/outer/url?id=";
+private static String coverUrl = null,lrc=null,songname=null,singger=null,Lrccontent=null;
 private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
 
     public PlayMusicFragment() {
@@ -138,6 +153,8 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
         View page2 = LayoutInflater.from(MyApplication.getQuanjuContext()).inflate(R.layout.pager2,null);
         viewPager = view.findViewById(R.id.viewpager);
         playbg = page1.findViewById(R.id.play_bg);
+        playlist = view.findViewById(R.id.play_list);
+        playlist.setOnClickListener(this);
         bantouming = page1.findViewById(R.id.bantouming);
         singlelrc = page1.findViewById(R.id.lrc_view_single);
         lyricView = page2.findViewById(R.id.lrcview);
@@ -332,10 +349,136 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
             case R.id.finish:
                 popupWindow.dismiss();
                 break;
+            case R.id.play_list:
+                ShowPlaylist();
+                break;
+                default:
+                    break;
 
         }
     }
 
+
+    //弹出当前播放列表的popupwindow
+    private void ShowPlaylist()
+    {
+        View contentview = LayoutInflater.from(getContext()).inflate(R.layout.play_list_layout,null);
+        initPlaylistview(contentview);
+        PopupWindow popupWindow = new PopupWindow(contentview,getActivity().getWindow().getDecorView().getWidth(),getActivity().getWindow().getDecorView().getHeight()/2);
+        popupWindow.setFocusable(true);
+        popupWindow.setTouchable(true);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setAnimationStyle(R.style.popuAnim);
+        /*
+        final WindowManager.LayoutParams params = getActivity().getWindow().getAttributes();
+        params.alpha=0.6f;
+        getActivity().getWindow().setAttributes(params);
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override                                                                          //弹出popup时背景变暗，这里不用效果会更好
+            public void onDismiss() {
+                params.alpha=1.0f;
+                getActivity().getWindow().setAttributes(params);
+            }
+        });*/
+        popupWindow.showAtLocation(getActivity().getWindow().getDecorView(),Gravity.BOTTOM,0,0);
+
+    }
+
+    private void initPlaylistview(View contentview) {
+        final PlayMusic.PlayList playList = new PlayMusic.PlayList();
+        final List<Song> list = playList.getPlaylist();
+        ListView listView =contentview.findViewById(R.id.play_listview);
+        final PlayListAdapter adapter = new PlayListAdapter(getContext(),R.layout.play_listview_item,list);
+        listView.setAdapter(adapter);
+        listView.setSelection(PlayMusic.playposition);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
+                final Song song = list.get(i);
+                songname = song.getTitle();
+                singger = song.getSinger();
+
+                switch (playList.getBang())
+                {
+                    case 0:
+                        final PlayMusic playMusic = new PlayMusic();
+                        final String path = song.getFileUrl();
+                        playMusic.play(path,i);
+                        adapter.notifyDataSetChanged();
+                        fragement1.getLrc(songname,song,i);
+                        break;
+                    case 1:
+                        final String geming = song.getTitle();
+                        final String geshou = song.getSinger();
+                        HttpClinet.getMusicUrl(song.getFileUrl(), new HttpCallback<DownloadInfo>() {
+                            @Override
+                            public void onSuccess(DownloadInfo downloadInfo) {
+                                PlayMusic playMusic1 = new PlayMusic();
+                                playMusic1.play(downloadInfo.getBitrate().getFile_link(),i);
+                                playMusic1.getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
+                            }
+
+                            @Override
+                            public void onFail(Exception e) {
+                                Toast.makeText(MyApplication.getQuanjuContext(),"播放在线歌曲失败，请检查网络重试",Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        break;
+                    case 2:
+                        String hash = song.getFileUrl();
+                        HttpClinet.KugouUrl(hash, new HttpCallback<KugouMusic>() {
+                            @Override
+                            public void onSuccess(KugouMusic kugouMusic) {
+                                String path = kugouMusic.getData().getPlay_url();
+                                if (path != null) {
+                                    Log.d("歌曲地址是", path);
+                                    PlayMusic playMusic = new PlayMusic();
+                                    playMusic.play(path, i);
+                                    adapter.notifyDataSetChanged();
+                                    coverUrl = kugouMusic.getData().getImg();
+                                    lrc = kugouMusic.getData().getLyrics();
+                                    SearchActivity.creatLrc(lrc, songname);
+                                    MainActivity mainActivity = new MainActivity();
+                                    mainActivity.tongbuShow(songname, singger, coverUrl, song.getDuration(), MainActivity.ONLINE);
+                                }
+                            }
+
+                            @Override
+                            public void onFail(Exception e) {
+
+                            }
+                        });
+                        break;
+                    case 3:
+                        final String id = song.getFileUrl();
+                        HttpClinet.WangyiLrc(id, new HttpCallback<WangyiLrc>() {
+                            @Override
+                            public void onSuccess(WangyiLrc wangyiLrc) {
+                                String lrcContent = wangyiLrc.lrc.lyric;
+                                SearchActivity.creatLrc(lrcContent,songname);
+                                String path = Path +id+ ".mp3";
+                                PlayMusic playMusic =new PlayMusic();
+                                playMusic.play(path,i);
+                                adapter.notifyDataSetChanged();
+                                playMusic.getLrc(path,song.getTitle(),song.getSinger(),song.getDuration());
+
+                            }
+
+                            @Override
+                            public void onFail(Exception e) {
+
+                            }
+                        });
+
+                }
+
+
+            }
+        });
+
+    }
+
+    //弹出设置歌词颜色的popupwindow
     private void ShowpopupWindow() {
         View contentView = LayoutInflater.from(getContext()).inflate(R.layout.geci_edit,null);
         initcontentView(contentView);

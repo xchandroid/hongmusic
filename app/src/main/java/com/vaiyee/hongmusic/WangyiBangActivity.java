@@ -34,6 +34,7 @@ import com.vaiyee.hongmusic.bean.OnlineLrc;
 import com.vaiyee.hongmusic.bean.OnlineMusic;
 import com.vaiyee.hongmusic.bean.OnlineMusiclist;
 import com.vaiyee.hongmusic.bean.Sheet;
+import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.bean.Tracks;
 import com.vaiyee.hongmusic.bean.WangyiBang;
 import com.vaiyee.hongmusic.bean.WangyiLrc;
@@ -62,6 +63,7 @@ public class WangyiBangActivity extends SwipeBackActivity{
     private TextView sheetTitle;
     private ImageView back;
     private WangyiBang wangyiBang;
+    private List<Song> songList;
     private static final String Path = "http://music.163.com/song/media/outer/url?id=";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,13 +76,14 @@ public class WangyiBangActivity extends SwipeBackActivity{
         ShowProgress();
         onlineMusicList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
                 final Tracks onlineMusic = onlineMusics.get(i-1);
                 final String songID = onlineMusic.Id;
                 final String geming = onlineMusic.songname;
                 HttpClinet.WangyiLrc(songID, new HttpCallback<WangyiLrc>() {
                     @Override
                     public void onSuccess(WangyiLrc wangyiLrc) {
+                        songList = new ArrayList<>();
                         String lrcContent = wangyiLrc.lrc.lyric;
                         Log.d("歌词内容是",lrcContent);
                         SearchActivity.creatLrc(lrcContent,geming);
@@ -91,7 +94,7 @@ public class WangyiBangActivity extends SwipeBackActivity{
 
                                 String path = Path + songID + ".mp3";
                                 PlayMusic playMusic =new PlayMusic();
-                                playMusic.play(path,0);
+                                playMusic.play(path,i-1);
                                 String songname = onlineMusic.songname;
                                 String geshou = onlineMusic.artist.get(0).artistName;
                                 String coverUrl = onlineMusic.abulum.pic;
@@ -100,6 +103,19 @@ public class WangyiBangActivity extends SwipeBackActivity{
                                 MainActivity mainActivity = new MainActivity();
                                 mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
 
+                                //加入当前播放列表
+                                for (int i=0;i<onlineMusics.size();i++)
+                                {
+                                    Song song = new Song();
+                                    song.setTitle(onlineMusics.get(i).songname);
+                                    song.setSinger(onlineMusics.get(i).artist.get(0).artistName);
+                                    song.setFileUrl(onlineMusics.get(i).Id);
+                                    song.setDuration(onlineMusics.get(i).duration);
+                                    songList.add(song);
+                                }
+                                PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                                playList.setPlaylist(songList);
+                                playList.setBang(3);  //3表示网易音乐列表
                                 break;
                             case NET_4G:
                                 builder = new AlertDialog.Builder(WangyiBangActivity.this);
@@ -112,7 +128,7 @@ public class WangyiBangActivity extends SwipeBackActivity{
 
                                                 String path = Path + songID + ".mp3";
                                                 PlayMusic playMusic =new PlayMusic();
-                                                playMusic.play(path,0);
+                                                playMusic.play(path,i-1);
                                                 String songname = onlineMusic.songname;
                                                 String geshou = onlineMusic.artist.get(0).artistName;
                                                 String coverUrl = onlineMusic.abulum.pic;
@@ -120,6 +136,20 @@ public class WangyiBangActivity extends SwipeBackActivity{
                                                 int time = onlineMusic.duration;
                                                 MainActivity mainActivity = new MainActivity();
                                                 mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+                                                //加入当前播放列表
+                                                for (int i=0;i<onlineMusics.size();i++)
+                                                {
+                                                    Song song = new Song();
+                                                    song.setTitle(onlineMusics.get(i).songname);
+                                                    song.setSinger(onlineMusics.get(i).artist.get(0).artistName);
+                                                    song.setFileUrl(onlineMusics.get(i).Id);
+                                                    song.setDuration(onlineMusics.get(i).duration);
+                                                    songList.add(song);
+                                                }
+                                                PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                                                playList.setPlaylist(songList);
+                                                playList.setBang(3);  //3表示网易音乐列表
+
                                                 dialog.dismiss();
                                             }
                                         });
@@ -143,7 +173,7 @@ public class WangyiBangActivity extends SwipeBackActivity{
                                             public void onClick(DialogInterface dialog, int which) {
                                                 String path = Path + songID + ".mp3";
                                                 PlayMusic playMusic =new PlayMusic();
-                                                playMusic.play(path,0);
+                                                playMusic.play(path,i-3);
                                                 String songname = onlineMusic.songname;
                                                 String geshou = onlineMusic.artist.get(0).artistName;
                                                 String coverUrl = onlineMusic.abulum.pic;
@@ -151,6 +181,21 @@ public class WangyiBangActivity extends SwipeBackActivity{
                                                 int time = onlineMusic.duration;
                                                 MainActivity mainActivity = new MainActivity();
                                                 mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+
+                                                //加入当前播放列表
+                                                for (int i=0;i<onlineMusics.size();i++)
+                                                {
+                                                    Song song = new Song();
+                                                    song.setTitle(onlineMusics.get(i).songname);
+                                                    song.setSinger(onlineMusics.get(i).artist.get(0).artistName);
+                                                    song.setFileUrl(onlineMusics.get(i).Id);
+                                                    song.setDuration(onlineMusics.get(i).duration);
+                                                    songList.add(song);
+                                                }
+                                                PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                                                playList.setPlaylist(songList);
+                                                playList.setBang(3);  //3表示网易音乐列表
+
                                                 dialog.dismiss();
                                             }
                                         });
@@ -175,7 +220,7 @@ public class WangyiBangActivity extends SwipeBackActivity{
 
                                                 String path = Path + songID + ".mp3";
                                                 PlayMusic playMusic =new PlayMusic();
-                                                playMusic.play(path,0);
+                                                playMusic.play(path,i-1);
                                                 String songname = onlineMusic.songname;
                                                 String geshou = onlineMusic.artist.get(0).artistName;
                                                 String coverUrl = onlineMusic.abulum.pic;
@@ -183,6 +228,20 @@ public class WangyiBangActivity extends SwipeBackActivity{
                                                 int time = onlineMusic.duration;
                                                 MainActivity mainActivity = new MainActivity();
                                                 mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+                                                //加入当前播放列表
+                                                for (int i=0;i<onlineMusics.size();i++)
+                                                {
+                                                    Song song = new Song();
+                                                    song.setTitle(onlineMusics.get(i).songname);
+                                                    song.setSinger(onlineMusics.get(i).artist.get(0).artistName);
+                                                    song.setFileUrl(onlineMusics.get(i).Id);
+                                                    song.setDuration(onlineMusics.get(i).duration);
+                                                    songList.add(song);
+                                                }
+                                                PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                                                playList.setPlaylist(songList);
+                                                playList.setBang(3);  //3表示网易音乐列表
+
                                                 dialog.dismiss();
                                             }
                                         });

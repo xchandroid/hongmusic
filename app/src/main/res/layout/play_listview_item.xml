@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="10dp"
+    android:layout_marginTop="5dp"
+    android:id="@+id/geming"
+    android:textColor="#FFFFFF"
+    android:textSize="15sp"
+    android:text="断桥残雪"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:textSize="10sp"
+        android:layout_marginTop="2dp"
+        android:id="@+id/geshou"
+        android:textColor="#FFFFF0"
+        android:text="玫瑰花的葬礼"/>
+    <ImageView
+        android:id="@+id/v_divider"
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_gravity="bottom"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/divider"/>
+    </LinearLayout>
+    <ProgressBar
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:id="@+id/left_tip"
+        android:layout_gravity="end|center"
+        android:layout_marginRight="20dp"
+        android:visibility="invisible"
+        android:indeterminateDrawable="@drawable/loading"/>
+</FrameLayout>

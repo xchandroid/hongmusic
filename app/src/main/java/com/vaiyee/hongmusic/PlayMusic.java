@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.vaiyee.hongmusic.Utils.AudioFocusManager;
@@ -12,6 +13,7 @@ import com.vaiyee.hongmusic.Utils.HttpClinet;
 import com.vaiyee.hongmusic.Utils.MediaSessionManager;
 import com.vaiyee.hongmusic.Utils.NetUtils;
 import com.vaiyee.hongmusic.Utils.getAudio;
+import com.vaiyee.hongmusic.bean.DownloadInfo;
 import com.vaiyee.hongmusic.bean.KugouMusic;
 import com.vaiyee.hongmusic.bean.KugouSearchResult;
 import com.vaiyee.hongmusic.bean.Song;
@@ -30,15 +32,16 @@ import java.util.List;
  */
 
 public class PlayMusic {
-    public   static MediaPlayer mediaPlayer;
+    public static MediaPlayer mediaPlayer;
     public static Boolean isPause=false,isRest = false;
-    private static int playposition;
-    private  List<Song>songList = new ArrayList<>();
+    public static int playposition;
+    private static List<Song>songList = new ArrayList<>();
     private  PlayMusicFragment p = new PlayMusicFragment();
-    public static String geming;
+    public static String geming,geshou;
     private MediaSessionManager mediaSessionManager;
     private  MainActivity mainActivity;
     public AudioFocusManager audioFocusManager;
+    private static final String Path = "http://music.163.com/song/media/outer/url?id=";
     public void getInstanse()
     {
         mediaPlayer = new MediaPlayer();
@@ -169,49 +172,152 @@ public class PlayMusic {
                 SuijiPlay();
                 return;
         }
-        songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        //songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        PlayList playList = new PlayList();
+        songList = playList.getPlaylist();
         if (playposition>=songList.size()-1)
         {
             Toast.makeText(MyApplication.getQuanjuContext(),"已经是最后一首歌了哦",Toast.LENGTH_LONG).show();
             return;
         }
-        Song song = songList.get(playposition+1);
+        final Song song = songList.get(playposition+1);
         playposition = playposition+1;
-        String path = song.getFileUrl();
-        geming = song.getTitle();
-        String geshou = song.getSinger();
-       // String coverUrl = song.getFileUrl();
-        int endtime = song.getDuration();
-        if (isPause)
+        switch (playList.getBang())
         {
-            mediaPlayer.reset();
+            case 0:     //表示本地音乐列表
+            String path = song.getFileUrl();
+            geming = song.getTitle();
+            geshou = song.getSinger();
+            // String coverUrl = song.getFileUrl();
+            int endtime = song.getDuration();
+            if (isPause) {
+                mediaPlayer.reset();
+            }
+            play(path, playposition);
+            getLrc(path, geming, geshou, endtime);
+            break;
+            case 1:    //表示百度音乐列表
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                HttpClinet.getMusicUrl(song.getFileUrl(), new HttpCallback<DownloadInfo>() {
+                    @Override
+                    public void onSuccess(DownloadInfo downloadInfo) {
+                        if (isPause) {
+                            mediaPlayer.reset();
+                        }
+                        play(downloadInfo.getBitrate().getFile_link(),playposition);
+                        getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        Toast.makeText(MyApplication.getQuanjuContext(),"播放在线歌曲失败，请检查网络重试",Toast.LENGTH_LONG).show();
+                    }
+                });
+                break;
+            case 2:
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                HttpClinet.KugouUrl(song.getFileUrl(), new HttpCallback<KugouMusic>() {
+                    @Override
+                    public void onSuccess(KugouMusic kugouMusic) {
+                        if (isPause)
+                        {
+                            mediaPlayer.reset();
+                        }
+                        play(kugouMusic.getData().getPlay_url(),playposition);
+                        getLrc(kugouMusic.getData().getPlay_url(),geming,geshou,song.getDuration());
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        Toast.makeText(MyApplication.getQuanjuContext(),"播放在线歌曲失败，请检查网络重试",Toast.LENGTH_LONG).show();
+                    }
+                });
+                break;
+            case 3:
+                geming =song.getTitle();
+                geshou = song.getSinger();
+                play(Path+song.getFileUrl()+".mp3",playposition);
+                getLrc(Path+song.getFileUrl()+".mp3",geming,geshou,song.getDuration());
+                break;
         }
-        play(path,playposition);
-        getLrc(path,geming,geshou,endtime);
 
     }
 
     public void xunhuanplay()
     {
 
-        songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        //songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        PlayList playList = new PlayList();
+        songList = playList.getPlaylist();
         if (playposition>=songList.size()-1)
         {
            playposition = -1;
         }
-        Song song = songList.get(playposition+1);
+        final Song song = songList.get(playposition+1);
         playposition = playposition+1;
-        String path = song.getFileUrl();
-        geming = song.getTitle();
-        String geshou = song.getSinger();
-        // String coverUrl = song.getFileUrl();
-        int endtime = song.getDuration();
-        if (isPause)
+        switch (playList.getBang())
         {
-            mediaPlayer.reset();
+            case 0:
+                String path = song.getFileUrl();
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                // String coverUrl = song.getFileUrl();
+                int endtime = song.getDuration();
+                if (isPause) {
+                    mediaPlayer.reset();
+                }
+                play(path, playposition);
+                getLrc(path, geming, geshou, endtime);
+                break;
+            case 1:
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                HttpClinet.getMusicUrl(song.getFileUrl(), new HttpCallback<DownloadInfo>() {
+                    @Override
+                    public void onSuccess(DownloadInfo downloadInfo) {
+                        if (isPause) {
+                            mediaPlayer.reset();
+                        }
+                        play(downloadInfo.getBitrate().getFile_link(),playposition);
+                        getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        Toast.makeText(MyApplication.getQuanjuContext(),"获取在线歌曲失败，请检查网络重试",Toast.LENGTH_LONG).show();
+                    }
+                });
+                break;
+            case 2:
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                HttpClinet.KugouUrl(song.getFileUrl(), new HttpCallback<KugouMusic>() {
+                    @Override
+                    public void onSuccess(KugouMusic kugouMusic) {
+                        if (isPause)
+                        {
+                            mediaPlayer.reset();
+                        }
+                        play(kugouMusic.getData().getPlay_url(),playposition);
+                        getLrc(kugouMusic.getData().getPlay_url(),geming,geshou,song.getDuration());
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        Toast.makeText(MyApplication.getQuanjuContext(),"播放在线歌曲失败，请检查网络重试",Toast.LENGTH_LONG).show();
+                    }
+                });
+                break;
+            case 3:
+                geming =song.getTitle();
+                geshou = song.getSinger();
+                play(Path+song.getFileUrl()+".mp3",playposition);
+                getLrc(Path+song.getFileUrl()+".mp3",geming,geshou,song.getDuration());
+                break;
         }
-        play(path,playposition);
-        getLrc(path,geming,geshou,endtime);
+
     }
 
     public void playPre()
@@ -223,71 +329,245 @@ public class PlayMusic {
                 SuijiPlay();
                 return;
         }
-        songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        //songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        PlayList playList = new PlayList();
+        songList = playList.getPlaylist();
         if (playposition==0)
         {
             Toast.makeText(MyApplication.getQuanjuContext(),"已经是第一首音乐了哦",Toast.LENGTH_LONG).show();
             return;
         }
-        Song song = songList.get(playposition-1);
+        final Song song = songList.get(playposition-1);
         playposition = playposition-1;
-        String path = song.getFileUrl();
-        String geming = song.getTitle();
-        String geshou = song.getSinger();
-       // String coverUrl = song.getFileUrl();
-        int endtime = song.getDuration();
-        if (isPause)
+        switch (playList.getBang())
         {
-            mediaPlayer.reset();
+            case 0:
+                String path = song.getFileUrl();
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                // String coverUrl = song.getFileUrl();
+                int endtime = song.getDuration();
+                if (isPause) {
+                    mediaPlayer.reset();
+                }
+                play(path, playposition);
+                getLrc(path, geming, geshou, endtime);
+                break;
+            case 1:
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                HttpClinet.getMusicUrl(song.getFileUrl(), new HttpCallback<DownloadInfo>() {
+                    @Override
+                    public void onSuccess(DownloadInfo downloadInfo) {
+                        if (isPause) {
+                            mediaPlayer.reset();
+                        }
+                        play(downloadInfo.getBitrate().getFile_link(),playposition);
+                        getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        Toast.makeText(MyApplication.getQuanjuContext(),"播放在线歌曲失败，请检查网络重试",Toast.LENGTH_LONG).show();
+                    }
+                });
+                break;
+            case 2:
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                HttpClinet.KugouUrl(song.getFileUrl(), new HttpCallback<KugouMusic>() {
+                    @Override
+                    public void onSuccess(KugouMusic kugouMusic) {
+                        if (isPause)
+                        {
+                            mediaPlayer.reset();
+                        }
+                        play(kugouMusic.getData().getPlay_url(),playposition);
+                        getLrc(kugouMusic.getData().getPlay_url(),geming,geshou,song.getDuration());
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        Toast.makeText(MyApplication.getQuanjuContext(),"播放在线歌曲失败，请检查网络重试",Toast.LENGTH_LONG).show();
+                    }
+                });
+                break;
+            case 3:
+                geming =song.getTitle();
+                geshou = song.getSinger();
+                play(Path+song.getFileUrl()+".mp3",playposition);
+                getLrc(Path+song.getFileUrl()+".mp3",geming,geshou,song.getDuration());
+                break;
         }
-        play(path,playposition);
-        getLrc(path,geming,geshou,endtime);
+
+
     }
 
     public void SuijiPlay()
     {
-          songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+          //songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        PlayList playList = new PlayList();
+        songList = playList.getPlaylist();
           playposition = getRandom();
-          Song song = songList.get(playposition);
-        String path = song.getFileUrl();
-        String geming = song.getTitle();
-        String geshou = song.getSinger();
-        // String coverUrl = song.getFileUrl();
-        int endtime = song.getDuration();
-        if (isPause)
+          final Song song = songList.get(playposition);
+        switch (playList.getBang())
         {
-            mediaPlayer.reset();
+            case 0:
+                String path = song.getFileUrl();
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                // String coverUrl = song.getFileUrl();
+                int endtime = song.getDuration();
+                if (isPause) {
+                    mediaPlayer.reset();
+                }
+                play(path, playposition);
+                getLrc(path, geming, geshou, endtime);
+                break;
+            case 1:    //百度列表
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                HttpClinet.getMusicUrl(song.getFileUrl(), new HttpCallback<DownloadInfo>() {
+                    @Override
+                    public void onSuccess(DownloadInfo downloadInfo) {
+                        if (isPause) {
+                            mediaPlayer.reset();
+                        }
+                        play(downloadInfo.getBitrate().getFile_link(),playposition);
+                        getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        Toast.makeText(MyApplication.getQuanjuContext(),"播放在线歌曲失败，请检查网络重试",Toast.LENGTH_LONG).show();
+                    }
+                });
+                break;
+            case 2:
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                HttpClinet.KugouUrl(song.getFileUrl(), new HttpCallback<KugouMusic>() {
+                    @Override
+                    public void onSuccess(KugouMusic kugouMusic) {
+                        if (isPause)
+                        {
+                            mediaPlayer.reset();
+                        }
+                        play(kugouMusic.getData().getPlay_url(),playposition);
+                        getLrc(kugouMusic.getData().getPlay_url(),geming,geshou,song.getDuration());
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        Toast.makeText(MyApplication.getQuanjuContext(),"播放在线歌曲失败，请检查网络重试",Toast.LENGTH_LONG).show();
+                    }
+                });
+                break;
+            case 3:
+                geming =song.getTitle();
+                geshou = song.getSinger();
+                play(Path+song.getFileUrl()+".mp3",playposition);
+                getLrc(Path+song.getFileUrl()+".mp3",geming,geshou,song.getDuration());
+                break;
         }
-        play(path,playposition);
-        getLrc(path,geming,geshou,endtime);
+
+
+
     }
 
     public void danqu()
     {
-        songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
-        Song song = songList.get(playposition);
+        //songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        PlayList playList = new PlayList();
+        songList = playList.getPlaylist();
+        final Song song = songList.get(playposition);
+
+        switch (playList.getBang())
+        {
+            case 0:
+                String path = song.getFileUrl();
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                // String coverUrl = song.getFileUrl();
+                int endtime = song.getDuration();
+                if (isPause) {
+                    mediaPlayer.reset();
+                }
+                play(path, playposition);
+                getLrc(path, geming, geshou, endtime);
+                break;
+            case 1:
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                HttpClinet.getMusicUrl(song.getFileUrl(), new HttpCallback<DownloadInfo>() {
+                    @Override
+                    public void onSuccess(DownloadInfo downloadInfo) {
+                        if (isPause) {
+                            mediaPlayer.reset();
+                        }
+                        play(downloadInfo.getBitrate().getFile_link(),playposition);
+                        getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        Toast.makeText(MyApplication.getQuanjuContext(),"播放在线歌曲失败，请检查网络重试",Toast.LENGTH_LONG).show();
+                    }
+                });
+                break;
+            case 2:
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                HttpClinet.KugouUrl(song.getFileUrl(), new HttpCallback<KugouMusic>() {
+                    @Override
+                    public void onSuccess(KugouMusic kugouMusic) {
+                        if (isPause)
+                        {
+                            mediaPlayer.reset();
+                        }
+                        play(kugouMusic.getData().getPlay_url(),playposition);
+                        getLrc(kugouMusic.getData().getPlay_url(),geming,geshou,song.getDuration());
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        Toast.makeText(MyApplication.getQuanjuContext(),"播放在线歌曲失败，请检查网络重试",Toast.LENGTH_LONG).show();
+                    }
+                });
+                break;
+            case 3:
+                geming =song.getTitle();
+                geshou = song.getSinger();
+                play(Path+song.getFileUrl()+".mp3",playposition);
+                getLrc(Path+song.getFileUrl()+".mp3",geming,geshou,song.getDuration());
+                break;
+        }
+
+
+        /*
         String path = song.getFileUrl();
         String geming = song.getTitle();
         String geshou = song.getSinger();
-        // String coverUrl = song.getFileUrl();
         int endtime = song.getDuration();
-        if (isPause)
+        if (isPause)                                             //这是原来没有加入当前播放列表使的播放逻辑
         {
             mediaPlayer.reset();
         }
         play(path,playposition);
         getLrc(path,geming,geshou,endtime);
+        */
     }
 
     private int getRandom()
     {
-        songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        PlayList playList = new PlayList();
+        songList = playList.getPlaylist();
         int size = songList.size();
-        int randomshu = (int)(Math.random()*size+1);
+        int randomshu = (int)(Math.random()*size);
         return randomshu;
     }
 
-    private void getLrc(final String path, final String geming, final String geshou, final int endtime)
+    public void getLrc(final String path, final String geming, final String geshou, final int endtime)
     {
         switch (NetUtils.getNetType())
         {
@@ -349,6 +629,28 @@ public class PlayMusic {
 
         public void setMode(int mode) {
             this.mode = mode;
+        }
+    }
+
+    public static class PlayList
+    {
+        private static   List<Song> playlist = new ArrayList<>();
+        private static int bang = 0;
+
+        public int getBang() {
+            return bang;
+        }
+
+        public void setBang(int bang) {
+            this.bang = bang;
+        }
+
+        public List<Song> getPlaylist() {
+            return playlist;
+        }
+
+        public void setPlaylist(List<Song> playlist) {
+            this.playlist = playlist;
         }
     }
 }

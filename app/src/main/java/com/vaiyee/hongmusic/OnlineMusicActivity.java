@@ -30,6 +30,7 @@ import com.vaiyee.hongmusic.bean.OnlineLrc;
 import com.vaiyee.hongmusic.bean.OnlineMusic;
 import com.vaiyee.hongmusic.bean.OnlineMusiclist;
 import com.vaiyee.hongmusic.bean.Sheet;
+import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.http.HttpCallback;
 
 import java.io.IOException;
@@ -53,6 +54,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
     private ProgressDialog progressDialog;
     private TextView sheetTitle;
     private ImageView back;
+    private List<Song> songList;
     private static String Lrccontent = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +67,8 @@ public class OnlineMusicActivity extends SwipeBackActivity{
         ShowProgress();
         onlineMusicList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemClick(final AdapterView<?> adapterView, View view, final int i, long l) {
+
                 final OnlineMusic onlineMusic = onlineMusics.get(i-1);
                 final String songID = onlineMusic.getSong_id();
                 final String geming = onlineMusic.getTitle();
@@ -96,7 +99,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                                }
                                String path = downloadInfo.getBitrate().getFile_link();
                                PlayMusic playMusic =new PlayMusic();
-                               playMusic.play(path,0);
+                               playMusic.play(path,i-1);
                                String songname = onlineMusic.getTitle().toString();
                                String geshou = onlineMusic.getArtist_name().toString();
                                String coverUrl = onlineMusic.getPic_big().toString();
@@ -104,6 +107,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                                int time = downloadInfo.getBitrate().getFile_duration()*1000;
                                MainActivity mainActivity = new MainActivity();
                                mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+                               addToNowPlaylist();
 
                            }
 
@@ -136,7 +140,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                                                }
                                                String path = downloadInfo.getBitrate().getFile_link();
                                                PlayMusic playMusic =new PlayMusic();
-                                               playMusic.play(path,0);
+                                               playMusic.play(path,i-1);
                                                String songname = onlineMusic.getTitle().toString();
                                                String geshou = onlineMusic.getArtist_name().toString();
                                                String coverUrl = onlineMusic.getPic_big().toString();
@@ -144,6 +148,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                                                int time = downloadInfo.getBitrate().getFile_duration()*1000;
                                                MainActivity mainActivity = new MainActivity();
                                                mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+                                               addToNowPlaylist();
                                            }
 
                                            @Override
@@ -187,7 +192,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                                                }
                                                String path = downloadInfo.getBitrate().getFile_link();
                                                PlayMusic playMusic =new PlayMusic();
-                                               playMusic.play(path,0);
+                                               playMusic.play(path,i-1);
                                                String songname = onlineMusic.getTitle().toString();
                                                String geshou = onlineMusic.getArtist_name().toString();
                                                String coverUrl = onlineMusic.getPic_big().toString();
@@ -195,6 +200,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                                                int time = downloadInfo.getBitrate().getFile_duration()*1000;
                                                MainActivity mainActivity = new MainActivity();
                                                mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+                                               addToNowPlaylist();
                                            }
 
                                            @Override
@@ -238,7 +244,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                                                }
                                                String path = downloadInfo.getBitrate().getFile_link();
                                                PlayMusic playMusic =new PlayMusic();
-                                               playMusic.play(path,0);
+                                               playMusic.play(path,i-1);
                                                String songname = onlineMusic.getTitle().toString();
                                                String geshou = onlineMusic.getArtist_name().toString();
                                                String coverUrl = onlineMusic.getPic_big().toString();
@@ -246,6 +252,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                                                int time = downloadInfo.getBitrate().getFile_duration()*1000;
                                                MainActivity mainActivity = new MainActivity();
                                                mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+                                               addToNowPlaylist();
                                            }
 
                                            @Override
@@ -275,6 +282,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                        default:
                            break;
                }
+
             }
         });
         HeaderView = LayoutInflater.from(OnlineMusicActivity.this).inflate(R.layout.activity_online_music_list_header,null);
@@ -283,6 +291,25 @@ public class OnlineMusicActivity extends SwipeBackActivity{
         onlineMusicList.addFooterView(footerView);
         onlineMusicAdapter =new OnlineMusicAdapter(OnlineMusicActivity.this,R.layout.localmusi_listitem,onlineMusics,this);
         onlineMusicList.setAdapter(onlineMusicAdapter);
+    }
+
+
+    private void addToNowPlaylist()
+    {
+        songList = new ArrayList<>();
+        //将当前列表添加到正在播放列表
+        for (int k=0;k<onlineMusics.size();k++)
+        {
+            Song song = new Song();
+            song.setTitle(onlineMusics.get(k).getTitle());
+            song.setSinger(onlineMusics.get(k).getArtist_name());
+            song.setDuration(360000);
+            song.setFileUrl(onlineMusics.get(k).getSong_id());
+            songList.add(song);
+        }
+        PlayMusic.PlayList playList = new PlayMusic.PlayList();
+        playList.setPlaylist(songList);
+        playList.setBang(1);
     }
     //获取传过来的intent中的Sheet对象
     private void Init()

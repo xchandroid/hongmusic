@@ -62,6 +62,7 @@ public static List<Song> songs;
  private ColorTrackView t,tt;
 public static String coverUrl,geming,geshou;
 public static songsAdapter adapter;
+private List<Song> songList;
 private TextView tips;
     @Nullable
     @Override
@@ -222,6 +223,11 @@ private TextView tips;
                 final String path = song.getFileUrl();
                 playMusic.play(path,i);
                 getLrc(geming,song,i);
+                songList = new ArrayList<>();
+                songList.addAll(songs);
+                PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                playList.setPlaylist(songList);
+                playList.setBang(0);
             }
         });
         return view;
@@ -246,7 +252,7 @@ private TextView tips;
         }
     }
 
-    private void getLrc(final String geming, final Song song, final int i) {
+    public static void getLrc(final String geming, final Song song, final int i) {
         switch (NetUtils.getNetType())
         {
             case NET_NONE:

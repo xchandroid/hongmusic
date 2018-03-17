@@ -10,6 +10,7 @@ import android.text.TextPaint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -24,6 +25,7 @@ import com.vaiyee.hongmusic.bean.KugouBang;
 import com.vaiyee.hongmusic.bean.KugouBangList;
 import com.vaiyee.hongmusic.bean.KugouMusic;
 import com.vaiyee.hongmusic.bean.Sheet;
+import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.http.HttpCallback;
 
 import java.util.ArrayList;
@@ -38,9 +40,11 @@ public class KugoubangActivity extends AppCompatActivity {
     private ListView onlineMusicList;
     private View HeaderView,footerView;
     private List<KugouBangList> list = new ArrayList<>();
+    private List<Song> songList;
     private KugouBangAdapter adapter;
     private static String geshou,geming,coverUrl,lrc;
-    private static int duration;
+    private static int duration,lastVisibleItem = 0,page = 1;
+    private boolean isPullup = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,18 +64,39 @@ public class KugoubangActivity extends AppCompatActivity {
         onlineMusicList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                songList = new ArrayList<>();
                 KugouBangList song = list.get(i-1);
                 String[] s = song.filename.split("-");
                 String hash = song.hash;
                 geming = s[1];
                 geshou = s[0];
                 duration = song.duration*1000;
-                getSongUrl(hash);
+                getSongUrl(hash,i-1);
+            }
+        });
+        onlineMusicList.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int i, int i1, int i2) {
+
+                isPullup = i>lastVisibleItem;
+                if (isPullup)
+                {
+                    if (i+i1==i2-2)
+                    {
+                        getKugouBang(sheet);
+                    }
+                }
+                lastVisibleItem =i;
             }
         });
     }
 
-    private void getSongUrl(final String hash) {
+    private void getSongUrl(final String hash,final int i) {
         AlertDialog.Builder builder;
         switch (NetUtils.getNetType()) {
             case NET_WIFI:
@@ -82,12 +107,27 @@ public class KugoubangActivity extends AppCompatActivity {
                         if (path != null) {
                             Log.d("歌曲地址是", path);
                             PlayMusic playMusic = new PlayMusic();
-                            playMusic.play(path, 0);
+                            playMusic.play(path, i);
                             coverUrl = kugouMusic.getData().getImg();
                             lrc = kugouMusic.getData().getLyrics();
                             SearchActivity.creatLrc(lrc, geming);
                             MainActivity mainActivity = new MainActivity();
                             mainActivity.tongbuShow(geming, geshou, coverUrl, duration, MainActivity.ONLINE);
+                            // 将播放列表加入当前播放列表
+                            for (int i=0;i<list.size();i++)
+                            {
+                                String[] s = list.get(i).filename.split("-");
+                                Song song = new Song();
+                                song.setTitle(s[1]);
+                                song.setSinger(s[0]);
+                                song.setDuration(list.get(i).duration*1000);
+                                song.setFileUrl(list.get(i).hash);
+                                songList.add(song);
+                            }
+                            PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                            playList.setPlaylist(songList);
+                            playList.setBang(2);  //2表示酷狗列表
+
                         }
                     }
 
@@ -113,12 +153,28 @@ public class KugoubangActivity extends AppCompatActivity {
                                         if (path != null) {
                                             Log.d("歌曲地址是", path);
                                             PlayMusic playMusic = new PlayMusic();
-                                            playMusic.play(path, 0);
+                                            playMusic.play(path, i);
                                             coverUrl = kugouMusic.getData().getImg();
                                             lrc = kugouMusic.getData().getLyrics();
                                             SearchActivity.creatLrc(lrc, geming);
                                             MainActivity mainActivity = new MainActivity();
                                             mainActivity.tongbuShow(geming, geshou, coverUrl, duration, MainActivity.ONLINE);
+
+                                            // 将播放列表加入当前播放列表
+                                            for (int i=0;i<list.size();i++)
+                                            {
+                                                String[] s = list.get(i).filename.split("-");
+                                                Song song = new Song();
+                                                song.setTitle(s[1]);
+                                                song.setSinger(s[0]);
+                                                song.setDuration(list.get(i).duration*1000);
+                                                song.setFileUrl(list.get(i).hash);
+                                                songList.add(song);
+                                            }
+                                            PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                                            playList.setPlaylist(songList);
+                                            playList.setBang(2);  //2表示酷狗列表
+
                                         }
                                     }
 
@@ -155,12 +211,28 @@ public class KugoubangActivity extends AppCompatActivity {
                                         if (path != null) {
                                             Log.d("歌曲地址是", path);
                                             PlayMusic playMusic = new PlayMusic();
-                                            playMusic.play(path, 0);
+                                            playMusic.play(path, i);
                                             coverUrl = kugouMusic.getData().getImg();
                                             lrc = kugouMusic.getData().getLyrics();
                                             SearchActivity.creatLrc(lrc, geming);
                                             MainActivity mainActivity = new MainActivity();
                                             mainActivity.tongbuShow(geming, geshou, coverUrl, duration, MainActivity.ONLINE);
+
+                                            // 将播放列表加入当前播放列表
+                                            for (int i=0;i<list.size();i++)
+                                            {
+                                                String[] s = list.get(i).filename.split("-");
+                                                Song song = new Song();
+                                                song.setTitle(s[1]);
+                                                song.setSinger(s[0]);
+                                                song.setDuration(list.get(i).duration*1000);
+                                                song.setFileUrl(list.get(i).hash);
+                                                songList.add(song);
+                                            }
+                                            PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                                            playList.setPlaylist(songList);
+                                            playList.setBang(2);  //2表示酷狗列表
+
                                         }
                                     }
 
@@ -197,12 +269,28 @@ public class KugoubangActivity extends AppCompatActivity {
                                         if (path != null) {
                                             Log.d("歌曲地址是", path);
                                             PlayMusic playMusic = new PlayMusic();
-                                            playMusic.play(path, 0);
+                                            playMusic.play(path, i);
                                             coverUrl = kugouMusic.getData().getImg();
                                             lrc = kugouMusic.getData().getLyrics();
                                             SearchActivity.creatLrc(lrc, geming);
                                             MainActivity mainActivity = new MainActivity();
                                             mainActivity.tongbuShow(geming, geshou, coverUrl, duration, MainActivity.ONLINE);
+
+                                            // 将播放列表加入当前播放列表
+                                            for (int i=0;i<list.size();i++)
+                                            {
+                                                String[] s = list.get(i).filename.split("-");
+                                                Song song = new Song();
+                                                song.setTitle(s[1]);
+                                                song.setSinger(s[0]);
+                                                song.setDuration(list.get(i).duration*1000);
+                                                song.setFileUrl(list.get(i).hash);
+                                                songList.add(song);
+                                            }
+                                            PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                                            playList.setPlaylist(songList);
+                                            playList.setBang(2);  //2表示酷狗列表
+
                                         }
                                     }
 
@@ -230,6 +318,7 @@ public class KugoubangActivity extends AppCompatActivity {
 
     private void getKugouBang(Sheet sheet)
     {
+
         HttpClinet.getKugoubang(sheet.getType(), 1, new HttpCallback<KugouBang>() {
             @Override
             public void onSuccess(KugouBang mkugouBang) {
@@ -240,6 +329,7 @@ public class KugoubangActivity extends AppCompatActivity {
                 InitHeader(HeaderView);
                 sheetTitle.setText(kugouBang.info.rankname);
                 onlineMusicList.setVisibility(View.VISIBLE);
+                page+=1;
             }
 
             @Override
