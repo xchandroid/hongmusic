@@ -30,53 +30,55 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="31dp"
+                    android:layout_width="15dp"
+                    android:layout_height="25dp"
                     android:scaleType="centerCrop"
-                   android:src="@drawable/p1"/>
+                   android:src="@drawable/one"/>
             <TextView
                 android:id="@+id/tv_music_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:singleLine="true"
-                android:text="1.加载中…"
+                android:text=" 数据加载中…"
                 android:textSize="15sp" />
             </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:orientation="horizontal">
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="32dp"
+                    android:layout_width="15dp"
+                    android:layout_height="25dp"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/p2"/>
+                    android:src="@drawable/two"/>
             <TextView
                 android:id="@+id/tv_music_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:singleLine="true"
-                android:text="2.加载中…"
+                android:text=" 数据加载中…"
                 android:textSize="15sp" />
 
             </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp">
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="32dp"
+                    android:layout_width="15dp"
+                    android:layout_height="25dp"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/p3"/>
+                    android:src="@drawable/three"/>
             <TextView
                 android:id="@+id/tv_music_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:singleLine="true"
-                android:text="3.加载中…"
+                android:text=" 数据加载中…"
                 android:textSize="15sp" />
             </LinearLayout>
         </LinearLayout>

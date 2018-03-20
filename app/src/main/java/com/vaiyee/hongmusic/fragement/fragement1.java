@@ -90,6 +90,7 @@ private TextView tips;
                 switch (i)
                 {
                     case AbsListView.OnScrollListener.SCROLL_STATE_IDLE: //滑动停止
+                        MainActivity.linearLayout.setVisibility(View.VISIBLE);
                      adapter.setScrollState(false);
                         //当前屏幕中listview的子项的个数
                         int count = absListView.getChildCount();
@@ -119,6 +120,7 @@ private TextView tips;
                     {
                         //设置为正在滚动
                         adapter.setScrollState(true);
+                        MainActivity.linearLayout.setVisibility(View.GONE);
                         break;
                     }
                     //正在滚动
@@ -126,6 +128,7 @@ private TextView tips;
                     {
                         //设置为正在滚动
                         adapter.setScrollState(true);
+                        MainActivity.linearLayout.setVisibility(View.GONE);
                         break;
                     }
                     default:
@@ -258,7 +261,7 @@ private TextView tips;
             case NET_NONE:
                 int time = song.getDuration();
                 MainActivity mainActivity = new MainActivity();
-                mainActivity.tongbuShow(geming,geshou,coverUrl,time,MainActivity.LOCAL);
+                mainActivity.tongbuShow(geming,song.getSinger(),coverUrl,time,MainActivity.LOCAL);
                 Toast.makeText(MyApplication.getQuanjuContext(),"获取歌手写真失败，请检查网络再试",Toast.LENGTH_LONG).show();
                 return;
         }
@@ -269,7 +272,7 @@ private TextView tips;
                 {
                     int time = song.getDuration();
                     MainActivity mainActivity = new MainActivity();
-                    mainActivity.tongbuShow(geming,geshou,coverUrl,time,MainActivity.LOCAL);
+                    mainActivity.tongbuShow(geming,song.getSinger(),coverUrl,time,MainActivity.LOCAL);
                     Toast.makeText(MyApplication.getQuanjuContext(),"获取歌词失败，请检查网络再试",Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -286,14 +289,14 @@ private TextView tips;
                         //PlayMusic playMusic = new PlayMusic();
                        // playMusic.play(path,i);
                         MainActivity mainActivity = new MainActivity();
-                        mainActivity.tongbuShow(geming,geshou,coverUrl,time,MainActivity.LOCAL);
+                        mainActivity.tongbuShow(geming,song.getSinger(),coverUrl,time,MainActivity.LOCAL);
                     }
 
                     @Override
                     public void onFail(Exception e) {
                         int time = song.getDuration();
                         MainActivity mainActivity = new MainActivity();
-                        mainActivity.tongbuShow(geming,geshou,coverUrl,time,MainActivity.LOCAL);
+                        mainActivity.tongbuShow(geming,song.getSinger(),coverUrl,time,MainActivity.LOCAL);
                         Toast.makeText(MyApplication.getQuanjuContext(),"获取歌词失败，请检查网络再试",Toast.LENGTH_LONG).show();
                     }
                 });

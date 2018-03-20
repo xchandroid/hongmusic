@@ -14,6 +14,8 @@ import android.widget.Toast;
 import com.vaiyee.hongmusic.MyApplication;
 import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.fragement.fragement1;
+import com.vaiyee.hongmusic.util.ID3TagUtils;
+import com.vaiyee.hongmusic.util.ID3Tags;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -142,8 +144,21 @@ public class DownloadTask extends AsyncTask<String,Void,Integer> {
                 song.setDuration(time);
                 fragement1.songs.add(0,song);
                 fragement1.adapter.notifyDataSetChanged();
+
+                ID3Tags id3Tags = new ID3Tags.Builder()
+                        .setTitle(songName)
+                        .setArtist(geshou)
+                        .setAlbum(ablumName)
+                        .build();
+                ID3TagUtils.setID3Tags(new File(path), id3Tags, false);          //下载完MP3文件后，设置歌曲详细信息，这里只设置了歌手，歌名和专辑名字
+
                 scanFile(MyApplication.getQuanjuContext(), Environment.getExternalStorageDirectory().getAbsolutePath());
-                MediaScannerConnection.scanFile(MyApplication.getQuanjuContext(), new String[]{path}, null, null);
+                MediaScannerConnection.scanFile(MyApplication.getQuanjuContext(), new String[]{path}, null, null);  //刷新媒体库
+                 /*
+                // 刷新媒体库
+                Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(mMusicFile));       //这个方法也可以刷新媒体库
+                sendBroadcast(intent);
+                */
                 Toast.makeText(MyApplication.getQuanjuContext(),"下载成功",Toast.LENGTH_LONG).show();
                 break;
             case 1:

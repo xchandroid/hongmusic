@@ -106,9 +106,18 @@ public class KugouAdapter extends RecyclerView.Adapter<KugouAdapter.ViewHolder> 
                     }
                     String coverUrl = kugouBang.info.imgurl.replace("{size}","150");
                     sheet.setCoverUrl(coverUrl);
-                    sheet.setMusic1(kugouBang.song.kugouBangList.get(0).filename);
-                    sheet.setMusic2(kugouBang.song.kugouBangList.get(1).filename);
-                    sheet.setMusic3(kugouBang.song.kugouBangList.get(2).filename);
+                    if (kugouBang.song.kugouBangList.size()>=1)
+                    {
+                        sheet.setMusic1(kugouBang.song.kugouBangList.get(0).filename);
+                    }
+                    if (kugouBang.song.kugouBangList.size()>=2)
+                    {
+                        sheet.setMusic2(kugouBang.song.kugouBangList.get(1).filename);
+                    }
+                    if (kugouBang.song.kugouBangList.size()>=3)
+                    {
+                        sheet.setMusic3(kugouBang.song.kugouBangList.get(2).filename);
+                    }
                     showData(sheet, holder);
                 }
 

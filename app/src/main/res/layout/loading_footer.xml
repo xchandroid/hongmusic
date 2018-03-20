@@ -14,5 +14,5 @@
         android:text="正在加载更多..."
         android:textSize="20sp"
         android:layout_marginLeft="5dp"
-        android:textColor="@color/blue"/>
+        android:textColor="@color/black"/>
 </LinearLayout>

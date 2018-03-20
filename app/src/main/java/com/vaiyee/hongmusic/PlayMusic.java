@@ -3,13 +3,16 @@ package com.vaiyee.hongmusic;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.vaiyee.hongmusic.Utils.AudioFocusManager;
 import com.vaiyee.hongmusic.Utils.HttpClinet;
+import com.vaiyee.hongmusic.Utils.ListDataSave;
 import com.vaiyee.hongmusic.Utils.MediaSessionManager;
 import com.vaiyee.hongmusic.Utils.NetUtils;
 import com.vaiyee.hongmusic.Utils.getAudio;
@@ -33,7 +36,7 @@ import java.util.List;
 
 public class PlayMusic {
     public static MediaPlayer mediaPlayer;
-    public static Boolean isPause=false,isRest = false;
+    public static Boolean isPause=false;
     public static int playposition;
     private static List<Song>songList = new ArrayList<>();
     private  PlayMusicFragment p = new PlayMusicFragment();
@@ -41,12 +44,14 @@ public class PlayMusic {
     private MediaSessionManager mediaSessionManager;
     private  MainActivity mainActivity;
     public AudioFocusManager audioFocusManager;
+    public static SharedPreferences.Editor editor;
     private static final String Path = "http://music.163.com/song/media/outer/url?id=";
     public void getInstanse()
     {
         mediaPlayer = new MediaPlayer();
     }
     public  void play(String path, final int position) {
+
         if (PlayMusicFragment.timerTask != null) {
             PlayMusicFragment.timerTask.cancel();  //取消定时任务，不然每次点击列表播放音乐会跳播
             PlayMusicFragment.timer.cancel();
@@ -60,6 +65,9 @@ public class PlayMusic {
             mainActivity = new MainActivity();
         }
         mainActivity.sendNotification();
+       editor = MyApplication.getQuanjuContext().getSharedPreferences("p",0).edit();
+       editor.putInt("i",position);
+       editor.apply();
         // MyService.noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_pause);
         MainActivity.setplayButtonpause();
         p.zhuanquanuqna();
@@ -215,7 +223,7 @@ public class PlayMusic {
                     }
                 });
                 break;
-            case 2:
+            case 2:    //酷狗音乐列表
                 geming = song.getTitle();
                 geshou = song.getSinger();
                 HttpClinet.KugouUrl(song.getFileUrl(), new HttpCallback<KugouMusic>() {
@@ -235,7 +243,7 @@ public class PlayMusic {
                     }
                 });
                 break;
-            case 3:
+            case 3:    //网易云音乐列表
                 geming =song.getTitle();
                 geshou = song.getSinger();
                 play(Path+song.getFileUrl()+".mp3",playposition);
@@ -638,19 +646,29 @@ public class PlayMusic {
         private static int bang = 0;
 
         public int getBang() {
-            return bang;
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MyApplication.getQuanjuContext());
+            return preferences.getInt("bang",6);
+            //return bang;
         }
 
         public void setBang(int bang) {
             this.bang = bang;
+            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MyApplication.getQuanjuContext()).edit();
+            editor.putInt("bang",this.bang);
+            editor.apply();   //最后一定要保存
+
         }
 
         public List<Song> getPlaylist() {
-            return playlist;
+            ListDataSave save = new ListDataSave(MyApplication.getQuanjuContext(),"Playlist");
+            return save.getDataList("Playlist");
+
         }
 
         public void setPlaylist(List<Song> playlist) {
             this.playlist = playlist;
+           ListDataSave save = new ListDataSave(MyApplication.getQuanjuContext(),"Playlist");
+           save.setDataList("Playlist",playlist);
         }
     }
 }

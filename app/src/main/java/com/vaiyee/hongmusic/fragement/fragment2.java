@@ -10,12 +10,14 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.vaiyee.hongmusic.Adapter.Onlinesheet;
+import com.vaiyee.hongmusic.MainActivity;
 import com.vaiyee.hongmusic.OnlineMusicActivity;
 import com.vaiyee.hongmusic.R;
 import com.vaiyee.hongmusic.bean.Sheet;
@@ -132,6 +134,32 @@ public class fragment2 extends Fragment {
                 Intent intent = new Intent(getContext(), OnlineMusicActivity.class);
                 intent.putExtra("ABC",sheet);
                 startActivity(intent);
+            }
+        });
+
+        onlineList.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
+
+                switch (i)
+                {
+                    case AbsListView.OnScrollListener.SCROLL_STATE_IDLE: //滑动停止
+                        MainActivity.linearLayout.setVisibility(View.VISIBLE);
+                    break;
+                    //滚动做出了抛的动作
+                    case AbsListView.OnScrollListener.SCROLL_STATE_FLING:
+                        MainActivity.linearLayout.setVisibility(View.GONE);
+                        break;
+                    //正在滚动
+                    case AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
+                        MainActivity.linearLayout.setVisibility(View.GONE);
+                        break;
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int i, int i1, int i2) {
+
             }
         });
     }

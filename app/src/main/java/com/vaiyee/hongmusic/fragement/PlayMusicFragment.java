@@ -1,6 +1,7 @@
 package com.vaiyee.hongmusic.fragement;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -90,27 +91,28 @@ import me.wcy.lrcview.LrcView;
  * A simple {@link Fragment} subclass.
  */
 public class PlayMusicFragment extends Fragment implements View.OnClickListener,View.OnTouchListener,SeekBar.OnSeekBarChangeListener, LyricView.OnPlayerClickListener{
-private static ImageView pre,next,playmode,hide,playmusicibg,ci,playlist;
-public static ImageView playbg,play;
-private static MyCircleView bantouming;
-private OnBacktoMainActiviListener listener;
-private boolean isPause=false;
-public static boolean firstplay=true;
-public static PlayMusic playMusic;
-private static TextView geming=null,geshou=null,startTime=null,endTime = null;
-private static SeekBar seekBar;
-public static Timer timer = new Timer() ;
-public static MyTimerTask timerTask;
-private static ViewPager viewPager;
-private ImageView one,tow;
-public static LrcView singlelrc;
-private static LyricView lyricView;
-private boolean isFirstpager = true;
-private int mode = 0;
-private PopupWindow popupWindow;
-private static final String Path = "http://music.163.com/song/media/outer/url?id=";
-private static String coverUrl = null,lrc=null,songname=null,singger=null,Lrccontent=null;
-private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
+    private static ImageView pre,next,playmode,hide,playmusicibg,ci,playlist;
+    public static ImageView playbg,play;
+    private static MyCircleView bantouming;
+    private OnBacktoMainActiviListener listener;
+    private boolean isPause=false,isFirstopen=true;
+    public static boolean firstplay=true;
+    public static PlayMusic playMusic;
+    private static TextView geming=null,geshou=null,startTime=null,endTime = null;
+    private static SeekBar seekBar;
+    public static Timer timer = new Timer() ;
+    public static MyTimerTask timerTask;
+    private static ViewPager viewPager;
+    private ImageView one,tow;
+    public static LrcView singlelrc;
+    private static LyricView lyricView;
+    private boolean isFirstpager = true;
+    private int mode = 0;
+    public static int lastCurrentposition=0,lastduration=0;
+    private PopupWindow popupWindow;
+    private static final String Path = "http://music.163.com/song/media/outer/url?id=";
+    private static String coverUrl = null,lrc=null,songname=null,singger=null,Lrccontent=null;
+    private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
 
     public PlayMusicFragment() {
         // Required empty public constructor
@@ -121,27 +123,27 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-       View view= inflater.inflate(R.layout.fragment_play_music, container, false);
-       play = view.findViewById(R.id.play_pause);
-       pre = view.findViewById(R.id.pre);
-       playmode = view.findViewById(R.id.playmode);
-       hide = view.findViewById(R.id.hidefragment);
-       hide.setOnClickListener(this);
-       next = view .findViewById(R.id.next);
-       seekBar = view.findViewById(R.id.seekbar);
-       seekBar.setOnSeekBarChangeListener(this);
-       playmusicibg = view.findViewById(R.id.play_music_bg);
-       geming = view.findViewById(R.id.play_fragment_geming);
-       geshou = view.findViewById(R.id.play_fragment_geshou);
-       play.setOnClickListener(this);
-       pre.setOnClickListener(this);
-       playmode.setOnClickListener(this);
-       next.setOnClickListener(this);
-       view.setOnTouchListener(this);
-       startTime = view.findViewById(R.id.star_time);
-       endTime = view.findViewById(R.id.end_time);
-       initViewpager(view);
-       return view;
+        View view= inflater.inflate(R.layout.fragment_play_music, container, false);
+        play = view.findViewById(R.id.play_pause);
+        pre = view.findViewById(R.id.pre);
+        playmode = view.findViewById(R.id.playmode);
+        hide = view.findViewById(R.id.hidefragment);
+        hide.setOnClickListener(this);
+        next = view .findViewById(R.id.next);
+        seekBar = view.findViewById(R.id.seekbar);
+        seekBar.setOnSeekBarChangeListener(this);
+        playmusicibg = view.findViewById(R.id.play_music_bg);
+        geming = view.findViewById(R.id.play_fragment_geming);
+        geshou = view.findViewById(R.id.play_fragment_geshou);
+        play.setOnClickListener(this);
+        pre.setOnClickListener(this);
+        playmode.setOnClickListener(this);
+        next.setOnClickListener(this);
+        view.setOnTouchListener(this);
+        startTime = view.findViewById(R.id.star_time);
+        endTime = view.findViewById(R.id.end_time);
+        initViewpager(view);
+        return view;
     }
 
     private void initViewpager(View view) {
@@ -213,51 +215,135 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        playMusic = new PlayMusic();
-        if (playMusic.mediaPlayer==null)
-        {
-            return;
-        }
-        if (playMusic.mediaPlayer.isPlaying())
-        {
-            play.setImageResource(R.drawable.ic_play_btn_pause);
-        }
+        playMusic = new PlayMusic();  //实例化playMusic，以便可以播放上下首、暂停音乐
+        ShowLastMusic(MainActivity.lastgeming,MainActivity.lastgeshou);
+        SharedPreferences sharedPreferences = MyApplication.getQuanjuContext().getSharedPreferences("p",0);
+        lastCurrentposition=sharedPreferences.getInt("b",0);
+        lastduration = sharedPreferences.getInt("k",0);
+        Log.d("上次总时长是",String.valueOf(lastduration));
+        seekBar.setMax(lastduration);
+        seekBar.setProgress( lastCurrentposition);
+        startTime.setText(QuanjuUtils.formatTime("mm:ss",lastCurrentposition));
+        endTime.setText(QuanjuUtils.formatTime("mm:ss",lastduration));
+        Glide.with(MyApplication.getQuanjuContext())
+                .load(MainActivity.coverurl)
+                .dontAnimate()//防止设置placeholder导致第一次不显示网络图片,只显示默认图片的问题
+                .error(R.drawable.music_ic)
+                .placeholder(R.drawable.music_ic)
+                .transform(new GlideRoundTransform(getContext(),300)).into(playbg);
+
+        Glide.with(MyApplication.getQuanjuContext())
+                .load(MainActivity.coverurl)
+                .crossFade(1000)
+                .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),25,1))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
+                .into(playmusicibg);
+        locatetoLrc(MainActivity.lastgeming);
+        singlelrc.updateTime(lastCurrentposition);
+        lyricView.setCurrentTimeMillis(lastCurrentposition);
+    }
+
+
+    public void ShowLastMusic(String songname,String singger)
+    {
+        geming.setText(songname);
+        geshou.setText(singger);
     }
 
     @Override
     public void onClick(View view) {
-        MainActivity mainActivity = new MainActivity();
+
         switch (view.getId())
         {
             case R.id.play_pause:
 
-                if (!isPause) {
                     if (!playMusic.mediaPlayer.isPlaying()&&firstplay)
                     {
-                        List<Song> songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
-                        Song song = songList .get(0);
-                        String path = song.getFileUrl();
-                        String geming = song.getTitle();
-                        String geshou = song.getSinger();
-                        int time = song.getDuration();
-                        playMusic.play(path,0);
-                        mainActivity.tongbuShow(geming,geshou,path,time,MainActivity.LOCAL);
-                       // setPause();
-                       // mainActivity.setpause();
-                        isPause = false;
+                        PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                        List<Song> songList = playList.getPlaylist();
+                        final Song song = songList .get(MainActivity.position);
+                        songname = song.getTitle();
+                        singger = song.getSinger();
+                        switch (playList.getBang())
+                        {
+                            case 0:
+                                final PlayMusic playMusic = new PlayMusic();
+                                final String path = song.getFileUrl();
+                                playMusic.play(path,MainActivity.position);
+                                playMusic.mediaPlayer.seekTo(lastCurrentposition);
+                                fragement1.getLrc(songname,song,MainActivity.position);
+                                break;
+                            case 1:
+                                final String geming = song.getTitle();
+                                final String geshou = song.getSinger();
+                                HttpClinet.getMusicUrl(song.getFileUrl(), new HttpCallback<DownloadInfo>() {
+                                    @Override
+                                    public void onSuccess(DownloadInfo downloadInfo) {
+                                        PlayMusic playMusic1 = new PlayMusic();
+                                        playMusic1.play(downloadInfo.getBitrate().getFile_link(),MainActivity.position);
+                                        playMusic1.mediaPlayer.seekTo(lastCurrentposition);
+                                        playMusic1.getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
+                                    }
+
+                                    @Override
+                                    public void onFail(Exception e) {
+                                        Toast.makeText(MyApplication.getQuanjuContext(),"播放在线歌曲失败，请检查网络重试",Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                                break;
+                            case 2:
+                                String hash = song.getFileUrl();
+                                HttpClinet.KugouUrl(hash, new HttpCallback<KugouMusic>() {
+                                    @Override
+                                    public void onSuccess(KugouMusic kugouMusic) {
+                                        String path = kugouMusic.getData().getPlay_url();
+                                        if (path != null) {
+                                            Log.d("歌曲地址是", path);
+                                            PlayMusic playMusic = new PlayMusic();
+                                            playMusic.play(path, MainActivity.position);
+                                            playMusic.mediaPlayer.seekTo(lastCurrentposition);
+                                            coverUrl = kugouMusic.getData().getImg();
+                                            lrc = kugouMusic.getData().getLyrics();
+                                            SearchActivity.creatLrc(lrc, songname);
+                                            MainActivity mainActivity = new MainActivity();
+                                            mainActivity.tongbuShow(songname, singger, coverUrl, song.getDuration(), MainActivity.ONLINE);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFail(Exception e) {
+
+                                    }
+                                });
+                                break;
+                            case 3:
+                                final String id = song.getFileUrl();
+                                HttpClinet.WangyiLrc(id, new HttpCallback<WangyiLrc>() {
+                                    @Override
+                                    public void onSuccess(WangyiLrc wangyiLrc) {
+                                        String lrcContent = wangyiLrc.lrc.lyric;
+                                        SearchActivity.creatLrc(lrcContent,songname);
+                                        String path = Path +id+ ".mp3";
+                                        PlayMusic playMusic =new PlayMusic();
+                                        playMusic.play(path,MainActivity.position);
+                                        playMusic.mediaPlayer.seekTo(lastCurrentposition);
+                                        playMusic.getLrc(path,song.getTitle(),song.getSinger(),song.getDuration());
+
+                                    }
+
+                                    @Override
+                                    public void onFail(Exception e) {
+
+                                    }
+                                });
+
+                        }
+
                         firstplay = false;
                         return;
                     }
                     playMusic.pause();
-                  //  play.setImageResource(R.drawable.play_btn_play_pause_selector);
-                    isPause = true;
-                }
-                else
-                {
-                    playMusic.pause();
-                  // setPause();
-                   //ainActivity.setpause();
-                }
+
+
                 break;
             case R.id.pre:
                 playMusic.playPre();
@@ -332,10 +418,10 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
                 lyricView.setmDefaultColor(Color.parseColor("#FFFFFF"));
                 break;
             case R.id.s_red:
-                lyricView.setmDefaultColor(Color.parseColor("#FAEBD7"));
+                lyricView.setmDefaultColor(Color.parseColor("#FFB90F"));
                 break;
             case R.id.s_fen_red:
-                lyricView.setmDefaultColor(Color.parseColor("#CDC8B1"));
+                lyricView.setmDefaultColor(Color.parseColor("#FFB6C1"));
                 break;
             case R.id.s_green:
                 lyricView.setmDefaultColor(Color.parseColor("#CAFF70"));
@@ -344,7 +430,7 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
                 lyricView.setmDefaultColor(Color.parseColor("#EEAEEE"));
                 break;
             case R.id.s_yellow:
-                lyricView.setmDefaultColor(Color.parseColor("#545454"));
+                lyricView.setmDefaultColor(Color.parseColor("#000000"));
                 break;
             case R.id.finish:
                 popupWindow.dismiss();
@@ -352,8 +438,8 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
             case R.id.play_list:
                 ShowPlaylist();
                 break;
-                default:
-                    break;
+            default:
+                break;
 
         }
     }
@@ -390,14 +476,21 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
         ListView listView =contentview.findViewById(R.id.play_listview);
         final PlayListAdapter adapter = new PlayListAdapter(getContext(),R.layout.play_listview_item,list);
         listView.setAdapter(adapter);
-        listView.setSelection(PlayMusic.playposition);
+        if (isFirstopen)
+        {
+            listView.setSelection(MainActivity.position);
+            isFirstopen = false;
+        }
+        else
+        {
+            listView.setSelection(PlayMusic.playposition);
+        }
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
                 final Song song = list.get(i);
                 songname = song.getTitle();
                 singger = song.getSinger();
-
                 switch (playList.getBang())
                 {
                     case 0:
@@ -533,7 +626,7 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
 
     }
-   //该方法拖动进度条开始拖动的时候调用。
+    //该方法拖动进度条开始拖动的时候调用。
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
 
@@ -548,74 +641,76 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
 
     @Override
     public void onPlayerClicked(long progress, String content) {
-          playMusic.mediaPlayer.seekTo((int) progress);
+        playMusic.mediaPlayer.seekTo((int) progress);
     }
 
     public interface OnBacktoMainActiviListener
-   {
-       void hide();
-   }
+    {
+        void hide();
+    }
 
-   public void setplayInfo(String a,String b,int endtime,String coverUrl,int type)
-   {
-       switch (type)
-       {
-           case MainActivity.LOCAL:
-               locatetoLrc(a);
-               geming.setText(a);
-               geshou.setText(b);
-               endTime.setText(QuanjuUtils.formatTime("mm:ss",endtime));
-               seekBar.setMax(endtime);
-               timerTask = new MyTimerTask();
-               timer = new Timer();
-               timer.schedule(timerTask,200,500);
-               Glide.with(MyApplication.getQuanjuContext())
-                       .load(coverUrl)
-                       .dontAnimate()//防止设置placeholder导致第一次不显示网络图片,只显示默认图片的问题
-                       .error(R.drawable.music_ic)
-                       .placeholder(R.drawable.music_ic)
-                       .transform(new GlideRoundTransform(getContext(),100)).into(playbg);
-
-
-               Glide.with(MyApplication.getQuanjuContext())
-                       .load(coverUrl)
-                       .crossFade(1000)
-                       .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),15,1))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
-                       .into(playmusicibg);
+    public void setplayInfo(String a,String b,int endtime,String coverUrl,int type)
+    {
+        PlayMusic.editor.putInt("k",endtime);      //保存上次退出时的歌曲时长
+        PlayMusic.editor.apply();
+        switch (type)
+        {
+            case MainActivity.LOCAL:
+                locatetoLrc(a);
+                geming.setText(a);
+                geshou.setText(b);
+                endTime.setText(QuanjuUtils.formatTime("mm:ss",endtime));
+                seekBar.setMax(endtime);
+                timerTask = new MyTimerTask();
+                timer = new Timer();
+                timer.schedule(timerTask,200,500);
+                Glide.with(MyApplication.getQuanjuContext())
+                        .load(coverUrl)
+                        .dontAnimate()//防止设置placeholder导致第一次不显示网络图片,只显示默认图片的问题
+                        .error(R.drawable.music_ic)
+                        .placeholder(R.drawable.music_ic)
+                        .transform(new GlideRoundTransform(getContext(),100)).into(playbg);
 
 
-               break;
-           case MainActivity.ONLINE:
-               locatetoLrc(a);
-               geming.setText(a);
-               geshou.setText(b);
-               seekBar.setMax(endtime);
-               timerTask = new MyTimerTask();
-               timer = new Timer();
-               timer.schedule(timerTask,200,500);
-               endTime.setText(QuanjuUtils.formatTime("mm:ss",endtime));
-               Glide.with(MyApplication.getQuanjuContext())
-                       .load(coverUrl)
-                       .dontAnimate()//防止设置placeholder导致第一次不显示网络图片,只显示默认图片的问题
-                       .error(R.drawable.music_ic)
-                       .placeholder(R.drawable.music_ic)
-                       .transform(new GlideRoundTransform(getContext(),300)).into(playbg);
-
-
-
-               Glide.with(MyApplication.getQuanjuContext())
-                       .load(coverUrl)
-                       .crossFade(1000)
-                       .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),25,1))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
+                Glide.with(MyApplication.getQuanjuContext())
+                        .load(coverUrl)
+                        .crossFade(1000)
+                        .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),15,1))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
                         .into(playmusicibg);
-               break;
-       }
-   }
+
+
+                break;
+            case MainActivity.ONLINE:
+                locatetoLrc(a);
+                geming.setText(a);
+                geshou.setText(b);
+                seekBar.setMax(endtime);
+                timerTask = new MyTimerTask();
+                timer = new Timer();
+                timer.schedule(timerTask,200,500);
+                endTime.setText(QuanjuUtils.formatTime("mm:ss",endtime));
+                Glide.with(MyApplication.getQuanjuContext())
+                        .load(coverUrl)
+                        .dontAnimate()//防止设置placeholder导致第一次不显示网络图片,只显示默认图片的问题
+                        .error(R.drawable.music_ic)
+                        .placeholder(R.drawable.music_ic)
+                        .transform(new GlideRoundTransform(getContext(),300)).into(playbg);
 
 
 
-   //定位歌词文件
-   public static void locatetoLrc(String geming)
+                Glide.with(MyApplication.getQuanjuContext())
+                        .load(coverUrl)
+                        .crossFade(1000)
+                        .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),25,1))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
+                        .into(playmusicibg);
+                break;
+        }
+    }
+
+
+
+    //定位歌词文件
+    public static void locatetoLrc(String geming)
     {
         File file = new File("/storage/emulated/0/HonchenMusic/Lrc/" + geming+".lrc");
         if (file.exists()) {
@@ -624,32 +719,34 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
         }
     }
 
-      public static Handler handler = new Handler()
-   {
-       @Override
-       public void handleMessage(Message msg) {
+    public static Handler handler = new Handler()
+    {
+        @Override
+        public void handleMessage(Message msg) {
 
-           switch (msg.what)
-           {
-               case 1:
-                   Bundle bundle = msg.getData();
-                   int nowposition = bundle.getInt("currentposition");
-                   seekBar.setProgress(nowposition);
-                   lyricView.setCurrentTimeMillis(playMusic.mediaPlayer.getCurrentPosition());
-                   singlelrc.updateTime(playMusic.mediaPlayer.getCurrentPosition());
-                   startTime.setText(QuanjuUtils.formatTime("mm:ss",nowposition));
-                   break;
-           }
-       }
-   };
+            switch (msg.what)
+            {
+                case 1:
+                    Bundle bundle = msg.getData();
+                    int nowposition = bundle.getInt("currentposition");
+                    seekBar.setProgress(nowposition);
+                    lyricView.setCurrentTimeMillis(playMusic.mediaPlayer.getCurrentPosition());
+                    singlelrc.updateTime(playMusic.mediaPlayer.getCurrentPosition());
+                    startTime.setText(QuanjuUtils.formatTime("mm:ss",nowposition));
+                    break;
+            }
+        }
+    };
 
 
-   public class MyTimerTask extends TimerTask
+    public class MyTimerTask extends TimerTask
     {
 
         @Override
         public void run() {
             int currnentPosition = playMusic.mediaPlayer.getCurrentPosition();
+            PlayMusic.editor.putInt("b",currnentPosition);
+            PlayMusic.editor.apply();
             Bundle bundle = new Bundle();
             bundle.putInt("currentposition",currnentPosition);
             Message message = new Message();
@@ -713,7 +810,7 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
         canvas.drawBitmap(bitmap, rect, rect, paint);
         return output;
     }
-//创建歌词文件
+    //创建歌词文件
     private void createLrc(String lrcContent)
     {
         String filePath = null;
@@ -730,8 +827,8 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
                 dir.mkdirs();  //先创建文件夹
                 file.createNewFile();//创建文件
             }
-          FileOutputStream outStream = new FileOutputStream(file);//创建文件字节输出流对象，以字节形式写入所创建的文件中
-                outStream.write(lrcContent.getBytes());//开始写入文件（也就是把文件写入内存卡中）
+            FileOutputStream outStream = new FileOutputStream(file);//创建文件字节输出流对象，以字节形式写入所创建的文件中
+            outStream.write(lrcContent.getBytes());//开始写入文件（也就是把文件写入内存卡中）
             Log.d("歌词路径",filePath);
             Log.d("歌词内容是",lrcContent);
             Log.d("看看这是什么鬼",String.valueOf(lrcContent.getBytes()));
@@ -741,8 +838,11 @@ private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
         }
     }
 
+
+
     public void resetLrcview()
     {
         lyricView.reset("暂时没发现歌词哦...");
     }
 }
+

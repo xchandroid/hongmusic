@@ -1,6 +1,7 @@
 package com.vaiyee.hongmusic.Adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.vaiyee.hongmusic.MainActivity;
+import com.vaiyee.hongmusic.MyApplication;
 import com.vaiyee.hongmusic.PlayMusic;
 import com.vaiyee.hongmusic.R;
 import com.vaiyee.hongmusic.bean.Song;
@@ -23,6 +26,7 @@ public class PlayListAdapter extends BaseAdapter {
     private Context context;
     private int resId;
     private List<Song> list;
+    private boolean isFirstopen = true;
     public PlayListAdapter(Context context, int resId, List<Song>list)
     {
         this.context=context;
@@ -65,19 +69,34 @@ public class PlayListAdapter extends BaseAdapter {
         }
         viewHolder.geming.setText(1+i+"."+song.getTitle());
         viewHolder.geshou.setText(song.getSinger());
-        viewHolder.tip.setVisibility(isShow(i)?View.VISIBLE:View.INVISIBLE);
+        if (isFirstopen)
+        {
+            viewHolder.tip.setVisibility(isShow(i)?View.VISIBLE:View.INVISIBLE);
+            isFirstopen = false;
+        }
+        else {
+            viewHolder.tip.setVisibility(isShow(i) ? View.VISIBLE : View.INVISIBLE);
+        }
         return view;
     }
 
     private boolean isShow(int i)
     {
-        if (i== PlayMusic.playposition) {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+         if (isFirstopen)
+         {
+             if (i==MainActivity.position)
+             {
+                 return true;
+             }
+         }
+         else {
+             if (i == PlayMusic.playposition) {
+                 return true;
+             } else {
+                 return false;
+             }
+         }
+         return false;
     }
     private class ViewHolder
     {

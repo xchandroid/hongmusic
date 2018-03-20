@@ -17,6 +17,7 @@ import android.text.TextPaint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -274,6 +275,7 @@ public class WangyiBangActivity extends SwipeBackActivity{
         onlineMusicList.addFooterView(footerView);
         onlineMusicAdapter =new WangyiBangAdapter(WangyiBangActivity.this,R.layout.localmusi_listitem,onlineMusics,this);
         onlineMusicList.setAdapter(onlineMusicAdapter);
+
     }
     //获取传过来的intent中的Sheet对象
     private void Init()
@@ -340,7 +342,8 @@ public class WangyiBangActivity extends SwipeBackActivity{
 
            @Override
            public void onFail(Exception e) {
-
+               Toast.makeText(WangyiBangActivity.this,"获取网易云榜单失败,请稍后再试",Toast.LENGTH_LONG).show();
+                  CloseProgress();
            }
        });
     }

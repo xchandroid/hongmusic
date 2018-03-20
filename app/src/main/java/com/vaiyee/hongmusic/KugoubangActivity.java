@@ -31,7 +31,9 @@ import com.vaiyee.hongmusic.http.HttpCallback;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KugoubangActivity extends AppCompatActivity {
+import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
+
+public class KugoubangActivity extends SwipeBackActivity{
     private Sheet sheet;
     private TextView sheetTitle;
     private ImageView back;
@@ -51,7 +53,7 @@ public class KugoubangActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_online_music);
         Init();
-        onlineMusicList = findViewById(R.id.online_music_list);
+        onlineMusicList = (ListView) findViewById(R.id.online_music_list);
         onlineMusicList.setVisibility(View.GONE);
         ShowProgress();
         getKugouBang(sheet);
@@ -81,7 +83,7 @@ public class KugoubangActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onScroll(AbsListView absListView, int i, int i1, int i2) {
+            public void onScroll(AbsListView absListView, int i, int i1, int i2) {          //滑动过程一直会调用
 
                 isPullup = i>lastVisibleItem;
                 if (isPullup)
@@ -319,7 +321,7 @@ public class KugoubangActivity extends AppCompatActivity {
     private void getKugouBang(Sheet sheet)
     {
 
-        HttpClinet.getKugoubang(sheet.getType(), 1, new HttpCallback<KugouBang>() {
+        HttpClinet.getKugoubang(sheet.getType(), page, new HttpCallback<KugouBang>() {
             @Override
             public void onSuccess(KugouBang mkugouBang) {
                 kugouBang =mkugouBang;
@@ -335,6 +337,7 @@ public class KugoubangActivity extends AppCompatActivity {
             @Override
             public void onFail(Exception e) {
                 Toast.makeText(KugoubangActivity.this,"获取数据失败",Toast.LENGTH_LONG).show();
+                CloseProgress();
             }
         });
     }
@@ -376,7 +379,11 @@ public class KugoubangActivity extends AppCompatActivity {
 
     }
 
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        page=1;
+    }
 
     //显示正在加载数据对话框
     private void ShowProgress()

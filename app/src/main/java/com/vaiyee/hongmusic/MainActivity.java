@@ -60,13 +60,18 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.vaiyee.hongmusic.Adapter.songsAdapter;
+import com.vaiyee.hongmusic.Utils.HttpClinet;
 import com.vaiyee.hongmusic.Utils.QuanjuUtils;
 import com.vaiyee.hongmusic.Utils.getAudio;
+import com.vaiyee.hongmusic.bean.DownloadInfo;
+import com.vaiyee.hongmusic.bean.KugouMusic;
 import com.vaiyee.hongmusic.bean.Song;
+import com.vaiyee.hongmusic.bean.WangyiLrc;
 import com.vaiyee.hongmusic.fragement.PlayMusicFragment;
 import com.vaiyee.hongmusic.fragement.WangyiFragment;
 import com.vaiyee.hongmusic.fragement.fragement1;
 import com.vaiyee.hongmusic.fragement.fragment2;
+import com.vaiyee.hongmusic.http.HttpCallback;
 import com.vaiyee.hongmusic.service.MyService;
 
 import java.sql.BatchUpdateException;
@@ -84,11 +89,11 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
     private NavigationView navigationView;
     private ViewPager viewPager;
     private ColorTrackView t, tt;
-    private LinearLayout linearLayout;
+    public static LinearLayout linearLayout;
     private List<ColorTrackView> mTabs = new ArrayList<ColorTrackView>();
     private PlayMusicFragment playMusicFragment;
     private List<Fragment> list = new ArrayList<Fragment>();
-    private Boolean isShowfragment =false,Pause=false;
+    private Boolean isShowfragment =false;
     public static boolean firstopen = false;
     public static ImageView cover,play;
     private static ImageView next;
@@ -96,10 +101,10 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
     public static final int LOCAL =0 ;
     public static final int ONLINE = 1;
     private static String a=null,b=null,time = null;
+    public static String lastgeming,lastgeshou,coverurl;
     private PlayMusic playMusic = new PlayMusic();
     private fragement1 f= new fragement1();
     public static Boolean firstplay = true,isPause=false,Xiumian = false;
-    public static SharedPreferences sharedPreferences;
     public static MyService.MusicBinder musicBinder;
     private EditText editText;
     private boolean showpopwindow = false;
@@ -107,8 +112,10 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
     private static diingShiTask task;
     private static Showtask showtask;
     private static int s;
+    public static int position=0;
     private static ImageView wether_ic;
     private static TextView city,wind,wind_speed,tmp,weinfo;
+    private static final String Path = "http://music.163.com/song/media/outer/url?id=";
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -126,15 +133,12 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        sharedPreferences = getSharedPreferences("data",0);
         if (Build.VERSION.SDK_INT>=21)
         {
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
-
-
 
          //强制更新媒体库
         MediaScannerConnection.scanFile(this, new String[]{Environment
@@ -143,6 +147,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         singer =findViewById(R.id.play_bar_geshou);
         daojishi = findViewById(R.id.daojishi);
         cover = findViewById(R.id.play_bar_cover);
+        ShowLastInfo();//显示上次播放的最后音乐
         play = findViewById(R.id.play_bar_star);
         next = findViewById(R.id.play_bar_next);
         play.setOnClickListener(this);
@@ -380,6 +385,29 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 
     }
 
+    private void ShowLastInfo()         //显示上次退出时播放的音乐
+    {
+        SharedPreferences preferences = getSharedPreferences("p",MODE_PRIVATE);
+        PlayMusic.PlayList playList = new PlayMusic.PlayList();
+        Song song = null;
+        position =preferences.getInt("i",0);
+        List<Song> songList = playList.getPlaylist();
+        if(songList.size()>0) {
+            song = songList.get(position);
+            lastgeming = song.getTitle();
+            lastgeshou = song.getSinger();
+            coverurl = preferences.getString("url", null);
+            songname.setText(lastgeming);
+            singer.setText(lastgeshou);
+            Glide.with(MyApplication.getQuanjuContext())
+                    .load(coverurl)
+                    .placeholder(R.drawable.music_ic)
+                    .error(R.drawable.music_ic)
+                    .into(cover);
+        }
+
+    }
+
     //同步播放条显示
     public void tongbuShow(String geming,String geshou,String coverUrl,int time,int type)
     {
@@ -414,6 +442,8 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
                 break;
 
         }
+        PlayMusic.editor.putString("url",coverUrl);
+        PlayMusic.editor.apply();
     }
 
    //显示播放界面
@@ -470,7 +500,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         }
         onBackTohome();
     }
-    //返回桌面
+    //返回桌面,而不执行onDesdroy()方法，但执行onStop()方法
     private void onBackTohome()
     {
         Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -491,17 +521,87 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
             case R.id.play_bar_star:
                 if (!playMusic.mediaPlayer.isPlaying()&&firstplay)
                 {
-                    List<Song> songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
-                    Song song = songList .get(0);
-                    String path = song.getFileUrl();
-                    String geming = song.getTitle();
-                    String geshou = song.getSinger();
-                    int endtime = song.getDuration();
-                    playMusic.play(path,0);
-                    MainActivity mainActivity = new MainActivity();
-                    mainActivity.tongbuShow(geming,geshou,path,endtime,MainActivity.LOCAL);
-                   // playMusicFragment.setPause();
-                    isPause = false;
+                    PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                    List<Song> songList = playList.getPlaylist();
+                    final Song song = songList .get(MainActivity.position);
+
+                    final String songname = song.getTitle();
+                    final String singger = song.getSinger();
+                    switch (playList.getBang())
+                    {
+                        case 0:
+                            final PlayMusic playMusic = new PlayMusic();
+                            final String path = song.getFileUrl();
+                            playMusic.play(path,MainActivity.position);
+                            playMusic.mediaPlayer.seekTo(PlayMusicFragment.lastCurrentposition);
+                            fragement1.getLrc(songname,song,MainActivity.position);
+                            break;
+                        case 1:
+                            final String geming = song.getTitle();
+                            final String geshou = song.getSinger();
+                            HttpClinet.getMusicUrl(song.getFileUrl(), new HttpCallback<DownloadInfo>() {
+                                @Override
+                                public void onSuccess(DownloadInfo downloadInfo) {
+                                    PlayMusic playMusic1 = new PlayMusic();
+                                    playMusic1.play(downloadInfo.getBitrate().getFile_link(),MainActivity.position);
+                                    playMusic1.mediaPlayer.seekTo(PlayMusicFragment.lastCurrentposition);
+                                    playMusic1.getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
+                                }
+
+                                @Override
+                                public void onFail(Exception e) {
+                                    Toast.makeText(MyApplication.getQuanjuContext(),"播放在线歌曲失败，请检查网络重试",Toast.LENGTH_LONG).show();
+                                }
+                            });
+                            break;
+                        case 2:
+                            String hash = song.getFileUrl();
+                            HttpClinet.KugouUrl(hash, new HttpCallback<KugouMusic>() {
+                                @Override
+                                public void onSuccess(KugouMusic kugouMusic) {
+                                    String path = kugouMusic.getData().getPlay_url();
+                                    if (path != null) {
+                                        Log.d("歌曲地址是", path);
+                                        PlayMusic playMusic = new PlayMusic();
+                                        playMusic.play(path, MainActivity.position);
+                                        playMusic.mediaPlayer.seekTo(PlayMusicFragment.lastCurrentposition);
+                                        String coverUrl = kugouMusic.getData().getImg();
+                                        String lrc = kugouMusic.getData().getLyrics();
+                                        SearchActivity.creatLrc(lrc, songname);
+                                        MainActivity mainActivity = new MainActivity();
+                                        mainActivity.tongbuShow(songname, singger, coverUrl, song.getDuration(), MainActivity.ONLINE);
+                                    }
+                                }
+
+                                @Override
+                                public void onFail(Exception e) {
+
+                                }
+                            });
+                            break;
+                        case 3:
+                            final String id = song.getFileUrl();
+                            HttpClinet.WangyiLrc(id, new HttpCallback<WangyiLrc>() {
+                                @Override
+                                public void onSuccess(WangyiLrc wangyiLrc) {
+                                    String lrcContent = wangyiLrc.lrc.lyric;
+                                    SearchActivity.creatLrc(lrcContent,songname);
+                                    String path = Path +id+ ".mp3";
+                                    PlayMusic playMusic =new PlayMusic();
+                                    playMusic.play(path,MainActivity.position);
+                                    playMusic.mediaPlayer.seekTo(PlayMusicFragment.lastCurrentposition);
+                                    playMusic.getLrc(path,song.getTitle(),song.getSinger(),song.getDuration());
+
+                                }
+
+                                @Override
+                                public void onFail(Exception e) {
+
+                                }
+                            });
+
+                    }
+
                     firstplay = false;
                 }
                 else {
@@ -523,20 +623,8 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         bindService(intent,serviceConnection,BIND_AUTO_CREATE);
         startService(intent);//启动服务
     }
-    public void setpause()
-    {
-        if (!Pause)
-        {
-            play.setImageResource(R.drawable.ic_play_bar_btn_pause);
-            Pause =true;
-        }
-        else
-        {
-            play.setImageResource(R.drawable.play_bar_btn_play_pause_selector);
-            Pause=false;
-        }
 
-    }
+
     //显示播放音乐的信息在通知栏
     public void sendNotification()
     {
@@ -576,6 +664,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
             showabouttask showabouttask = new showabouttask();
             timer.schedule(showabouttask,2000);
         }
+       // playMusicFragment.ShowLastMusic(lastgeming,lastgeshou);   //之所以在这个方法显示上次退出时方法的音乐，是因为生命周期问题，在这里不会导致fragment中setText（）方法引用为空
         super.onResume();
     }
 
