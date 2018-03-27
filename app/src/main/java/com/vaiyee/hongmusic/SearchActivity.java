@@ -5,10 +5,12 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextUtils;
@@ -23,6 +25,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -62,14 +65,17 @@ public class SearchActivity extends SwipeBackActivity {
     private TextView textView;
     private String geshou,coverUrl,lrc;
     public static String geming;
-    private int endtime;
+    private static int endtime,i=-1;
     private ProgressDialog progressDialog;
     private static List<KugouSearchResult.lists> songs = new ArrayList<>();
     private static List<KugouSearchResult.lists> resultList = new ArrayList<>();
     private int mfirstvisibleItem = 0,size = 0;
     private static String content = null;
     private static View footer;
-    private boolean isLoding = false;
+    private boolean isLoding = false,isShowlishi = false;
+    private String[] lishi = new String[10];
+    private SharedPreferences.Editor editor;
+    private LinearLayout linearLayout;
 
 
     @Override
@@ -78,12 +84,22 @@ public class SearchActivity extends SwipeBackActivity {
         setContentView(R.layout.activity_search);
         footer = LayoutInflater.from(SearchActivity.this).inflate(R.layout.loading_footer,null);
         initView();
+        editor = getSharedPreferences("L",0).edit();
     }
+
+    @Override
+    protected void onResume() {
+        DuquSousuoLishi();
+        ShowHistory();
+        super.onResume();
+    }
+
     private void initView()
     {
         adapter = new SearchAdapter(SearchActivity.this,this,R.layout.search_listitem,songs);
         back = (ImageView) findViewById(R.id.fanhui);
         textView = (TextView)findViewById(R.id.Null);
+        linearLayout = (LinearLayout) findViewById(R.id.lishi_layout);
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -127,6 +143,20 @@ public class SearchActivity extends SwipeBackActivity {
                     toast.show();
                     CloseProgress();
                     return;
+                }
+                    i=i+1;
+                if(i<10)
+                {
+                    editor.putString("h" + i, content);      //这里表示仅保存10条历史搜索记录,i是从0开始的
+                    editor.putInt("s", i);
+                    editor.apply();
+                }
+                else
+                {
+                    i = 0;                                       //当大于9的时候，重置i的值为0
+                    editor.putString("h" + i, content);      //else这段代码仅执行一次
+                    editor.putInt("s", 9);
+                    editor.apply();
                 }
                 size = 20;
                 loadMore();
@@ -175,16 +205,23 @@ public class SearchActivity extends SwipeBackActivity {
 
             @Override
             public void onScroll(AbsListView absListView, int i, int i1, int i2) {  // i 是第一个可见item，第二个是可见的总item, 第三个参数是总的item
-                boolean isPulldonw = i>mfirstvisibleItem;
-                int lastvisibleItem = i+i1;
+                boolean isPulldonw = i>mfirstvisibleItem;   //当前的第一个可见item的索引大于上一次第一个可见item的索引时，listview为上拉
+                int lastvisibleItem = i+i1;  //最后一个可见的item
                 if (isPulldonw && !isLoding)  //判断listview是否滑动到底部（isLoading为限制开关,防止滑动到底部一直调用loadMore方法造成listview反应不过来导致程序崩溃）
                 {
+                    linearLayout.setVisibility(View.GONE);
+                    isShowlishi = false;         //这个是否显示历史记录的标志位，防止下拉过程视图闪屏
                     if (lastvisibleItem==i2-1)  //滑动到最后一个Item调用loadMore加载更多，此时isLoading为true，也就是正在加载
                     {
                         loadMore();
                         isLoding = true;
                         listView.addFooterView(footer);
                     }
+                }
+                if (i+2==mfirstvisibleItem&&!isShowlishi)   //这里表示当下拉超过2个item时（实测是快速下拉就显示，慢慢下拉则不显示，这里有效防止下拉过程闪屏问题）显示历史记录
+                {
+                    linearLayout.setVisibility(View.VISIBLE);
+                    isShowlishi = true;
                 }
                 mfirstvisibleItem = i;
             }
@@ -291,7 +328,7 @@ public class SearchActivity extends SwipeBackActivity {
                         if (path!=null) {
                             Log.d("歌曲地址是", path);
                             PlayMusic playMusic = new PlayMusic();
-                            playMusic.play(path, 0);
+                            playMusic.play(path, PlayMusic.playposition);
                             coverUrl = kugouMusic.getData().getImg();
                             lrc = kugouMusic.getData().getLyrics();
                             creatLrc(lrc,geming);
@@ -322,7 +359,7 @@ public class SearchActivity extends SwipeBackActivity {
                                         if (path!=null) {
                                             Log.d("歌曲地址是", path);
                                             PlayMusic playMusic = new PlayMusic();
-                                            playMusic.play(path, 0);
+                                            playMusic.play(path, PlayMusic.playposition);
                                             coverUrl = kugouMusic.getData().getImg();
                                             lrc = kugouMusic.getData().getLyrics();
                                             creatLrc(lrc,geming);
@@ -364,7 +401,7 @@ public class SearchActivity extends SwipeBackActivity {
                                         if (path!=null) {
                                             Log.d("歌曲地址是", path);
                                             PlayMusic playMusic = new PlayMusic();
-                                            playMusic.play(path, 0);
+                                            playMusic.play(path,PlayMusic.playposition);
                                             coverUrl = kugouMusic.getData().getImg();
                                             lrc = kugouMusic.getData().getLyrics();
                                             creatLrc(lrc,geming);
@@ -406,7 +443,7 @@ public class SearchActivity extends SwipeBackActivity {
                                         if (path!=null) {
                                             Log.d("歌曲地址是", path);
                                             PlayMusic playMusic = new PlayMusic();
-                                            playMusic.play(path, 0);
+                                            playMusic.play(path,PlayMusic.playposition);
                                             coverUrl = kugouMusic.getData().getImg();
                                             lrc = kugouMusic.getData().getLyrics();
                                             creatLrc(lrc,geming);
@@ -491,6 +528,49 @@ public class SearchActivity extends SwipeBackActivity {
             outStream.close();//关闭文件字节输出流
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+
+
+    //读取保存的历史搜索记录
+    private void DuquSousuoLishi()
+    {
+        SharedPreferences sharedPreferences = getSharedPreferences("L",0);
+        i = sharedPreferences.getInt("s",-1);   //读取已保存的长度,这里默认值为-1，是因为在搜索按钮点击事件中保存数据索引要从0开始
+        if (sharedPreferences.getInt("s",0)==-1)
+        {
+            return;
+        }
+        for (int i=0;i<=sharedPreferences.getInt("s",0);i++)    //保存是历史记录索引从0开始，所以这里的条件是<=
+        {
+            lishi[i] = sharedPreferences.getString("h"+i,null);
+        }
+    }
+
+    //显示历史搜索记录
+    private void ShowHistory()
+    {
+        linearLayout.removeAllViews();
+        for (int k=0;k<=i;k++)
+        {
+            View jilu = LayoutInflater.from(this).inflate(R.layout.search_history,linearLayout,false);
+            TextView textView = jilu.findViewById(R.id.lishi);
+            if (lishi[k]!=null)
+            {
+                textView.setText(lishi[k]);
+                final int finalK = k;
+                jilu.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ShowProgress();
+                        content = lishi[finalK];
+                        size = 20;
+                        loadMore();
+                    }
+                });
+                linearLayout.addView(jilu);
+            }
         }
     }
 

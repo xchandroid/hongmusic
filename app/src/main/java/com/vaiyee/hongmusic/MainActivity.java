@@ -24,7 +24,10 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -34,6 +37,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
@@ -53,6 +57,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RemoteViews;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,17 +67,22 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.vaiyee.hongmusic.Adapter.songsAdapter;
 import com.vaiyee.hongmusic.Utils.HttpClinet;
 import com.vaiyee.hongmusic.Utils.QuanjuUtils;
+import com.vaiyee.hongmusic.Utils.YinxiaoActivity;
 import com.vaiyee.hongmusic.Utils.getAudio;
 import com.vaiyee.hongmusic.bean.DownloadInfo;
 import com.vaiyee.hongmusic.bean.KugouMusic;
 import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.bean.WangyiLrc;
+import com.vaiyee.hongmusic.fragement.GedanFragment;
 import com.vaiyee.hongmusic.fragement.PlayMusicFragment;
 import com.vaiyee.hongmusic.fragement.WangyiFragment;
+import com.vaiyee.hongmusic.fragement.YinxiaoFragment;
 import com.vaiyee.hongmusic.fragement.fragement1;
 import com.vaiyee.hongmusic.fragement.fragment2;
+import com.vaiyee.hongmusic.gson.Weather;
 import com.vaiyee.hongmusic.http.HttpCallback;
 import com.vaiyee.hongmusic.service.MyService;
+import com.vaiyee.hongmusic.util.Utility;
 
 import java.sql.BatchUpdateException;
 import java.util.ArrayList;
@@ -80,15 +90,19 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import jp.wasabeef.glide.transformations.BlurTransformation;
+
 import static org.litepal.LitePalApplication.getContext;
 
-public class MainActivity extends FragmentActivity implements View.OnTouchListener,View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnTouchListener,View.OnClickListener,SeekBar.OnSeekBarChangeListener {
 
-    private ImageButton opendrawermenu,search;
+    private ImageView opendrawermenu,search;
     private DrawerLayout drawerLayout;
+    private static LinearLayout appBarLayout;
     private NavigationView navigationView;
     private ViewPager viewPager;
-    private ColorTrackView t, tt;
+    private ColorTrackView t, tt,ttt;
+    private static LinearLayout playbar;
     public static LinearLayout linearLayout;
     private List<ColorTrackView> mTabs = new ArrayList<ColorTrackView>();
     private PlayMusicFragment playMusicFragment;
@@ -96,7 +110,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
     private Boolean isShowfragment =false;
     public static boolean firstopen = false;
     public static ImageView cover,play;
-    private static ImageView next;
+    private static ImageView next,localbg;
     public static TextView songname,singer,daojishi;
     public static final int LOCAL =0 ;
     public static final int ONLINE = 1;
@@ -132,13 +146,13 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         if (Build.VERSION.SDK_INT>=21)
         {
             View decorView = getWindow().getDecorView();
-            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE); //使背景图与状态栏融合到一起，这里需要在setcontentview前执行
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
+        setContentView(R.layout.activity_main);
 
          //强制更新媒体库
         MediaScannerConnection.scanFile(this, new String[]{Environment
@@ -150,11 +164,15 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         ShowLastInfo();//显示上次播放的最后音乐
         play = findViewById(R.id.play_bar_star);
         next = findViewById(R.id.play_bar_next);
+        localbg = findViewById(R.id.local_list_bg);
+        playbar = findViewById(R.id.play_bar);
+        appBarLayout = findViewById(R.id.appbar);
         play.setOnClickListener(this);
         next.setOnClickListener(this);
         initNav();
         t = findViewById(R.id.changeTextColorView);
         tt = findViewById(R.id.textView2);
+        ttt = findViewById(R.id.colorTrackView);
         tt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -167,8 +185,15 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
                 viewPager.setCurrentItem(0);
             }
         });
+        ttt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewPager.setCurrentItem(2);
+            }
+        });
         mTabs.add(t);
         mTabs.add(tt);
+        mTabs.add(ttt);
         linearLayout = findViewById(R.id.play_bar);
         linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -176,7 +201,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
                 showfragment();
             }
         });
-        opendrawermenu = (ImageButton) findViewById(R.id.opendrawermenu);
+        opendrawermenu =  findViewById(R.id.opendrawermenu);
         search = findViewById(R.id.music_search);
         search.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,6 +214,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         viewPager = findViewById(R.id.viewpager);
         list.add(new fragement1());
         list.add(new fragment2());
+        list.add(new GedanFragment());
         viewPager.setAdapter(new fragmentAdapter(getSupportFragmentManager(), list));
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -232,7 +258,9 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_night:
-                        Toast.makeText(MainActivity.this, "更换主题将在下个版本推出", Toast.LENGTH_LONG).show();
+                        ShowYinxiaoSet();
+                        //Intent intent = new Intent(MainActivity.this,YinxiaoActivity.class);
+                        //startActivity(intent);
                         break;
                     case R.id.action_timer:
                         View contentview = LayoutInflater.from(MainActivity.this).inflate(R.layout.timerexit,null);
@@ -334,8 +362,8 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
                        }
                         break;
                        case R.id.weather_setting:
-                           Intent intent = new Intent(MainActivity.this,WetMainActivity.class);
-                           startActivity(intent);
+                           Intent intent1 = new Intent(MainActivity.this,WetMainActivity.class);
+                           startActivity(intent1);
                            break;
                     default:
                         break;
@@ -353,7 +381,18 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         playMusic.getInstanse();
         showfragment();
         hidefragment();
-        bindService();
+        bindService();   //绑定通知栏播放条服务，此时服务仅被创建未被调用onStartcommand（）
+        ShowWeatherInfo();//每次打开程序时显示已保存的天气数据
+    }
+
+
+    //弹出设置音效的fragment
+    private void ShowYinxiaoSet()
+    {
+        YinxiaoFragment fragment = new YinxiaoFragment();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.show_yinxiao_set,fragment);
+        transaction.commitAllowingStateLoss();
     }
 
     //弹出关于的窗口
@@ -442,7 +481,12 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
                 break;
 
         }
-        PlayMusic.editor.putString("url",coverUrl);
+        Glide.with(MyApplication.getQuanjuContext())
+                .load(coverUrl)
+                .crossFade(1000)  //加载图片淡入淡出效果
+                .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),25,4))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
+                .into(localbg);
+        PlayMusic.editor.putString("url",coverUrl);  //保存图片url，以便下次启动时显示相应的图片
         PlayMusic.editor.apply();
     }
 
@@ -458,7 +502,6 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         {
             playMusicFragment = new PlayMusicFragment();
             fragmentTransaction.replace(android.R.id.content,playMusicFragment);
-            fragmentTransaction.addToBackStack(null);//把碎片加入当前Activity管理的返回栈
         }
         else
         {
@@ -620,8 +663,8 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
     private void bindService()
     {
         Intent intent = new Intent(this,MyService.class);
-        bindService(intent,serviceConnection,BIND_AUTO_CREATE);
-        startService(intent);//启动服务
+        bindService(intent,serviceConnection,BIND_AUTO_CREATE);   //此方法仅仅是绑定服务，服务并没有启动
+        startService(intent);//这里正式启动通知栏播放条服务服务
     }
 
 
@@ -719,6 +762,33 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
                 });
 
     }
+
+
+    //Seekbar拖动响应的事件
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+
+
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+              switch (seekBar.getId())
+              {
+                  case R.id.setDecayHFRatio:
+                      PlayMusic.setDecayHFRatio(seekBar.getProgress());
+                      break;
+                  case R.id.setDecayTime:
+                      PlayMusic.setDecayTime(seekBar.getProgress());
+                      break;
+              }
+    }
+
     //定时退出
    private class diingShiTask extends TimerTask
     {
@@ -807,6 +877,8 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
         weinfo = view.findViewById(R.id.weinfo);
     }
 
+
+    //这个方法是在WeatherActivity中每次刷新天气是调用的
     public void setWeatherInfo(int code,String chengshi,String feng,String windLi,String windSpeed,String wendu,String info)
     {
         switch (code)
@@ -829,12 +901,56 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
             case 200:
                 wether_ic.setImageResource(R.drawable.youfeng);
                 break;
+            default:
+                wether_ic.setImageResource(R.drawable.ic_weather_sunny);
+                break;
         }
         city.setText(chengshi);
         wind.setText(feng +windLi+"级");
         wind_speed.setText("风速"+windSpeed+"km/h");
         tmp.setText(wendu);
         weinfo.setText(info);
+    }
+
+    //  这个方法是在每次打开程序时调用，显示已经保存的天气数据（由后台服务每小时更新一次天气数据）
+    private void ShowWeatherInfo()
+    {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);          //总结：用PreferenceManager获取SharePreference实例 不会导致sharepreference获取不到键值的情况
+        String weathString = preferences.getString("weather",null);
+        if(weathString==null)
+        {
+            return;
+        }
+        Weather weather = Utility.handleWeatherResponse(weathString);
+        switch (weather.now.more.code)
+        {
+            case 100:
+                wether_ic.setImageResource(R.drawable.qing);
+                break;
+            case 101:
+                wether_ic.setImageResource(R.drawable.duoyun);
+                break;
+            case 102:
+                wether_ic.setImageResource(R.drawable.shaoyun);
+                break;
+            case 103:
+                wether_ic.setImageResource(R.drawable.qingjianduoyun);
+                break;
+            case 104:
+                wether_ic.setImageResource(R.drawable.yin);
+                break;
+            case 200:
+                wether_ic.setImageResource(R.drawable.youfeng);                        //以上天气图标仅设置了几种常见的天气图标
+                break;
+                default:
+                    wether_ic.setImageResource(R.drawable.ic_weather_sunny);
+                    break;
+        }
+        city.setText(weather.basic.cityName);
+        wind.setText(weather.now.dir +weather.now.sc+"级");
+        wind_speed.setText("风速"+weather.now.spd+"km/h");
+        tmp.setText(weather.now.temperature+"℃");
+        weinfo.setText(weather.now.more.info);
     }
 
     //判断用户是否安装了QQ,参数packageName为包名

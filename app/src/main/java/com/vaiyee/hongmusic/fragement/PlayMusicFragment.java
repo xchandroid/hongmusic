@@ -33,9 +33,11 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
@@ -93,13 +95,12 @@ import me.wcy.lrcview.LrcView;
 public class PlayMusicFragment extends Fragment implements View.OnClickListener,View.OnTouchListener,SeekBar.OnSeekBarChangeListener, LyricView.OnPlayerClickListener{
     private static ImageView pre,next,playmode,hide,playmusicibg,ci,playlist;
     public static ImageView playbg,play;
-    private static MyCircleView bantouming;
     private OnBacktoMainActiviListener listener;
     private boolean isPause=false,isFirstopen=true;
     public static boolean firstplay=true;
     public static PlayMusic playMusic;
     private static TextView geming=null,geshou=null,startTime=null,endTime = null;
-    private static SeekBar seekBar;
+    private static SeekBar seekBar,yinxiao;
     public static Timer timer = new Timer() ;
     public static MyTimerTask timerTask;
     private static ViewPager viewPager;
@@ -113,6 +114,7 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
     private static final String Path = "http://music.163.com/song/media/outer/url?id=";
     private static String coverUrl = null,lrc=null,songname=null,singger=null,Lrccontent=null;
     private OnlineMusicActivity onlineMusicActivity = new OnlineMusicActivity();
+    private static View bantouming;
 
     public PlayMusicFragment() {
         // Required empty public constructor
@@ -132,6 +134,9 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
         next = view .findViewById(R.id.next);
         seekBar = view.findViewById(R.id.seekbar);
         seekBar.setOnSeekBarChangeListener(this);
+        yinxiao = view.findViewById(R.id.yinxiao);
+        yinxiao.setOnSeekBarChangeListener(this);
+        yinxiao.setMax(1000);
         playmusicibg = view.findViewById(R.id.play_music_bg);
         geming = view.findViewById(R.id.play_fragment_geming);
         geshou = view.findViewById(R.id.play_fragment_geshou);
@@ -157,7 +162,7 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
         playbg = page1.findViewById(R.id.play_bg);
         playlist = view.findViewById(R.id.play_list);
         playlist.setOnClickListener(this);
-        bantouming = page1.findViewById(R.id.bantouming);
+        bantouming = page1.findViewById(R.id.btm);
         singlelrc = page1.findViewById(R.id.lrc_view_single);
         lyricView = page2.findViewById(R.id.lrcview);
         ci = page2.findViewById(R.id.ci);
@@ -169,21 +174,6 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
         List<View> viewList = new ArrayList<>();
         viewList.add(page1);
         viewList.add(page2);
-        viewPager.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isFirstpager)
-                {
-                    viewPager.setCurrentItem(1);
-                    isFirstpager = false;
-                }
-                else
-                {
-                    viewPager.setCurrentItem(0);
-                    isFirstpager = true;
-                }
-            }
-        });
         viewPager.setAdapter(new ViewPagerAdapter(viewList));
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -634,14 +624,22 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
     //该方法拖动进度条停止拖动的时候调用
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        if (playMusic.mediaPlayer.isPlaying()) {
-            playMusic.mediaPlayer.seekTo(seekBar.getProgress());
+        switch (seekBar.getId()) {
+            case R.id.seekbar:
+            if (playMusic.mediaPlayer.isPlaying()) {
+                playMusic.mediaPlayer.seekTo(seekBar.getProgress());
+            }
+            break;
+            case R.id.yinxiao:
+                //PlayMusic.setVirtualizer(seekBar.getProgress());
+                PlayMusic.setBassBoost(seekBar.getProgress());
+                break;
         }
     }
 
     @Override
     public void onPlayerClicked(long progress, String content) {
-        playMusic.mediaPlayer.seekTo((int) progress);
+        playMusic.mediaPlayer.seekTo((int) progress);   //歌词拖动播放
     }
 
     public interface OnBacktoMainActiviListener
@@ -674,8 +672,8 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
 
                 Glide.with(MyApplication.getQuanjuContext())
                         .load(coverUrl)
-                        .crossFade(1000)
-                        .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),15,1))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
+                        .crossFade(1000)  //加载图片淡入淡出效果
+                        .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),25,4))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
                         .into(playmusicibg);
 
 
@@ -701,7 +699,7 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                 Glide.with(MyApplication.getQuanjuContext())
                         .load(coverUrl)
                         .crossFade(1000)
-                        .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),25,1))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
+                        .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),25,4))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
                         .into(playmusicibg);
                 break;
         }
@@ -762,17 +760,27 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
     }
     public void zhuanquanuqna()
     {
-        Animation animation = AnimationUtils.loadAnimation(MyApplication.getQuanjuContext(),R.anim.zhuanqunaquan);
+       Animation animation1 = AnimationUtils.loadAnimation(MyApplication.getQuanjuContext(),R.anim.zhuanqunaquan); //这里是加载anim文件夹中的动画
+        int pivotType = Animation.RELATIVE_TO_SELF; // 相对于自身
+        float pivotX = 0.5f; // 取自身区域在X轴上的中心点
+        float pivotY = 0.5f; // 取自身区域在Y轴上的中心点
+        Animation animation = new RotateAnimation(0,360,pivotType, pivotX, pivotType, pivotY);  // 围绕自身的中心点进行旋转
+        animation.setDuration(30000);
+        animation.setRepeatCount(-1);  //表示一直旋转
+        animation.setRepeatMode(Animation.RESTART);
         LinearInterpolator interpolator = new LinearInterpolator();//匀速旋转
         animation.setInterpolator(interpolator);
-        playbg.startAnimation(animation);
-        //bantouming.startAnimation(animation);
+        animation1.setInterpolator(interpolator);  //设置拦截器，使其匀速旋转
+        bantouming.startAnimation(animation);
+        playbg.startAnimation(animation1);
+
 
     }
     public void stop()
     {
+        bantouming.clearAnimation();
         playbg.clearAnimation();
-        //bantouming.clearAnimation();
+
     }
 
     //画圆

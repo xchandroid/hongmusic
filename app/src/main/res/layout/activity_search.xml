@@ -15,7 +15,7 @@
             android:layout_width="50dp"
             android:layout_height="40dp"
             android:layout_marginTop="4dp"
-            android:background="@drawable/ripple_bg"
+            android:background="@drawable/button_ripple"
             android:id="@+id/fanhui"
             android:src="@drawable/ic_back"/>
         <FrameLayout
@@ -47,9 +47,16 @@
             android:padding="0dp"
             android:layout_gravity="center"
             android:id="@+id/search_online_music"
-            android:background="@drawable/ripple_bg"
+            android:background="@drawable/button_ripple"
             android:text="搜索"/>
     </LinearLayout>
+    <com.vaiyee.hongmusic.CustomView.AutoNextLineLinearlayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/lishi_layout"
+        android:orientation="horizontal">
+
+    </com.vaiyee.hongmusic.CustomView.AutoNextLineLinearlayout>
 <ListView
     android:layout_width="match_parent"
     android:layout_height="match_parent"

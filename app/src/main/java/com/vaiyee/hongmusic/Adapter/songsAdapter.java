@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,9 +30,11 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.vaiyee.hongmusic.ColorTrackView;
 import com.vaiyee.hongmusic.MainActivity;
 import com.vaiyee.hongmusic.MyApplication;
+import com.vaiyee.hongmusic.PlayMusic;
 import com.vaiyee.hongmusic.R;
 import com.vaiyee.hongmusic.Utils.DownloadTask;
 import com.vaiyee.hongmusic.bean.Song;
@@ -40,33 +43,35 @@ import com.vaiyee.hongmusic.fragement.fragement1;
 import org.w3c.dom.Text;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Created by Administrator on 2018/1/29.
  */
 
-public class songsAdapter extends ArrayAdapter<Song> {
+public class songsAdapter extends RecyclerView.Adapter<songsAdapter.Viewholder> {
     private int resourLayout;
     private List<Song> songList;
     private int start_index, end_index;//当前屏幕显示的起始和结束索引
     private boolean scrollState = false;//Listview是否滑动状态,默认没在滑动
     private Activity activity;
+    private Context context;
 
     public songsAdapter(@NonNull Context context, int resource, @NonNull List<Song> objects,Activity activity) {
-        super(context, resource, objects);
         resourLayout = resource;
         songList = objects;
         this.activity = activity;
-
+        this.context = context;
     }
 
     public void setScrollState(boolean scrollState) {
         this.scrollState = scrollState;
     }
 
-    //获取专辑封面
-    public static Bitmap setArtwork(Context context, String url) {
+    //获取专辑封面,返回图片的字节数组用Glide加载
+    public static byte[] getArtwork(Context context, String url) {
         Uri selectedAudio = Uri.parse(url);
         MediaMetadataRetriever myRetriever = new MediaMetadataRetriever();
         try {
@@ -82,14 +87,15 @@ public class songsAdapter extends ArrayAdapter<Song> {
         artwork = myRetriever.getEmbeddedPicture();
 
         if (artwork != null) {
-            Bitmap bMap = BitmapFactory.decodeByteArray(artwork, 0, artwork.length);
-            return bMap;
+
+            return artwork;
         } else {
 
-            return BitmapFactory.decodeResource(context.getResources(), R.drawable.music_ic);
+            return null;
         }
     }
 
+/*
     @NonNull
     @Override
     public View getView(final int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -139,9 +145,9 @@ public class songsAdapter extends ArrayAdapter<Song> {
 
         return view;
     }
-
+*/
     private void Showpopwindow(String genming, String path,int i) {
-        View contentview = LayoutInflater.from(getContext()).inflate(R.layout.popuwindow, null);
+        View contentview = LayoutInflater.from(context).inflate(R.layout.popuwindow, null);
         PopupWindow popupWindow = new PopupWindow(contentview, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         initContentview(popupWindow,contentview, genming, path,i);
         popupWindow.setTouchable(true);
@@ -197,9 +203,9 @@ public class songsAdapter extends ArrayAdapter<Song> {
                             file.delete();
                             fragement1.songs.remove(i);
                             notifyDataSetChanged();
-                            DownloadTask.scanFile(getContext(),"/storage/emulated/0/HonchenMusic/download");
-                            MediaScannerConnection.scanFile(getContext(), new String[]{path}, null, null);
-                            Toast.makeText(getContext(), "删除了" + geming, Toast.LENGTH_LONG).show();
+                            DownloadTask.scanFile(context,"/storage/emulated/0/HonchenMusic/download");
+                            MediaScannerConnection.scanFile(context, new String[]{path}, null, null);
+                            Toast.makeText(context, "删除了" + geming, Toast.LENGTH_LONG).show();
                         }
                         dialog.dismiss();
                     }
@@ -215,11 +221,74 @@ public class songsAdapter extends ArrayAdapter<Song> {
         builder.create().show();
     }
 
-    class Viewholder
+    @Override
+    public Viewholder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(resourLayout,parent,false);
+       final Viewholder viewholder = new Viewholder(view);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Song song = songList.get(viewholder.getAdapterPosition());
+                String geming = song.getTitle().toString();
+                String geshou = song.getSinger().toString();
+                PlayMusic playMusic = new PlayMusic();
+                final String path = song.getFileUrl();
+                playMusic.play(path,viewholder.getAdapterPosition());
+                fragement1.getLrc(geming,song,viewholder.getAdapterPosition());
+                songList.addAll(songList);
+                PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                playList.setPlaylist(songList);
+                playList.setBang(0);
+            }
+        });
+        return viewholder;
+    }
+
+    @Override
+    public void onBindViewHolder(Viewholder holder, final int position) {
+            final  Song song = songList.get(position);
+              String url = song.getFileUrl();
+        holder.ablum.setText("《" + song.getAlbum() + "》");
+        holder.geshou.setText(song.getSinger());
+        holder.geming.setText(1 + position + "." + song.getTitle());
+        holder.moremenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Showpopwindow(song.getTitle(), song.getFileUrl(),position);
+            }
+        });
+            Glide.with(context)
+                    .load(getArtwork(context, url))
+                    .placeholder(R.drawable.music_ic)
+                    .error(R.drawable.music_ic)
+                    .into(holder.zjview);
+
+        //holder.zjview.setImageBitmap(getArtwork(context, url));
+
+    }
+
+
+    @Override
+    public int getItemCount() {
+        return songList.size();
+    }
+
+    class Viewholder extends RecyclerView.ViewHolder
     {
         ImageView zjview;
-       TextView geming,geshou,ablum;
+        TextView geming,geshou,ablum;
         ImageView moremenu;
+
+        public Viewholder(View itemView) {
+            super(itemView);
+            zjview = itemView.findViewById(R.id.zj_id);
+            //zjview.setTag(position);
+            moremenu = itemView.findViewById(R.id.more);
+            geming = itemView.findViewById(R.id.geming);
+            geshou = itemView.findViewById(R.id.geshou);
+            ablum = itemView.findViewById(R.id.ablum);
+        }
     }
 
 }

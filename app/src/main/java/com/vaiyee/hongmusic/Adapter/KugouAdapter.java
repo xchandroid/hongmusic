@@ -84,8 +84,8 @@ public class KugouAdapter extends RecyclerView.Adapter<KugouAdapter.ViewHolder> 
                     context.startActivity(intent);
                 }
             });
+            holder.divider.setVisibility(isShowDivider(position)?View.VISIBLE:View.GONE);       //如果条件为true选第一个，否则选第二个
         }
-        //holder.divider.setVisibility(isShowDivider(position)?View.VISIBLE:View.GONE);       //如果条件为true选第一个，否则选第二个
         getSongInfo(sheet,holder);
     }
 

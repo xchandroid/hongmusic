@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,12 +16,15 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -30,6 +34,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.jude.rollviewpager.OnItemClickListener;
+import com.jude.rollviewpager.RollPagerView;
+import com.jude.rollviewpager.adapter.StaticPagerAdapter;
+import com.jude.rollviewpager.hintview.ColorPointHintView;
 import com.vaiyee.hongmusic.ColorTrackView;
 import com.vaiyee.hongmusic.MainActivity;
 import com.vaiyee.hongmusic.MyApplication;
@@ -38,6 +47,8 @@ import com.vaiyee.hongmusic.R;
 import com.vaiyee.hongmusic.SearchActivity;
 import com.vaiyee.hongmusic.Utils.HttpClinet;
 import com.vaiyee.hongmusic.Utils.NetUtils;
+import com.vaiyee.hongmusic.WebActivity;
+import com.vaiyee.hongmusic.bean.Banner;
 import com.vaiyee.hongmusic.bean.KugouMusic;
 import com.vaiyee.hongmusic.bean.KugouSearchResult;
 import com.vaiyee.hongmusic.bean.Song;
@@ -56,21 +67,27 @@ import java.util.List;
 public class fragement1 extends Fragment {
 
     private TextView textView;
-  private ListView listView;
-public static List<Song> songs;
- private  List<ColorTrackView> mTabs = new ArrayList<ColorTrackView>();
- private ColorTrackView t,tt;
-public static String coverUrl,geming,geshou;
-public static songsAdapter adapter;
-private List<Song> songList;
-private TextView tips;
+    private static RecyclerView recyclerView;
+    public static List<Song> songs;
+    private  List<ColorTrackView> mTabs = new ArrayList<ColorTrackView>();
+    private ColorTrackView t,tt;
+    public static String coverUrl,geming,geshou;
+    public static songsAdapter adapter;
+    private List<Song> songList;
+    private TextView tips;
+    private RollPagerView rollPagerView;
+    private  String[]imgs = new String[4];
+    private View hearder;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment1_layout,null);
         tips = view.findViewById(R.id.tips);
-        listView = view.findViewById(R.id.localmusic_list);
+        //hearder = LayoutInflater.from(getContext()).inflate(R.layout.roll_pager_view,null);  //这里不要把ViewGroup container作为参数，否则造成布局参数错误导致崩溃
+        recyclerView = view.findViewById(R.id.localmusic_list);
+        //listView.addHeaderView(hearder);
+        rollPagerView = view.findViewById(R.id.rollview);
         // 申请权限
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
         {
@@ -81,7 +98,7 @@ private TextView tips;
            updateSonglist();  //已授过权了直接扫面音乐
         }
 
-       // listView.setAdapter(adapter);
+/*
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int i) {
@@ -90,27 +107,30 @@ private TextView tips;
                 switch (i)
                 {
                     case AbsListView.OnScrollListener.SCROLL_STATE_IDLE: //滑动停止
-                        MainActivity.linearLayout.setVisibility(View.VISIBLE);
+                        // MainActivity.linearLayout.setVisibility(View.VISIBLE);
                      adapter.setScrollState(false);
                         //当前屏幕中listview的子项的个数
                         int count = absListView.getChildCount();
                         for (int j = 0; j < count; j++) {
                             //获取到item的图片显示的Imageview控件
-                            ImageView iv_show= (ImageView) absListView.getChildAt(j).findViewById(R.id.zj_id);
-                            if (!iv_show.getTag().equals("1")){//如果等于1说明图片资源已加载过，不等于说明没有去getTag()的图片url
+                            ImageView iv_show = (ImageView) absListView.getChildAt(j).findViewById(R.id.zj_id);
+                            if (iv_show != null)
+                            {
+                                if (!iv_show.getTag().equals("1")) {//如果等于1说明图片资源已加载过，不等于说明没有去getTag()的图片url
 
-                                //直接从Tag中取出我们存储的数据image——url
-                                String image_url = iv_show.getTag().toString();
-                                if (image_url != null) {//这个判断是防止图片的url是否为空，为空的话给默认图片。
-                                    iv_show.setImageBitmap(songsAdapter.setArtwork(getContext(),image_url));
-                                    //设置为已加载过数据
-                                    iv_show.setTag("1");
-                                } else {
-                                    iv_show.setImageResource(R.drawable.music_ic);
-                                    iv_show.setTag("1");
+                                    //直接从Tag中取出我们存储的数据image——url
+                                    String image_url = iv_show.getTag().toString();
+                                    if (image_url != null) {//这个判断是防止图片的url是否为空，为空的话给默认图片。
+                                        iv_show.setImageBitmap(songsAdapter.setArtwork(getContext(), image_url));
+                                        //设置为已加载过数据
+                                        iv_show.setTag("1");
+                                    } else {
+                                        iv_show.setImageResource(R.drawable.music_ic);
+                                        iv_show.setTag("1");
+                                    }
+
                                 }
-
-                            }
+                        }
                         }
 
                     break;
@@ -120,7 +140,7 @@ private TextView tips;
                     {
                         //设置为正在滚动
                         adapter.setScrollState(true);
-                        MainActivity.linearLayout.setVisibility(View.GONE);
+                        //MainActivity.linearLayout.setVisibility(View.GONE);
                         break;
                     }
                     //正在滚动
@@ -128,7 +148,7 @@ private TextView tips;
                     {
                         //设置为正在滚动
                         adapter.setScrollState(true);
-                        MainActivity.linearLayout.setVisibility(View.GONE);
+                        //MainActivity.linearLayout.setVisibility(View.GONE);
                         break;
                     }
                     default:
@@ -141,81 +161,10 @@ private TextView tips;
 
             }
         });
-        /*
-        View view1 = inflater.inflate(R.layout.localmusi_listitem,null);
-        t= view1.findViewById(R.id.geming);
-        tt=view1.findViewById(R.id.geshou);
-        mTabs.add(t);
-        mTabs.add(tt);
-
-        /*
-        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
-
-            private SparseArray recordSp = new SparseArray(0);
-            private int mCurrentfirstVisibleItem = 0;
-            @Override
-            public void onScrollStateChanged(AbsListView absListView, int i) {
-                switch(i){
-                    case AbsListView.OnScrollListener.SCROLL_STATE_IDLE://空闲状态
-
-                  break;
-                    case AbsListView.OnScrollListener.SCROLL_STATE_FLING://滚动状态
-
-                        break;
-                    case AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL://触摸后滚动
-
-                        break;
-                }
-            }
-
-            @Override
-            public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                mCurrentfirstVisibleItem = firstVisibleItem;
-                View firstView = absListView.getChildAt(0);
-                if (null != firstView) {
-                    ItemRecod itemRecord = (ItemRecod) recordSp.get(firstVisibleItem);
-                    if (null == itemRecord) {
-                        itemRecord = new ItemRecod();
-                    }
-                    itemRecord.height = firstView.getHeight();
-                    itemRecord.top = firstView.getTop();
-                    recordSp.append(firstVisibleItem, itemRecord);
-
-                }
-                int h = getScrollY();
-                ColorTrackView left = mTabs.get(0);
-                ColorTrackView right = mTabs.get(1);
-
-                left.setDirection(2);
-                right.setDirection(3);
-                //Log.e("TAG", positionOffset+"");
-                left.setProgress(1 - h);
-                right.setProgress(h);
-
-            }
-
-
-            private int getScrollY() {
-                int height = 0;
-                for (int i = 0; i < mCurrentfirstVisibleItem; i++) {
-                    ItemRecod itemRecod = (ItemRecod) recordSp.get(i);
-                    height += itemRecod.height;
-                }
-                ItemRecod itemRecod = (ItemRecod) recordSp.get(mCurrentfirstVisibleItem);
-                if (null == itemRecod) {
-                    itemRecod = new ItemRecod();
-                }
-                return height - itemRecod.top;
-            }
-
-
-            class ItemRecod {
-                int height = 0;
-                int top = 0;
-            }
-        });
-*/
-
+        *
+        *
+        *
+        *
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
@@ -233,6 +182,7 @@ private TextView tips;
                 playList.setBang(0);
             }
         });
+        */
         return view;
     }
 
@@ -310,19 +260,92 @@ private TextView tips;
     }
 
 
+
+
     //刷新音乐列表
     public void updateSonglist()
     {
        // getAudio.updateMedia();
         songs = getAudio.getAllSongs(MyApplication.getQuanjuContext()) ;
         adapter = new songsAdapter(MyApplication.getQuanjuContext(),R.layout.localmusi_listitem,songs,getActivity());
-        listView.setAdapter(adapter);
+        LinearLayoutManager manager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setAdapter(adapter);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        //textView.setText("sad防护镜撒返回带回家的");
+        HttpClinet.getBanner(new HttpCallback<Banner>() {
+            @Override
+            public void onSuccess(Banner banner) {
+                final List<Banner.Fengmian> bannerlist = banner.bannerlist;
+                for (int i=0;i<bannerlist.size();i++)
+                {
+                    imgs[i] = bannerlist.get(i).img;
+                }
+
+                //设置每个图片的切换时间
+                rollPagerView.setPlayDelay(3000);
+                //设置图片切换动画时间
+                rollPagerView.setAnimationDurtion(500);
+                //设置指示器:
+                //rollPV.setHintView(new IconHintView());
+                //rollPV.setHintView(new IconHintView(this,R.mipmap.ic_launcher,R.mipmap.ic_launcher));
+                rollPagerView.setHintView(new ColorPointHintView(getContext(),
+                        getResources().getColor(R.color.blue),
+                        Color.WHITE));
+                //设置适配器
+                rollPagerView.setAdapter(new RollPagerAdapter());            //获取图片url成功后再设置Adapter，防止空对象引用
+
+                //设置每一个图片的点击事件
+                rollPagerView.setOnItemClickListener(new OnItemClickListener() {
+                    @Override
+                    public void onItemClick(int position) {
+
+                        Intent intent = new Intent(getContext(), WebActivity.class);
+                        intent.putExtra("URL",bannerlist.get(position).extra.tourl);
+                        intent.putExtra("title",bannerlist.get(position).title);
+                        startActivity(intent);
+                    }
+                });
+
+            }
+
+            @Override
+            public void onFail(Exception e) {
+                Toast.makeText(getContext(),"获取首页推荐失败",Toast.LENGTH_LONG).show();
+            }
+        });
     }
+
+
+    //适配器
+    private class RollPagerAdapter extends StaticPagerAdapter {
+
+        @Override
+        public View getView(ViewGroup container, int position) {
+
+            ImageView view=new ImageView(getContext());
+            //设置图片资源
+            Glide.with(fragement1.this)
+                    .load(imgs[position])
+                    .dontAnimate()//防止设置placeholder导致第一次不显示网络图片,只显示默认图片的问题
+                    .placeholder(R.drawable.default_cover)
+                    .error(R.drawable.default_cover)
+                    .into(view);
+            //设置高度和宽度
+            view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            //设置拉伸方式
+            view.setScaleType(ImageView.ScaleType.CENTER_CROP);  //以中心拉伸填充控件
+            return view;
+        }
+
+        @Override
+        public int getCount() {
+            return imgs.length;
+        }
+    }
+
 
 }

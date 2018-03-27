@@ -137,30 +137,5 @@ public class fragment2 extends Fragment {
             }
         });
 
-        onlineList.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView absListView, int i) {
-
-                switch (i)
-                {
-                    case AbsListView.OnScrollListener.SCROLL_STATE_IDLE: //滑动停止
-                        MainActivity.linearLayout.setVisibility(View.VISIBLE);
-                    break;
-                    //滚动做出了抛的动作
-                    case AbsListView.OnScrollListener.SCROLL_STATE_FLING:
-                        MainActivity.linearLayout.setVisibility(View.GONE);
-                        break;
-                    //正在滚动
-                    case AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
-                        MainActivity.linearLayout.setVisibility(View.GONE);
-                        break;
-                }
-            }
-
-            @Override
-            public void onScroll(AbsListView absListView, int i, int i1, int i2) {
-
-            }
-        });
     }
 }

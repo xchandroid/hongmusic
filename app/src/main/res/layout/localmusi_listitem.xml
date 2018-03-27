@@ -59,7 +59,7 @@
         android:layout_width="40dp"
         android:layout_height="65dp"
         android:scaleType="centerInside"
-        android:background="@drawable/btn_action_bg_selector"
+        android:background="@drawable/button_ripple"
         android:src="@drawable/ic_music_list_icon_more"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

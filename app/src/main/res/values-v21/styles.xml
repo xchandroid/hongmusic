@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="MyAPPtheme" parent="AppTheme">
+    <style name="meterial" parent="Theme.AppCompat.Light.NoActionBar">                    //这个用不到，已放弃
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 </resources>

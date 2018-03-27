@@ -3,7 +3,10 @@ package com.vaiyee.hongmusic.Utils;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.vaiyee.hongmusic.bean.Banner;
 import com.vaiyee.hongmusic.bean.DownloadInfo;
+import com.vaiyee.hongmusic.bean.Gedan;
+import com.vaiyee.hongmusic.bean.GedanList;
 import com.vaiyee.hongmusic.bean.KugouBang;
 import com.vaiyee.hongmusic.bean.Sheet;
 import com.vaiyee.hongmusic.bean.WangyiLrc;
@@ -44,23 +47,26 @@ public class HttpClinet {
  private static final String PARAM_OFFSET = "offset";
  private static final String PARAM_SONG_ID = "songid";
  private static final String PARAM_TING_UID = "tinguid";
- private static final String PARAM_QUERY = "query";
- private static final String KUGOU = "http://songsearch.kugou.com/song_search_v2?callback=jQuery191034642999175022426_1489023388639&keyword=";
+ private static final String PARAM_QUERY = "query";    //以上是百度音乐的接口
+ private static final String KUGOU = "http://songsearch.kugou.com/song_search_v2?callback=jQuery191034642999175022426_1489023388639&keyword=";  //酷狗搜索音乐接口
  private static final String KUGOUURL = "&page=1&pagesize=";
  private static final String KUGOUEND = "&userid=-1&clientver=&platform=WebFilter&tag=em&filter=2&iscorrection=1&privilege_filter=0&_=1489023388641";
-private static final String  KUGO = "http://www.kugou.com/yy/index.php?r=play/getdata&hash=";
- private static final String WANGYI = "http://musicapi.leanapp.cn/top/list?idx=";
- private static final String WYLRC = "http://musicapi.leanapp.cn/lyric?id=";
+ private static final String  KUGO = "http://www.kugou.com/yy/index.php?r=play/getdata&hash="; //酷狗单曲详情详情
+ private static final String WANGYI = "http://musicapi.leanapp.cn/top/list?idx=";  //网易云排行榜
+ private static final String WYLRC = "http://musicapi.leanapp.cn/lyric?id=";   //网易云歌词接口
  private static final String KUGOUBANG = "http://m.kugou.com/rank/info/?rankid=";
+ private static final String BANNER ="http://m.kugou.com/?json=true"; //首页banner接口
+ private static final String KUGOUGEDAN="http://m.kugou.com/plist/index&json=true&page="; //酷狗推荐歌单接口
+    private static final String KUGOUGEDANLIST = "http://m.kugou.com/plist/list/";//酷狗推荐歌单的歌曲列表接口，在后面加上歌单相应的ID，如125032?json=true
 
  static {
   OkHttpClient okHttpClient = new OkHttpClient.Builder()
           .connectTimeout(10, TimeUnit.SECONDS)
           .readTimeout(10, TimeUnit.SECONDS)
           .writeTimeout(10, TimeUnit.SECONDS)
-          .addInterceptor(new HttpInterceptor())
+          .addInterceptor(new HttpInterceptor())   //添加拦截器伪造头为电脑网页访问
           .build();
-  OkHttpUtils.initClient(okHttpClient);
+  OkHttpUtils.initClient(okHttpClient);    //初始化OkHttpClinet
  }
  //获取相应Type的在线音乐列表,这是百度在线列表
  public static void getOnlineMusicList(String type,int size,int offset,@NonNull final HttpCallback<OnlineMusiclist>callback)
@@ -237,5 +243,52 @@ private static final String  KUGO = "http://www.kugou.com/yy/index.php?r=play/ge
                         callback.onSuccess(response);
                     }
                 });
+    }
+    public static void getBanner(final HttpCallback<Banner> callback)
+    {
+        OkHttpUtils.get().url(BANNER)
+                .build().execute(new JsonCallback<Banner>(Banner.class) {
+            @Override
+            public void onError(Call call, Exception e, int id) {
+                callback.onFail(e);
+            }
+
+            @Override
+            public void onResponse(Banner response, int id) {
+                    callback.onSuccess(response);
+            }
+        });
+    }
+    public static void getKugouGedan(int page, final HttpCallback<Gedan>callback)
+    {
+        OkHttpUtils.get().url(KUGOUGEDAN+page)
+                .build()
+                .execute(new JsonCallback<Gedan>(Gedan.class) {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        callback.onFail(e);
+                    }
+
+                    @Override
+                    public void onResponse(Gedan response, int id) {
+                         callback.onSuccess(response);
+                    }
+                });
+    }
+    public static void getKugouGedanList(String id, final HttpCallback<GedanList>callback)
+    {
+            OkHttpUtils.get().url(KUGOUGEDANLIST+id+"?json=true")
+                    .build()
+                    .execute(new JsonCallback<GedanList>(GedanList.class) {
+                        @Override
+                        public void onError(Call call, Exception e, int id) {
+                            callback.onFail(e);
+                        }
+
+                        @Override
+                        public void onResponse(GedanList response, int id) {
+                                 callback.onSuccess(response);
+                        }
+                    });
     }
 }

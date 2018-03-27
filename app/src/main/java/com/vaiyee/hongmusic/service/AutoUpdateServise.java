@@ -8,6 +8,8 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.vaiyee.hongmusic.gson.Weather;
 import com.vaiyee.hongmusic.util.HttpUtil;
@@ -30,13 +32,13 @@ public class AutoUpdateServise extends Service {
         updateWeather();
         updateBingPic();
         AlarmManager alarmManiger =(AlarmManager) getSystemService(ALARM_SERVICE);
-        int miniute = 30*60*1000;
-        long trggerTime = SystemClock.elapsedRealtime() + miniute;
+        int miniute = 60*60*1000;
+        long trggerTime = SystemClock.elapsedRealtime() + miniute;        //设置触发时间为1分钟后
         Intent i = new Intent(this,AutoUpdateServise.class);
         PendingIntent pi = PendingIntent.getService(this,0,i,0);
         alarmManiger.cancel(pi);
-        alarmManiger.set(AlarmManager.ELAPSED_REALTIME,trggerTime,pi);
-
+        alarmManiger.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,trggerTime,pi);
+        Log.d("后台更新天气成功","啦啦啦");
         return super.onStartCommand(intent, flags, startId);
     }
 

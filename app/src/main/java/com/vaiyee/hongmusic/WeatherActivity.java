@@ -44,7 +44,7 @@ public class WeatherActivity extends AppCompatActivity {
     private ImageView bingPicImg;
     public SwipeRefreshLayout swipeRefreshLayout;
     public DrawerLayout drawerlayout;
-    private Button navButton;
+    private ImageView navButton;
     private MainActivity mainActivity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +69,7 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText = (TextView) findViewById(R.id.car_wash_text);
         sportText = (TextView) findViewById(R.id.sport_text);
         bingPicImg = (ImageView)findViewById(R.id.bing_pic_img);
-        navButton = (Button) findViewById(R.id.nav_button);
+        navButton = findViewById(R.id.nav_button);
         drawerlayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         navButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -229,8 +229,6 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText.setText(carwash);
         sportText.setText(sport);
         weatherLayout.setVisibility(View.VISIBLE);
-        Intent intent =new Intent(WeatherActivity.this, AutoUpdateServise.class);
-        startService(intent);
     }
 
     @Override

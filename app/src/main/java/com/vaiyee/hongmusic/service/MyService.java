@@ -83,7 +83,7 @@ public class MyService extends Service {
             noti.setImageViewBitmap(R.id.noti_cover, bitmap);
             noti.setTextViewText(R.id.noti_geming, geming);
             noti.setTextViewText(R.id.noti_geshou, geshou);
-            startForeground(1, notification);
+            startForeground(1, notification);  //刷新ID为 1 的通知，这一步很重要，否则不能同步通知栏的歌曲信息
         }
 
         public void tongbuButton() {
@@ -109,12 +109,12 @@ public class MyService extends Service {
 
         public void setpause() {
             noti.setImageViewResource(R.id.noti_play, R.drawable.play_btn_pause_selector);
-            startForeground(1, notification);
+            startForeground(1, notification); //刷新ID为 1 的通知，这一步很重要，否则不能同步通知栏的歌曲信息
         }
 
         public void setplay() {
             noti.setImageViewResource(R.id.noti_play,R.drawable.play_btn_play_pause_selector);
-            startForeground(1, notification);
+            startForeground(1, notification); //刷新ID为 1 的通知，这一步很重要，否则不能同步通知栏的歌曲信息
         }
     }
 }

@@ -67,7 +67,7 @@ public class KugouBangAdapter extends BaseAdapter {
         View view = null;
         ViewHolder viewHolder = null;
         final KugouBangList song = kugouBangList.get(i);
-        final String[]s=song.filename.split("-");
+        final String[]s=song.filename.split(" - ");
         if (contentview ==null)
         {
             viewHolder = new ViewHolder();

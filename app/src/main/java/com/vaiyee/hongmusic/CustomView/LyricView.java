@@ -86,6 +86,7 @@ public class LyricView extends View {
     private ValueAnimator mFlingAnimator;
     private boolean mPlayable = false;
     private boolean mSliding = false;
+    private String l1=null,l2=null;
 
 
     public LyricView(Context context) {
@@ -305,6 +306,7 @@ public class LyricView extends View {
      * @param event
      * */
     private void actionDown(MotionEvent event) {
+        setUserTouch(true);
         postman.removeMessages(MSG_PLAYER_SLIDE);
         postman.removeMessages(MSG_PLAYER_HIDE);
         mLastScrollY = mScrollY;
@@ -357,7 +359,7 @@ public class LyricView extends View {
     private void actionUp(MotionEvent event) {
         releaseVelocityTracker();
         // 2.4s 后发送一个指示器隐藏的请求
-        postman.sendEmptyMessageDelayed(MSG_PLAYER_HIDE, 2000);
+        postman.sendEmptyMessageDelayed(MSG_PLAYER_HIDE, 2400);
         if(scrollable()) {
             setUserTouch(false);  // 用户手指离开屏幕，取消触摸标记
             if(overScrolled() && mScrollY < 0) {
@@ -661,7 +663,16 @@ public class LyricView extends View {
         if(line != null && index == 9 && line.trim().length() > 10) {
             // 歌词内容
             LineInfo lineInfo = new LineInfo();
-            lineInfo.content = line.substring(10, line.length());
+            if (line.substring(10,line.length()).length()>12)
+            {
+              l1 = line.substring(10,line.length()/2);
+              l2 =line.substring(line.length()/2,line.length());
+              lineInfo.content = l1+"\n"+l2;
+            }
+            else
+            {
+                lineInfo.content = line.substring(10, line.length());
+            }
             lineInfo.start = measureStartTimeMillis(line.substring(0, 10));
             lyricInfo.song_lines.add(lineInfo);
         }

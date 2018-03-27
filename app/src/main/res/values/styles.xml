@@ -3,14 +3,12 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/blue</item>
         <item name="colorPrimaryDark">@color/colorbar</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
     <style name="AppTheme.Text" parent="TextAppearance.AppCompat" />
 
-    <style name="MyAPPtheme" parent="Theme.AppCompat.Light.DarkActionBar">
-    </style>
     <style name="popuAnim">
         <item name="android:windowEnterAnimation">@anim/popup_enter</item>
         <item name="android:windowExitAnimation">@anim/popup_exit</item>
@@ -19,4 +17,8 @@
         <item name="android:windowEnterAnimation">@anim/window_enter</item>
         <item name="android:windowExitAnimation">@anim/window_exit</item>
     </style>
+    <style name="TitleMaxline">
+        <item name="android:textSize">18sp</item>
+    </style>
+
 </resources>

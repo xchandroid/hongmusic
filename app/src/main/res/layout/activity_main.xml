@@ -1,48 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<android.support.v4.widget.DrawerLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:zhy="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:fitsSystemWindows="true"
+    android:id="@+id/show_yinxiao_set"
+    android:background="@drawable/button_style"
+    android:layout_height="match_parent"
+    >
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/local_list_bg"
+        android:scaleType="centerCrop"/>
+<android.support.v4.widget.DrawerLayout
+    android:layout_width="match_parent"
     android:id="@+id/drawerlaout"
     android:layout_height="match_parent">
-
-
 <LinearLayout
     android:layout_width="match_parent"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
     android:layout_height="wrap_content">
-<android.support.design.widget.AppBarLayout
+<LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:fitsSystemWindows="true"
+    android:layout_height="50dp"
+    android:gravity="center_vertical"
     android:id="@+id/appbar">
 
-    <android.support.constraint.ConstraintLayout
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/opendrawermenu"
+        android:background="@drawable/button_ripple"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_menu"
+        android:layout_width="50dp"
         android:layout_height="50dp"
-        android:background="#00F5FF"
-        android:fitsSystemWindows="true"
-        tools:context="com.vaiyee.hongmusic.MainActivity">
-
-
+        />
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:layout_height="50dp">
         <com.vaiyee.hongmusic.ColorTrackView
             android:id="@+id/changeTextColorView"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="12dp"
-            android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:padding="0dp"
-            app:layout_constraintEnd_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="MissingConstraints"
             zhy:direction="left"
             zhy:progress="0"
             zhy:text="本机音乐"
@@ -52,14 +56,10 @@
 
         <com.vaiyee.hongmusic.ColorTrackView
             android:id="@+id/textView2"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:padding="0dp"
-            app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginLeft="15dp"
             zhy:direction="left"
             zhy:progress="0"
             zhy:text="排行榜单"
@@ -67,44 +67,27 @@
             zhy:text_origin_color="#000000"
             zhy:text_size="20sp" />
 
-        <android.support.constraint.Guideline
-            android:id="@+id/guideline"
-            android:layout_width="wrap_content"
+        <com.vaiyee.hongmusic.ColorTrackView
+            android:id="@+id/colorTrackView"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5" />
+            android:layout_marginLeft="15dp"
+            zhy:direction="left"
+            zhy:text="推荐歌单"
+            zhy:text_size="20sp"
+            zhy:text_change_color="#ffff0000"
+            zhy:text_origin_color="#000000"/>
+    </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/opendrawermenu"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:fitsSystemWindows="true"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_menu"
-            android:background="@drawable/button_press_ripple"
-            app:layout_constraintBottom_toBottomOf="@+id/music_search"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0" />
-
-        <ImageButton
+        <ImageView
             android:id="@+id/music_search"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="26dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/button_press_ripple"
-            android:fitsSystemWindows="true"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/button_ripple"
             android:scaleType="centerInside"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             android:src="@drawable/ic_menu_search" />
-    </android.support.constraint.ConstraintLayout>
-</android.support.design.widget.AppBarLayout>
+</LinearLayout>
 
 
     <LinearLayout
@@ -122,8 +105,15 @@
 
         <LinearLayout
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@drawable/divider"/>
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="#00F5FF"
             android:id="@+id/play_bar"
             android:gravity="center_horizontal|center_vertical"
             android:layout_gravity="bottom">
@@ -172,20 +162,23 @@
                 android:id="@+id/play_bar_star"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:background="@drawable/button_ripple"
                 android:src="@drawable/play_bar_btn_play_pause_selector" />
 
             <ImageView
                 android:id="@+id/play_bar_next"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:background="@drawable/button_ripple"
                 android:src="@drawable/ic_play_bar_btn_next"
                 />
 
         </LinearLayout>
     </LinearLayout>
+    </LinearLayout>
 </LinearLayout>
 <android.support.design.widget.NavigationView
-    android:background="@drawable/menu_bg"
+    android:background="@drawable/button_style"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/navigation_view"
@@ -203,3 +196,4 @@
      android:layout_gravity="center_vertical|end"/>
 </android.support.design.widget.NavigationView>
 </android.support.v4.widget.DrawerLayout>
+</FrameLayout>

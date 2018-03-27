@@ -6,8 +6,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.audiofx.BassBoost;
+import android.media.audiofx.EnvironmentalReverb;
+import android.media.audiofx.Equalizer;
+import android.media.audiofx.Virtualizer;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.MediaController;
 import android.widget.Toast;
 
 import com.vaiyee.hongmusic.Utils.AudioFocusManager;
@@ -46,6 +51,10 @@ public class PlayMusic {
     public AudioFocusManager audioFocusManager;
     public static SharedPreferences.Editor editor;
     private static final String Path = "http://music.163.com/song/media/outer/url?id=";
+    private static BassBoost bassBoost;
+    private static Virtualizer virtualizer;
+    private static EnvironmentalReverb environmentalReverb;
+    private static int mbassBoostStrength = 0;
     public void getInstanse()
     {
         mediaPlayer = new MediaPlayer();
@@ -108,8 +117,11 @@ public class PlayMusic {
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-                PlayMusicFragment.timer.cancel();
-                PlayMusicFragment.timerTask.cancel();
+                if (PlayMusicFragment.timerTask!=null)
+                {
+                    PlayMusicFragment.timerTask.cancel();
+                    PlayMusicFragment.timer.cancel();
+                }
                 p.resetLrcview();
                 PlayMusicFragment.singlelrc.setLabel("暂无歌词");
                 mediaPlayer.reset();
@@ -626,6 +638,61 @@ public class PlayMusic {
         });
 
     }
+
+
+    //设置重低音音效
+    public static void setBassBoost(int value)
+    {
+            if (bassBoost==null)
+            {
+                bassBoost = new BassBoost(0,mediaPlayer.getAudioSessionId());
+            }
+            bassBoost.setEnabled(true);
+            if (bassBoost.getStrengthSupported()) //这里应该是获取修改音效的权限
+            {
+                  mbassBoostStrength = bassBoost.getRoundedStrength();   //保存没改变之前的值
+                  bassBoost.setStrength((short) value);
+                Toast.makeText(MyApplication.getQuanjuContext(),"设置重低音成功",Toast.LENGTH_LONG).show();
+            }
+    }
+    //设置环绕音音效
+    public static void setVirtualizer(int value)
+    {
+        if (virtualizer==null)
+        {
+            virtualizer = new Virtualizer(0,mediaPlayer.getAudioSessionId());
+        }
+        virtualizer.setEnabled(true);
+        if (virtualizer.getStrengthSupported()) //这里应该是获取修改音效的权限
+        {
+            mbassBoostStrength = virtualizer.getRoundedStrength();   //保存没改变之前的值
+            virtualizer.setStrength((short) value);
+            Toast.makeText(MyApplication.getQuanjuContext(),"设置环绕音成功",Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+    //以下方法为设置各种混响
+    public static void setDecayHFRatio(int value)
+    {
+        if(environmentalReverb==null)
+        {
+            environmentalReverb = new EnvironmentalReverb(0,mediaPlayer.getAudioSessionId());
+        }
+        environmentalReverb.setEnabled(true); //启用
+        environmentalReverb.setDecayHFRatio((short) value);
+
+    }
+    public static void setDecayTime(int value)
+    {
+        if(environmentalReverb==null)
+        {
+            environmentalReverb = new EnvironmentalReverb(0,mediaPlayer.getAudioSessionId());
+        }
+        environmentalReverb.setEnabled(true); //启用
+        environmentalReverb.setDecayTime((short) value);
+    }
+
 
     public static class playMode
     {
