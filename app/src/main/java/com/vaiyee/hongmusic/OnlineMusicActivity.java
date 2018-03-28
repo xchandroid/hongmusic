@@ -5,14 +5,21 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -33,10 +40,13 @@ import com.vaiyee.hongmusic.bean.Sheet;
 import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.http.HttpCallback;
 
+import net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.wasabeef.glide.transformations.BlurTransformation;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -44,7 +54,7 @@ import okhttp3.Response;
 
 public class OnlineMusicActivity extends SwipeBackActivity{
 
-    private ListView onlineMusicList;
+    private RecyclerView onlineMusicList;
     private View HeaderView,footerView;
     private Sheet sheet;//榜单列表
     private int offset = 0;
@@ -52,19 +62,41 @@ public class OnlineMusicActivity extends SwipeBackActivity{
     private OnlineMusiclist onlineMusiclistcallback;
     private OnlineMusicAdapter onlineMusicAdapter;
     private ProgressDialog progressDialog;
-    private TextView sheetTitle;
-    private ImageView back;
+    private ImageView back,Cover;
     private List<Song> songList;
-    private static String Lrccontent = null;
+    private TextView updateTime;
+    private GradualTextView content;
+    private net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout collapsingToolbarLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_online_music);
-        Init();
-        getOnlineMusiclist(sheet);
-        onlineMusicList = (ListView) findViewById(R.id.online_music_list);
-        onlineMusicList.setVisibility(View.GONE);
+        if (Build.VERSION.SDK_INT>=21)
+        {
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
+        setContentView(R.layout.activity_gedan);
+        Intent intent =getIntent();
+        sheet = (Sheet) intent.getSerializableExtra("ABC");    //获取传过来的intent中的Sheet对象
+        Cover = (ImageView) findViewById(R.id.gedan_bg);
+        updateTime = (TextView) findViewById(R.id.publish_time);
+        content = (GradualTextView) findViewById(R.id.comment);
+        onlineMusicList = (RecyclerView) findViewById(R.id.gedan_list);
         ShowProgress();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collasping_toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar!=null)
+        {
+            actionBar.setDisplayHomeAsUpEnabled(true); //显示返回按钮
+        }
+        collapsingToolbarLayout.setExpandedTitleColor(Color.parseColor("#00F5FF"));  //标题字体展开的颜色
+        collapsingToolbarLayout.setCollapsedTitleTextColor(Color.BLACK);                         //标题字体收缩的颜色
+        getOnlineMusiclist(sheet);
+        /*//根据传过来的type获取相应的榜单列表
         onlineMusicList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(final AdapterView<?> adapterView, View view, final int i, long l) {
@@ -285,64 +317,31 @@ public class OnlineMusicActivity extends SwipeBackActivity{
 
             }
         });
-        HeaderView = LayoutInflater.from(OnlineMusicActivity.this).inflate(R.layout.activity_online_music_list_header,null);
-        footerView = LayoutInflater.from(OnlineMusicActivity.this).inflate(R.layout.online_musiclist_footer,null);
-        onlineMusicList.addHeaderView(HeaderView);
-        onlineMusicList.addFooterView(footerView);
-        onlineMusicAdapter =new OnlineMusicAdapter(OnlineMusicActivity.this,R.layout.localmusi_listitem,onlineMusics,this);
-        onlineMusicList.setAdapter(onlineMusicAdapter);
+        */
+        //HeaderView = LayoutInflater.from(OnlineMusicActivity.this).inflate(R.layout.activity_online_music_list_header,null);
+        //footerView = LayoutInflater.from(OnlineMusicActivity.this).inflate(R.layout.online_musiclist_footer,null);
+        //onlineMusicList.addHeaderView(HeaderView);
+        //onlineMusicList.addFooterView(footerView);
+        //onlineMusicAdapter =new OnlineMusicAdapter(OnlineMusicActivity.this,R.layout.localmusi_listitem,onlineMusics,this);
+        //onlineMusicList.setAdapter(onlineMusicAdapter);
     }
 
 
-    private void addToNowPlaylist()
-    {
-        songList = new ArrayList<>();
-        //将当前列表添加到正在播放列表
-        for (int k=0;k<onlineMusics.size();k++)
-        {
-            Song song = new Song();
-            song.setTitle(onlineMusics.get(k).getTitle());
-            song.setSinger(onlineMusics.get(k).getArtist_name());
-            song.setDuration(360000);
-            song.setFileUrl(onlineMusics.get(k).getSong_id());
-            songList.add(song);
-        }
-        PlayMusic.PlayList playList = new PlayMusic.PlayList();
-        playList.setPlaylist(songList);
-        playList.setBang(1);
-    }
-    //获取传过来的intent中的Sheet对象
-    private void Init()
-    {
-        Intent intent =getIntent();
-        sheet = (Sheet) intent.getSerializableExtra("ABC");
-        sheetTitle = (TextView) findViewById(R.id.sheet_title);
-        TextPaint paint = sheetTitle.getPaint();
-        paint.setFakeBoldText(true);
-        back = (ImageView) findViewById(R.id.backlast);
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
-    }
-    //初始化ListHeader
+
+    //初始化CollapsingToolbarLayout内容
     private void InitHeader(View headerView)
     {
-        ImageView Cover = headerView.findViewById(R.id.iv_cover);
-        TextView title,updateTime,content;
-        title = headerView.findViewById(R.id.tv_title);
-        updateTime = headerView.findViewById(R.id.tv_update_date);
-        content = headerView.findViewById(R.id.tv_comment);
+
         Glide.with(OnlineMusicActivity.this)
                 .load(onlineMusiclistcallback.getBillboard().getPic_s640())
                 .placeholder(R.drawable.default_cover)
                 .error(R.drawable.default_cover)
+                .crossFade(1000)
+                .bitmapTransform(new BlurTransformation(OnlineMusicActivity.this,20,3))
                 .into(Cover);
-        title.setText(onlineMusiclistcallback.getBillboard().getName());
-        updateTime.setText(onlineMusiclistcallback.getBillboard().getUpdate_date());
-        content.setText(onlineMusiclistcallback.getBillboard().getComment());
+        updateTime.setText("更新时间："+onlineMusiclistcallback.getBillboard().getUpdate_date());
+        content.setText("数据来源：百度音乐"+"\n"+onlineMusiclistcallback.getBillboard().getComment());
+        collapsingToolbarLayout.setTitle(onlineMusiclistcallback.getBillboard().getName());
 
     }
     //根据传过来的sheet对象相应的Type获取在线音乐列表
@@ -354,18 +353,18 @@ public class OnlineMusicActivity extends SwipeBackActivity{
                 onlineMusiclistcallback = response;
                 if (offset == 0 && response == null) {
                     return;
-                } else if (offset == 0) {
-                    InitHeader(HeaderView);
                 }
+
                 if (response == null || response.getSong_list() == null || response.getSong_list().size() == 0) {
                     return;
                 }
+                InitHeader(HeaderView);
                 onlineMusics.addAll(response.getSong_list());
-                onlineMusicAdapter.notifyDataSetChanged();
-                String title = onlineMusiclistcallback.getBillboard().getName();
+                onlineMusicAdapter =new OnlineMusicAdapter(OnlineMusicActivity.this,R.layout.localmusi_listitem,onlineMusics,OnlineMusicActivity.this);
+                LinearLayoutManager manager = new LinearLayoutManager(OnlineMusicActivity.this);
+                onlineMusicList.setLayoutManager(manager);                                                   //给RecycleView设置Layoutmanager必须要，否则数据将不能显示
+                onlineMusicList.setAdapter(onlineMusicAdapter);
                 CloseProgress();
-                onlineMusicList.setVisibility(View.VISIBLE);
-                sheetTitle.setText(title);
             }
 
             @Override
@@ -381,52 +380,7 @@ public class OnlineMusicActivity extends SwipeBackActivity{
         });
     }
 
-    /*
 
-
-     Handler handler = new Handler()
-     {
-         @Override
-         public void handleMessage(Message msg) {
-            switch (msg.what)
-            {
-                case ABC:
-                    Bundle data = msg.getData();
-                    String val = data.getString("value");
-                    Log.d("歌曲长度",val);
-                    totaltime = Integer.parseInt(val);
-                break;
-            }
-
-         }
-     };
-    private void getLenth(final String Url)
-    {
-         new Thread(new Runnable() {
-             @Override
-             public void run() {
-                 OkHttpClient ok = new OkHttpClient();
-                 Request request = new Request.Builder().url(Url).build();
-                 Response response = null;
-                 try {
-                     response = ok.newCall(request).execute();
-                 } catch (IOException e) {
-                     e.printStackTrace();
-                 }
-                 if (response!=null&& response.isSuccessful())
-                 {
-                     long contentLength = response.body().contentLength();
-                     Message msg = new Message();
-                     msg.what = ABC;
-                     Bundle data = new Bundle();
-                     data.putString("value", "154632");
-                     msg.setData(data);
-                     handler.sendMessage(msg);
-                 }
-             }
-         });
-    }
-  */
 
 
     //显示正在加载数据对话框
@@ -447,6 +401,17 @@ public class OnlineMusicActivity extends SwipeBackActivity{
         {
             progressDialog.dismiss();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId())
+        {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

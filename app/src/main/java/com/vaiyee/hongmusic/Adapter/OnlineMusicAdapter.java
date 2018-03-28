@@ -1,11 +1,15 @@
 package com.vaiyee.hongmusic.Adapter;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,13 +23,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.vaiyee.hongmusic.MainActivity;
 import com.vaiyee.hongmusic.MyApplication;
+import com.vaiyee.hongmusic.PlayMusic;
 import com.vaiyee.hongmusic.R;
 import com.vaiyee.hongmusic.SearchActivity;
 import com.vaiyee.hongmusic.Utils.DownloadTask;
 import com.vaiyee.hongmusic.Utils.HttpClinet;
+import com.vaiyee.hongmusic.Utils.NetUtils;
 import com.vaiyee.hongmusic.bean.DownloadInfo;
+import com.vaiyee.hongmusic.bean.OnlineLrc;
 import com.vaiyee.hongmusic.bean.OnlineMusic;
+import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.http.HttpCallback;
 
 import java.util.ArrayList;
@@ -35,7 +44,7 @@ import java.util.List;
  * Created by Administrator on 2018/2/6.
  */
 
-public class OnlineMusicAdapter extends ArrayAdapter {
+public class OnlineMusicAdapter extends RecyclerView.Adapter<OnlineMusicAdapter.ViewHolder> {
     private int resId;
     private List<OnlineMusic> onlineMusics;
     private Context context;
@@ -43,9 +52,10 @@ public class OnlineMusicAdapter extends ArrayAdapter {
     private  PopupWindow popupWindow;
     private Button title,download;
     private static String url = null;
+    private static String Lrccontent = null;
+    private List<Song> songList;
     public OnlineMusicAdapter(Context context, int resId, List<OnlineMusic> onlineMusics,Activity activity)
     {
-        super(context,resId,onlineMusics);
         this.context=context;
         this.resId = resId;
         this.onlineMusics = onlineMusics;
@@ -53,17 +63,7 @@ public class OnlineMusicAdapter extends ArrayAdapter {
         popupWindow = new PopupWindow(context);
     }
 
-    @Override
-    public int getCount() {
-        return onlineMusics.size();
-    }
-
-    @Nullable
-    @Override
-    public Object getItem(int position) {
-        return onlineMusics.get(position);
-    }
-
+/*
     @NonNull
     @Override
     public View getView(int position, @Nullable final View convertView, @NonNull ViewGroup parent) {
@@ -102,6 +102,8 @@ public class OnlineMusicAdapter extends ArrayAdapter {
         viewHolder.ablum.setText("《"+onlineMusic.getAlbum_title()+"》");
         return view;
     }
+
+    */
 
     private void showPopupwindow(String songName,String geshou,String ablumName,String songId) {
         View contentview = LayoutInflater.from(MyApplication.getQuanjuContext()).inflate(R.layout.popuwindow,null);
@@ -171,9 +173,295 @@ public class OnlineMusicAdapter extends ArrayAdapter {
         });
     }
 
-    class ViewHolder
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+       View view =  LayoutInflater.from(context).inflate(resId,parent,false);
+       ViewHolder viewHolder = new ViewHolder(view);
+        return viewHolder;
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, final int position) {
+        final OnlineMusic onlineMusic = onlineMusics.get(position);
+        holder.more.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showPopupwindow(onlineMusic.getTitle(),onlineMusic.getArtist_name(),onlineMusic.getAlbum_title(),onlineMusic.getSong_id());
+            }
+        });
+        Glide.with(context)
+                .load(onlineMusic.getPic_big())
+                .placeholder(R.drawable.music_ic)
+                .error(R.drawable.music_ic)
+                .into(holder.ablumCover);
+        holder.songaName.setText(1+position+"."+onlineMusic.getTitle());
+        holder.singger.setText(onlineMusic.getArtist_name());
+        holder.ablum.setText("《"+onlineMusic.getAlbum_title()+"》");
+        holder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onItemclick(position);
+            }
+        });
+
+    }
+
+    private void onItemclick(final int i)
+    {
+        final OnlineMusic onlineMusic = onlineMusics.get(i);
+        final String songID = onlineMusic.getSong_id();
+        final String geming = onlineMusic.getTitle();
+        HttpClinet.getLrc(songID, new HttpCallback<OnlineLrc>() {
+            @Override
+            public void onSuccess(OnlineLrc onlineLrc) {
+                Lrccontent = onlineLrc.getLrcContent();
+                SearchActivity.creatLrc(Lrccontent,geming);
+
+            }
+
+            @Override
+            public void onFail(Exception e) {
+
+            }
+        });
+
+        AlertDialog.Builder builder;
+        switch (NetUtils.getNetType())
+        {
+            case NET_WIFI:
+                HttpClinet.getMusicUrl(songID, new HttpCallback<DownloadInfo>() {
+                    @Override
+                    public void onSuccess(DownloadInfo downloadInfo) {
+                        if (downloadInfo == null || downloadInfo.getBitrate() == null) {
+                            onFail(null);
+                            return;
+                        }
+                        String path = downloadInfo.getBitrate().getFile_link();
+                        PlayMusic playMusic =new PlayMusic();
+                        playMusic.play(path,i);
+                        String songname = onlineMusic.getTitle().toString();
+                        String geshou = onlineMusic.getArtist_name().toString();
+                        String coverUrl = onlineMusic.getPic_big().toString();
+                        Log.d("路径是",path);
+                        int time = downloadInfo.getBitrate().getFile_duration()*1000;
+                        MainActivity mainActivity = new MainActivity();
+                        mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+                        addToNowPlaylist();
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+
+                    }
+
+                });
+                break;
+            case NET_4G:
+                builder = new AlertDialog.Builder(context);
+                builder.setMessage("当前正在使用4G网络，是否使用数据流量播放在线音乐？");
+                builder.setTitle("提示");
+                builder.setIcon(R.drawable.tip);
+                builder.setPositiveButton("流量多",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                HttpClinet.getMusicUrl(songID, new HttpCallback<DownloadInfo>() {
+                                    @Override
+                                    public void onSuccess(DownloadInfo downloadInfo) {
+                                        if (downloadInfo == null || downloadInfo.getBitrate() == null) {
+                                            onFail(null);
+                                            return;
+                                        }
+                                        String path = downloadInfo.getBitrate().getFile_link();
+                                        PlayMusic playMusic =new PlayMusic();
+                                        playMusic.play(path,i);
+                                        String songname = onlineMusic.getTitle().toString();
+                                        String geshou = onlineMusic.getArtist_name().toString();
+                                        String coverUrl = onlineMusic.getPic_big().toString();
+                                        Log.d("路径是",path);
+                                        int time = downloadInfo.getBitrate().getFile_duration()*1000;
+                                        MainActivity mainActivity = new MainActivity();
+                                        mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+                                        addToNowPlaylist();
+                                    }
+
+                                    @Override
+                                    public void onFinish() {
+
+                                    }
+
+                                    @Override
+                                    public void onFail(Exception e) {
+
+                                    }
+
+                                });
+                                dialog.dismiss();
+                            }
+                        });
+
+                builder.setNegativeButton("伤不起",
+                        new android.content.DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                builder.create().show();
+
+                break;
+            case NET_3G:
+                builder = new AlertDialog.Builder(context);
+                builder.setMessage("当前正在使用3G网络，是否使用数据流量播放在线音乐？");
+                builder.setTitle("提示");
+                builder.setIcon(R.drawable.tip);
+                builder.setPositiveButton("流量多",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                HttpClinet.getMusicUrl(songID, new HttpCallback<DownloadInfo>() {
+                                    @Override
+                                    public void onSuccess(DownloadInfo downloadInfo) {
+                                        if (downloadInfo == null || downloadInfo.getBitrate() == null) {
+                                            onFail(null);
+                                            return;
+                                        }
+                                        String path = downloadInfo.getBitrate().getFile_link();
+                                        PlayMusic playMusic =new PlayMusic();
+                                        playMusic.play(path,i);
+                                        String songname = onlineMusic.getTitle().toString();
+                                        String geshou = onlineMusic.getArtist_name().toString();
+                                        String coverUrl = onlineMusic.getPic_big().toString();
+                                        Log.d("路径是",path);
+                                        int time = downloadInfo.getBitrate().getFile_duration()*1000;
+                                        MainActivity mainActivity = new MainActivity();
+                                        mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+                                        addToNowPlaylist();
+                                    }
+
+                                    @Override
+                                    public void onFinish() {
+
+                                    }
+
+                                    @Override
+                                    public void onFail(Exception e) {
+
+                                    }
+
+                                });
+                                dialog.dismiss();
+                            }
+                        });
+
+                builder.setNegativeButton("伤不起",
+                        new android.content.DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                builder.create().show();
+
+                break;
+            case NET_2G:
+                builder = new AlertDialog.Builder(context);
+                builder.setMessage("当前正在使用2G网络，播放在线音乐会卡顿哟");
+                builder.setTitle("提示");
+                builder.setIcon(R.drawable.tip);
+                builder.setPositiveButton("流量多",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                HttpClinet.getMusicUrl(songID, new HttpCallback<DownloadInfo>() {
+                                    @Override
+                                    public void onSuccess(DownloadInfo downloadInfo) {
+                                        if (downloadInfo == null || downloadInfo.getBitrate() == null) {
+                                            onFail(null);
+                                            return;
+                                        }
+                                        String path = downloadInfo.getBitrate().getFile_link();
+                                        PlayMusic playMusic =new PlayMusic();
+                                        playMusic.play(path,i);
+                                        String songname = onlineMusic.getTitle().toString();
+                                        String geshou = onlineMusic.getArtist_name().toString();
+                                        String coverUrl = onlineMusic.getPic_big().toString();
+                                        Log.d("路径是",path);
+                                        int time = downloadInfo.getBitrate().getFile_duration()*1000;
+                                        MainActivity mainActivity = new MainActivity();
+                                        mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
+                                        addToNowPlaylist();
+                                    }
+
+                                    @Override
+                                    public void onFinish() {
+
+                                    }
+
+                                    @Override
+                                    public void onFail(Exception e) {
+
+                                    }
+
+                                });
+                                dialog.dismiss();
+                            }
+                        });
+
+                builder.setNegativeButton("伤不起",
+                        new android.content.DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                builder.create().show();
+
+                break;
+            default:
+                break;
+        }
+
+    }
+
+
+    private void addToNowPlaylist()
+    {
+        songList = new ArrayList<>();
+        //将当前列表添加到正在播放列表
+        for (int k=0;k<onlineMusics.size();k++)
+        {
+            Song song = new Song();
+            song.setTitle(onlineMusics.get(k).getTitle());
+            song.setSinger(onlineMusics.get(k).getArtist_name());
+            song.setDuration(360000);
+            song.setFileUrl(onlineMusics.get(k).getSong_id());
+            songList.add(song);
+        }
+        PlayMusic.PlayList playList = new PlayMusic.PlayList();
+        playList.setPlaylist(songList);
+        playList.setBang(1);  //表示百度音乐榜
+    }
+
+    @Override
+    public int getItemCount() {
+        return onlineMusics.size();
+    }
+
+    class ViewHolder extends RecyclerView.ViewHolder
     {
         ImageView ablumCover,more;
         TextView songaName,singger,ablum;
+        View view;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            ablumCover = itemView.findViewById(R.id.zj_id);
+            more = itemView.findViewById(R.id.more);
+            songaName = itemView.findViewById(R.id.geming);
+            singger = itemView.findViewById(R.id.geshou);
+            ablum = itemView.findViewById(R.id.ablum);
+            view = itemView;
+        }
     }
 }
