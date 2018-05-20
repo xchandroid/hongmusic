@@ -1,2 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+
+        <item name="t1" type="id"/>
+        <item name="t2" type="id"/>
+        <item name="t3" type="id"/>
+        <item name="t4" type="id"/>
+</resources>

@@ -6,9 +6,11 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,27 +24,15 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.vaiyee.hongmusic.DownloadListener;
 import com.vaiyee.hongmusic.MainActivity;
 import com.vaiyee.hongmusic.MyApplication;
 import com.vaiyee.hongmusic.R;
+import com.vaiyee.hongmusic.Utils.DownloadTask;
 
 import java.util.TimerTask;
 
 public class MyService extends Service {
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    public MyService() {
-    }
 
     MusicBinder binder = new MusicBinder();
 
@@ -116,5 +106,6 @@ public class MyService extends Service {
             noti.setImageViewResource(R.id.noti_play,R.drawable.play_btn_play_pause_selector);
             startForeground(1, notification); //刷新ID为 1 的通知，这一步很重要，否则不能同步通知栏的歌曲信息
         }
+
     }
 }

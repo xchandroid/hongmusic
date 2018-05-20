@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:layout_gravity="center"
-        android:text="独立编写制作完成的处女作"
+        android:text="独立编写制作完成的毕业设计作品"
         android:textSize="15sp"/>
     <com.vaiyee.hongmusic.GradualTextView
         android:layout_width="wrap_content"

@@ -5,4 +5,8 @@ package com.vaiyee.hongmusic;
  */
 
 public interface DownloadListener {
+    void onProgress(String geming,int progress,int notiID);
+    void onSuccess(String geming,int notiID);
+    void onFail();
+
 }

@@ -41,7 +41,7 @@ public class GedanAdapter extends RecyclerView.Adapter<GedanAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {   //这个方法相当于getView()
-        String url = gedanList.get(position).imgurl.replace("{size}","150");
+        String url = gedanList.get(position).imgurl.replace("{size}","400");
         Glide.with(context)
                 .load(url)
                 .placeholder(R.drawable.default_cover)
@@ -59,6 +59,7 @@ public class GedanAdapter extends RecyclerView.Adapter<GedanAdapter.ViewHolder> 
                 intent.putExtra("img",gedanList.get(position).imgurl);
                 intent.putExtra("time","创建时间："+gedanList.get(position).publishtime.split(" ")[0]);
                 intent.putExtra("id",gedanList.get(position).specialid);
+                intent.putExtra("type","gedan");
                 context.startActivity(intent);
             }
         });

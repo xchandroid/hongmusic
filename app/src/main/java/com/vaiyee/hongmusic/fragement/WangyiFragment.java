@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +37,7 @@ public class WangyiFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_wangyi,null);
+        View view = inflater.inflate(R.layout.fragment_wangyi,container,false);
         wyListview = view.findViewById(R.id.wangyilist);
         sheetList = new ArrayList<>();
         return view;
@@ -67,5 +68,33 @@ public class WangyiFragment extends Fragment {
     }
 
 
+    @Override
+    public void onDestroy() {
+        Log.d("Destroy了","网易这个碎片");
+        super.onDestroy();
+    }
 
+    @Override
+    public void onDetach() {
+        Log.d("Detach了","网易这个碎片");
+        super.onDetach();
+    }
+
+    @Override
+    public void onPause() {
+        Log.d("Pause了","网易这个碎片");
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        Log.d("Stop了","网易这个碎片");
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroyView() {
+        Log.d("DestroyView了","网易这个碎片");
+        super.onDestroyView();
+    }
 }

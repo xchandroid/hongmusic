@@ -41,7 +41,7 @@ public class MyCircleView extends View {
         int pointY = getHeight()/2;   //XY为画圆的坐标原点，getHeight()方法是获取XML文件中设置的宽高
         int r = 450;        //半径450 刚好合适
 
-        LinearGradient mLinearGradient = new LinearGradient(0,0,getMeasuredWidth(),0,new int[]{Color.parseColor("#00F5FF"),Color.parseColor("#FF3030"),Color.parseColor("#00F5FF")},new float[]{0,0.5f,1.0f}, Shader.TileMode.CLAMP); //设置外圈颜色渐变
+        LinearGradient mLinearGradient = new LinearGradient(0,0,getMeasuredWidth(),0,new int[]{Color.parseColor("#FFFFFF"),Color.parseColor("#FF3030"),Color.parseColor("#FFFFFF")},new float[]{0,0.5f,1.0f}, Shader.TileMode.CLAMP); //设置外圈颜色渐变
 
         Paint paint = new Paint();  //实例化画笔对象
         paint.setAntiAlias(true);

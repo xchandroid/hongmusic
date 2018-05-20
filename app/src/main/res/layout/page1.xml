@@ -4,27 +4,26 @@
     android:layout_width="match_parent"
     xmlns:lrc="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent">
-    <com.vaiyee.hongmusic.CustomView.MyCircleView
-        android:layout_width="310dp"
-        android:layout_height="310dp"
-        android:id="@+id/btm"
-        android:layout_gravity="center"/>
     <ImageView
         android:id="@+id/play_bg"
         android:layout_width="300dp"
         android:src="@drawable/music_ic"
         android:layout_gravity="center"
         android:layout_height="300dp" />
+    <com.vaiyee.hongmusic.CustomView.MyCircleView
+        android:layout_width="310dp"
+        android:layout_height="310dp"
+        android:id="@+id/btm"
+        android:layout_gravity="center"/>
     <me.wcy.lrcview.LrcView
         android:id="@+id/lrc_view_single"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        lrc:lrcAnimationDuration="500"
+        lrc:lrcAnimationDuration="800"
         lrc:lrcCurrentTextColor="@color/blue"
-        lrc:lrcDividerHeight="3dp"
+        lrc:lrcDividerHeight="2dp"
         lrc:lrcNormalTextColor="@color/white"
         lrc:lrcPadding="20dp"
-        lrc:lrcTextSize="15sp"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="3dp"/>
+        lrc:lrcTextSize="14sp"
+        android:layout_gravity="bottom"/>
 </FrameLayout>

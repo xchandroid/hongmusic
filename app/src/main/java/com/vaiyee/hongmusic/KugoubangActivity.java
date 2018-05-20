@@ -149,7 +149,6 @@ public class KugoubangActivity extends SwipeBackActivity{
             @Override
             public void onSuccess(KugouBang mkugouBang) {
                 kugouBang =mkugouBang;
-                CloseProgress();
                 list.addAll(kugouBang.song.kugouBangList);
                 adapter.notifyDataSetChanged();
                 Log.d("page的值是",String.valueOf(page));
@@ -158,6 +157,7 @@ public class KugoubangActivity extends SwipeBackActivity{
                 if (isFirstopen)
                 {
                     InitHeader();
+                    CloseProgress();
                     isFirstopen = false;
                 }
             }

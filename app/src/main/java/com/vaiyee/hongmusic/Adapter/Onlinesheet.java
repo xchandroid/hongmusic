@@ -74,7 +74,7 @@ public class Onlinesheet extends BaseAdapter{
 
     @Override
     public boolean isEnabled(int position) {
-        return getItemViewType(position) ==TYPE_MUSIC_LIST;
+        return getItemViewType(position) == TYPE_MUSIC_LIST;
     }
 
     @NonNull

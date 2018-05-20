@@ -9,18 +9,12 @@ import java.util.List;
  */
 
 public class GedanList {
-    @SerializedName("list")
-    public List1 list1;
-
-    public class List1
-    {
-      @SerializedName("list")
-        public List2 list2;
-    }
-    public class List2
+    @SerializedName("data")
+    public Data data;
+    public class Data
     {
         @SerializedName("info")
-        public List<Info> gedanlist;
+        public List<Info> infoList;
         @SerializedName("total")
         public int total;
     }
@@ -34,5 +28,9 @@ public class GedanList {
         public String hash;
         @SerializedName("duration")
         public int duration;
+        @SerializedName("320hash")
+        public String hqhash;
+        @SerializedName("sqhash")
+        public String sqhash;
     }
 }

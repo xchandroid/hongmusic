@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.vaiyee.hongmusic.SearchActivity">
+<LinearLayout
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.vaiyee.hongmusic.SearchActivity">
+   >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,6 +30,8 @@
             android:layout_height="35dp"
             android:hint="输入歌手、歌名、专辑..."
             android:textColor="#C71585"
+            android:imeOptions="actionSearch"
+            android:singleLine="true"
             android:id="@+id/sousuokuang"
             android:gravity="center_horizontal|center_vertical"
             android:layout_gravity="center_horizontal|center_vertical"
@@ -55,7 +60,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/lishi_layout"
         android:orientation="horizontal">
-
     </com.vaiyee.hongmusic.CustomView.AutoNextLineLinearlayout>
 <ListView
     android:layout_width="match_parent"
@@ -73,3 +77,14 @@
         android:textColor="#EE0000"
         android:visibility="gone"/>
 </LinearLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="10dp"
+        android:scaleType="center"
+        android:id="@+id/open_geshou"
+        android:background="@drawable/button_ripple"
+        android:backgroundTint="#FFC125"
+        android:src="@drawable/geshou"/>
+</merge>

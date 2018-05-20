@@ -2,24 +2,33 @@ package com.vaiyee.hongmusic.Adapter;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.vaiyee.hongmusic.DownloadListener;
+import com.vaiyee.hongmusic.GedanActivity;
 import com.vaiyee.hongmusic.KugoubangActivity;
 import com.vaiyee.hongmusic.MainActivity;
 import com.vaiyee.hongmusic.MyApplication;
@@ -29,6 +38,7 @@ import com.vaiyee.hongmusic.SearchActivity;
 import com.vaiyee.hongmusic.Utils.DownloadTask;
 import com.vaiyee.hongmusic.Utils.HttpClinet;
 import com.vaiyee.hongmusic.Utils.NetUtils;
+import com.vaiyee.hongmusic.Utils.NotiUtil;
 import com.vaiyee.hongmusic.bean.GedanList;
 import com.vaiyee.hongmusic.bean.KugouBangList;
 import com.vaiyee.hongmusic.bean.KugouMusic;
@@ -52,6 +62,9 @@ public class GedanListAdapter extends RecyclerView.Adapter<GedanListAdapter.View
     private static  int duration;
     private PopupWindow popupWindow;
     private Button title,download;
+    private ShowBottonPal showBottonPal;
+    public static boolean duoxuan =false; // 长按进入多选的标志位
+    private static SparseBooleanArray selectedposition = new SparseBooleanArray();  //默认每个条目为false
     public GedanListAdapter(Context context, List<GedanList.Info> songlist,Activity activity) {
 
         this.context = context;
@@ -68,10 +81,11 @@ public class GedanListAdapter extends RecyclerView.Adapter<GedanListAdapter.View
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         final GedanList.Info song = songlist.get(position);
         holder.geming.setText(1+position+"."+song.filename.split(" - ")[1]);
         holder.geshou.setText(song.filename.split(" - ")[0]);
+        holder.cover.setVisibility(View.GONE);
         final String[] s = song.filename.split(" - ");
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,11 +95,45 @@ public class GedanListAdapter extends RecyclerView.Adapter<GedanListAdapter.View
                 geming = s[1];
                 geshou = s[0];
                 duration = song.duration*1000;
-                songList = new ArrayList<>();
                 getSongUrl(hash,position);
             }
         });
+        if (duoxuan) //根据标志位来显示|隐藏 checkbox
+        {
+            holder.more.setVisibility(View.GONE);
+            holder.checkBox.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            holder.more.setVisibility(View.VISIBLE);
+            holder.checkBox.setVisibility(View.GONE);
+        }
 
+        //长按多选，批量下载
+        if (!duoxuan)
+        holder.view.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                duoxuan =true; //标志长按进入多选模式
+                NotiDataChange();//刷新列表重新显示
+                showBottonPal.show();
+                return true;//表示只触发长按事件，屏蔽单击事件（防止单击和长按同时触发）
+            }
+        });
+        holder.checkBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (selectedposition.get(position)) // 根据位置判断条目是否选中
+                {
+                    selectedposition.put(position,false); //如果选中就相反
+                }
+                else
+                {
+                    selectedposition.put(position,true);
+                }
+            }
+        });
+        holder.checkBox.setChecked(selectedposition.get(position));  //根据position保存的是否选中状态设置checkbox的状态
         holder.more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -93,6 +141,85 @@ public class GedanListAdapter extends RecyclerView.Adapter<GedanListAdapter.View
             }
         });
 
+    }
+
+    //批量下载方法
+    public void startDownload()
+    {
+        for (int j = 0;j<songlist.size();j++)
+        {
+            if (selectedposition.get(j)==true)
+            {
+                GedanList.Info song = songlist.get(j);
+                final String hash = song.hash;
+                final String id =String.valueOf(j);
+                final String songname = String.valueOf(Html.fromHtml((song.filename.split(" - ")[1])));
+                final String singger = String.valueOf(Html.fromHtml(song.filename.split(" - ")[0]));
+                final int duration = song.duration*1000;
+                HttpClinet.KugouUrl(hash, new HttpCallback<KugouMusic>() {
+                            @Override
+                            public void onSuccess(KugouMusic kugouMusic) {
+                                String url = kugouMusic.getData().getPlay_url();
+                                DownloadTask downloadTask = new DownloadTask(listener);
+                                downloadTask.execute(url,songname,singger,"未知",String.valueOf(duration),id);
+                            }
+
+                            @Override
+                            public void onFail(Exception e) {
+
+                            }
+                        });
+                Log.d("选中了",String.valueOf(j));
+            }
+        }
+    }
+
+    DownloadListener listener = new DownloadListener() {
+        @Override
+        public void onProgress(String geming, int progress,int notiID) {
+            getManager().notify(notiID,getNotification(geming,progress));
+        }
+
+
+        @Override
+        public void onSuccess(String geming,int notiID) {
+            Intent intent = new Intent(context, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context,0,intent,0);
+            NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            manager.cancel(notiID);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+            builder.setContentTitle(geming);
+            builder.setContentText("下载完成！");
+            builder.setSmallIcon(R.drawable.xiazai1);
+            builder.setContentIntent(pendingIntent);
+            builder.setAutoCancel(true);//点击后清除通知
+            manager.notify(notiID,builder.build());
+        }
+
+        @Override
+        public void onFail() {
+
+        }
+    };
+    private NotificationManager getManager()
+    {
+        return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+    private Notification getNotification(String geming, int progress)
+    {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        builder.setContentText("《"+geming+"》"+"  正在下载："+progress+"%");
+        builder.setContentTitle("歌曲");
+        builder.setSmallIcon(R.drawable.xiazai1);
+        builder.setProgress(100, progress, false);
+        return builder.build();
+    }
+
+
+
+    private void NotiDataChange()
+    {
+        notifyDataSetChanged();
     }
 
     private void showPopu(String songName,String geshou,String ablumName,String songId,final String duration) {
@@ -145,8 +272,8 @@ public class GedanListAdapter extends RecyclerView.Adapter<GedanListAdapter.View
             @Override
             public void onSuccess(KugouMusic kugouMusic) {
                 String url = kugouMusic.getData().getPlay_url();
-                DownloadTask downloadTask = new DownloadTask();
-                downloadTask.execute(url,songName,geshou,ablumName,duration);
+                DownloadTask downloadTask = new DownloadTask(listener);
+                downloadTask.execute(url,songName,geshou,ablumName,duration,String.valueOf(NotiUtil.getRandom()));
                 Toast.makeText(MyApplication.getQuanjuContext(), "开始下载", Toast.LENGTH_SHORT).show();
                 popupWindow.dismiss();
             }
@@ -168,13 +295,16 @@ public class GedanListAdapter extends RecyclerView.Adapter<GedanListAdapter.View
     {
         TextView geming,geshou;
         View view;
-        ImageView more;
+        ImageView more,cover;
+        CheckBox checkBox;
 
         public ViewHolder(View itemView) {
             super(itemView);
             geming = itemView.findViewById(R.id.geming);
             geshou = itemView.findViewById(R.id.geshou);
             more = itemView.findViewById(R.id.more);
+            cover = itemView.findViewById(R.id.zj_id);
+            checkBox = itemView.findViewById(R.id.checkbox);
             view = itemView;
         }
     }
@@ -400,7 +530,15 @@ public class GedanListAdapter extends RecyclerView.Adapter<GedanListAdapter.View
         }
     }
 
+   public interface ShowBottonPal
+   {
+       void show();
+   }
 
+   public void setListener(ShowBottonPal showBottonPal)
+   {
+       this.showBottonPal = showBottonPal;
+   }
 
     //显示正在加载数据对话框
     private void ShowProgress()

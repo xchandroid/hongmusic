@@ -31,6 +31,7 @@ import com.vaiyee.hongmusic.SearchActivity;
 import com.vaiyee.hongmusic.Utils.DownloadTask;
 import com.vaiyee.hongmusic.Utils.HttpClinet;
 import com.vaiyee.hongmusic.Utils.NetUtils;
+import com.vaiyee.hongmusic.Utils.NotiUtil;
 import com.vaiyee.hongmusic.WangyiBangActivity;
 import com.vaiyee.hongmusic.bean.DownloadInfo;
 import com.vaiyee.hongmusic.bean.OnlineMusic;
@@ -350,8 +351,8 @@ public class WangyiBangAdapter extends RecyclerView.Adapter<WangyiBangAdapter.Vi
 
                 url = Path + songId + ".mp3";
                 String time = String.valueOf(duration);
-                DownloadTask downloadTask = new DownloadTask();
-                downloadTask.execute(url, songName, geshou, ablumName, time);
+                DownloadTask downloadTask = new DownloadTask(NotiUtil.listener);
+                downloadTask.execute(url, songName, geshou, ablumName,time,String.valueOf(NotiUtil.getRandom()));
                 Toast.makeText(MyApplication.getQuanjuContext(), "开始下载", Toast.LENGTH_SHORT).show();
                 popupWindow.dismiss();
 

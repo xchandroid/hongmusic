@@ -15,6 +15,8 @@ public class Myreceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         MainActivity.firstopen = true;
-        context.startActivity(new Intent(context,MainActivity.class));
+        Intent intent1 = new Intent(context,MainActivity.class);
+        intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
+        context.startActivity(intent1);
     }
 }

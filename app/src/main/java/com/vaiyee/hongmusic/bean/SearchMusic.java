@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * JavaBean
- * Created by hzwangchenyan on 2016/1/13.
+ * Created by xch on 2018/2/13.  、、这个是百度音乐搜索接口的实体类，已弃用
  */
 public class SearchMusic {
     @SerializedName("song")

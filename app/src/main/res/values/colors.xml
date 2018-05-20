@@ -25,4 +25,5 @@
     <color name="grey_900_96p">#F5212121</color>
     <color name="txtcolor">#7A67EE</color>
     <color name="txtcoler">#FFFFF0</color>
+    <color name="colorControlHighlight">#FF4081</color>
 </resources>

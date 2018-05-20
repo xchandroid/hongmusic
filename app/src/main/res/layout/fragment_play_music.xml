@@ -21,12 +21,12 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_marginTop="23dp">
+            android:layout_marginTop="20dp">
            <ImageView
                android:layout_width="50dp"
                android:layout_height="wrap_content"
                android:id="@+id/hidefragment"
-               android:background="@drawable/button_ripple"
+               android:background="?android:attr/selectableItemBackground"
                android:src="@drawable/ic_down"/>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -63,8 +63,9 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="15dp"
-            android:layout_marginTop="5dp"
+            android:layout_height="12dp"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
             android:orientation="horizontal">
 
             <ImageView
@@ -79,11 +80,6 @@
                 android:layout_height="10dp"
                 android:layout_marginLeft="10dp"
                 android:src="@drawable/ic_play_page_indicator_unselected" />
-            <SeekBar
-                android:layout_width="match_parent"
-                android:layout_height="15dp"
-                android:id="@+id/yinxiao"
-                />
         </LinearLayout>
 
         <LinearLayout
@@ -129,7 +125,7 @@
                 android:layout_height="60dp"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                android:background="@drawable/button_ripple"
+                android:background="?android:attr/selectableItemBackground"
                 android:src="@drawable/play_mode_level_list" />
 
             <ImageView
@@ -138,7 +134,7 @@
                 android:layout_height="80dp"
                 android:layout_alignParentTop="true"
                 android:layout_marginEnd="11dp"
-                android:background="@drawable/button_ripple"
+                android:background="?android:attr/selectableItemBackground"
                 android:layout_toStartOf="@+id/play_pause"
                 android:src="@drawable/play_btn_prev_selector" />
 
@@ -146,7 +142,7 @@
                 android:id="@+id/play_pause"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:background="@drawable/button_ripple"
+                android:background="?android:attr/selectableItemBackground"
                 android:layout_centerInParent="true"
                 android:src="@drawable/play_btn_play_pause_selector" />
 
@@ -156,7 +152,7 @@
                 android:layout_height="80dp"
                 android:layout_alignParentTop="true"
                 android:layout_marginStart="12dp"
-                android:background="@drawable/button_ripple"
+                android:background="?android:attr/selectableItemBackground"
                 android:layout_toEndOf="@+id/play_pause"
                 android:src="@drawable/play_btn_next_selector" />
 
@@ -166,7 +162,7 @@
                 android:id="@+id/play_list"
                 android:layout_alignParentTop="true"
                 android:layout_toEndOf="@+id/next"
-                android:background="@drawable/button_ripple"
+                android:background="?android:attr/selectableItemBackground"
                 android:scaleType="center"
                 android:src="@drawable/play_list_menu" />
         </RelativeLayout>

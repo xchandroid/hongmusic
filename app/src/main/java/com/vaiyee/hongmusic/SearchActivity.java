@@ -5,20 +5,25 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -66,7 +71,7 @@ public class SearchActivity extends SwipeBackActivity {
     private String geshou,coverUrl,lrc;
     public static String geming;
     private static int endtime,i=-1;
-    private ProgressDialog progressDialog;
+    private static ProgressDialog progressDialog;
     private static List<KugouSearchResult.lists> songs = new ArrayList<>();
     private static List<KugouSearchResult.lists> resultList = new ArrayList<>();
     private int mfirstvisibleItem = 0,size = 0;
@@ -76,12 +81,14 @@ public class SearchActivity extends SwipeBackActivity {
     private String[] lishi = new String[10];
     private SharedPreferences.Editor editor;
     private LinearLayout linearLayout;
+    private FloatingActionButton geshou_button;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);  //使不自动弹出软键盘
         footer = LayoutInflater.from(SearchActivity.this).inflate(R.layout.loading_footer,null);
         initView();
         editor = getSharedPreferences("L",0).edit();
@@ -100,6 +107,14 @@ public class SearchActivity extends SwipeBackActivity {
         back = (ImageView) findViewById(R.id.fanhui);
         textView = (TextView)findViewById(R.id.Null);
         linearLayout = (LinearLayout) findViewById(R.id.lishi_layout);
+        geshou_button = (FloatingActionButton)findViewById(R.id.open_geshou);
+        geshou_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(SearchActivity.this,GeshouActivity.class);
+                startActivity(intent);
+            }
+        });
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -130,66 +145,24 @@ public class SearchActivity extends SwipeBackActivity {
 
             }
         });
+
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if (i==EditorInfo.IME_ACTION_SEARCH)
+                {
+                    huicheSousuo();
+                }
+                return false;
+            }
+        });
+
+
         search = (Button) findViewById(R.id.search_online_music);
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-                ShowProgress();
-                content = editText.getText().toString();
-                if (TextUtils.isEmpty(content))
-                {
-                   Toast toast= Toast.makeText(SearchActivity.this,"请输入搜索内容",Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP , 0, 200);
-                    toast.show();
-                    CloseProgress();
-                    return;
-                }
-                    i=i+1;
-                if(i<10)
-                {
-                    editor.putString("h" + i, content);      //这里表示仅保存10条历史搜索记录,i是从0开始的
-                    editor.putInt("s", i);
-                    editor.apply();
-                }
-                else
-                {
-                    i = 0;                                       //当大于9的时候，重置i的值为0
-                    editor.putString("h" + i, content);      //else这段代码仅执行一次
-                    editor.putInt("s", 9);
-                    editor.apply();
-                }
-                size = 20;
-                loadMore();
-
-
-
-/*
-                HttpClinet.SearchMusic(content, new HttpCallback<SearchMusic>() {
-                    @Override
-                    public void onSuccess(SearchMusic searchMusic) {
-                        List<SearchMusic.Song> songList = searchMusic.getSong();
-                        songs.clear();
-                        if (songList!=null) {
-                            songs.addAll(songList);
-                            adapter.notifyDataSetChanged();
-                            listView.setVisibility(View.VISIBLE);
-                            textView.setVisibility(View.GONE);
-                        }
-                        else
-                        {
-                            listView.setVisibility(View.GONE);
-                            textView.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                    @Override
-                    public void onFail(Exception e) {
-
-                    }
-                });
-
-                */
-
+              huicheSousuo();
             }
         });
         listView = (ListView) findViewById(R.id.searched_online_music);
@@ -260,7 +233,8 @@ public class SearchActivity extends SwipeBackActivity {
         HttpClinet.KugouSearch(content,size, new HttpCallback<KugouSearchResult>() {
             @Override
             public void onSuccess(KugouSearchResult kugouSearchResult) {
-                songs.clear();if (kugouSearchResult!=null) {
+                songs.clear();
+                if (kugouSearchResult!=null) {
                     resultList = kugouSearchResult.getResultList();
                 }
                 if (resultList!=null)
@@ -510,7 +484,7 @@ public class SearchActivity extends SwipeBackActivity {
         String filePath = null;
         boolean hasSDCard = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);//是否有外置SD卡
         if (hasSDCard) {
-            filePath =Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator+"HonchenMusic"+File.separator+"Lrc"+"/"+name+".lrc";
+            filePath =Environment.getExternalStorageDirectory().getPath()+"/HonchenMusic/Lrc/"+name+".lrc";
         } else
             filePath =Environment.getDownloadCacheDirectory().toString() + File.separator +name+".lrc";
 
@@ -521,6 +495,7 @@ public class SearchActivity extends SwipeBackActivity {
                 dir.mkdirs();  //先创建文件夹
                 file.createNewFile();//创建文件
             }
+
             FileOutputStream outStream = new FileOutputStream(file);//创建文件字节输出流对象，以字节形式写入所创建的文件中
             outStream.write(lrc.getBytes());//开始写入文件（也就是把文件写入内存卡中）
            // Log.d("歌词路径",filePath);
@@ -600,6 +575,36 @@ public class SearchActivity extends SwipeBackActivity {
         {
             imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS); }
         }
+    }
+
+    private void huicheSousuo()
+    {
+        ShowProgress();
+        content = editText.getText().toString();
+        if (TextUtils.isEmpty(content))
+        {
+            Toast toast= Toast.makeText(SearchActivity.this,"请输入搜索内容",Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.TOP , 0, 200);
+            toast.show();
+            CloseProgress();
+            return;
+        }
+        i=i+1;
+        if(i<10)
+        {
+            editor.putString("h" + i, content);      //这里表示仅保存10条历史搜索记录,i是从0开始的
+            editor.putInt("s", i);
+            editor.apply();
+        }
+        else
+        {
+            i = 0;                                       //当大于9的时候，重置i的值为0
+            editor.putString("h" + i, content);      //else这段代码仅执行一次
+            editor.putInt("s", 9);
+            editor.apply();
+        }
+        size = 20;
+        loadMore();
     }
 
 

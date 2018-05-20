@@ -65,19 +65,21 @@ import java.util.List;
  */
 
 public class fragement1 extends Fragment {
-
-    private TextView textView;
     private static RecyclerView recyclerView;
     public static List<Song> songs;
-    private  List<ColorTrackView> mTabs = new ArrayList<ColorTrackView>();
-    private ColorTrackView t,tt;
     public static String coverUrl,geming,geshou;
     public static songsAdapter adapter;
     private List<Song> songList;
     private TextView tips;
     private RollPagerView rollPagerView;
-    private  String[]imgs = new String[4];
-    private View hearder;
+    private  String[]imgs = new String[8];
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -95,7 +97,7 @@ public class fragement1 extends Fragment {
         }
         else
         {
-           updateSonglist();  //已授过权了直接扫面音乐
+           updateSonglist();  //已授过权了直接扫描音乐
         }
 
 /*
@@ -279,10 +281,10 @@ public class fragement1 extends Fragment {
         HttpClinet.getBanner(new HttpCallback<Banner>() {
             @Override
             public void onSuccess(Banner banner) {
-                final List<Banner.Fengmian> bannerlist = banner.bannerlist;
+                final List<Banner.DataBean.InfoBean> bannerlist = banner.bean.getInfo();
                 for (int i=0;i<bannerlist.size();i++)
                 {
-                    imgs[i] = bannerlist.get(i).img;
+                    imgs[i] = bannerlist.get(i).getImg();
                 }
 
                 //设置每个图片的切换时间
@@ -304,8 +306,8 @@ public class fragement1 extends Fragment {
                     public void onItemClick(int position) {
 
                         Intent intent = new Intent(getContext(), WebActivity.class);
-                        intent.putExtra("URL",bannerlist.get(position).extra.tourl);
-                        intent.putExtra("title",bannerlist.get(position).title);
+                        intent.putExtra("URL",bannerlist.get(position).getExtra().getUrl());
+                        intent.putExtra("title",bannerlist.get(position).getTitle());
                         startActivity(intent);
                     }
                 });

@@ -105,7 +105,7 @@ public class LyricView extends View {
     }
 
     private void initMyView(Context context) {
-        maximumFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
+        maximumFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();   // 获取View的最大纵向滑动速度
         initAllPaints();
         initAllBounds();
     }
@@ -128,8 +128,8 @@ public class LyricView extends View {
      * */
     private void initAllPaints() {
         mTextPaint = new Paint();
-        mTextPaint.setDither(true);
-        mTextPaint.setAntiAlias(true);
+        mTextPaint.setDither(true);//设置抖动，视觉效果好看
+        mTextPaint.setAntiAlias(true);//抗锯齿
         mTextPaint.setTextAlign(Paint.Align.CENTER);
 
         mIndicatorPaint = new Paint();
@@ -146,10 +146,12 @@ public class LyricView extends View {
         mBtnPaint.setStyle(Paint.Style.STROKE);
     }
 
+
+    //调用时间：当控件的父元素放置该控件时，用于告诉父元素该控件需要的大小。
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        mShaderWidth = getMeasuredHeight() * 0.3f;
+        mShaderWidth = getMeasuredHeight() * 0.3f; //getMeasuredHeight()得到的是view的实际高度
     }
 
     @Override
@@ -157,6 +159,7 @@ public class LyricView extends View {
         if(mLyricInfo != null && mLyricInfo.song_lines != null && mLyricInfo.song_lines.size() > 0) {
             for(int i = 0, size = mLineCount; i < size; i ++) {
                 float x = getMeasuredWidth() * 0.5f;
+
                 float y = getMeasuredHeight() * 0.5f + (i + 0.5f) * mLineHeight - 6 - mLineSpace * 0.5f - mScrollY;
                 if(y + mLineHeight * 0.5f < 0) {
                     continue;
@@ -386,7 +389,7 @@ public class LyricView extends View {
     }
 
     /**
-     * 刷新View
+     * 刷新View(重绘view)
      * */
     private void invalidateView() {
         if(Looper.getMainLooper() == Looper.myLooper()) {
@@ -421,6 +424,7 @@ public class LyricView extends View {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
+
     }
 
     /**
@@ -502,12 +506,12 @@ public class LyricView extends View {
      * @param toY  指定纵坐标位置
      * */
     private void smoothScrollTo(float toY) {
-        final ValueAnimator animator = ValueAnimator.ofFloat(mScrollY , toY);
+        final ValueAnimator animator = ValueAnimator.ofFloat(mScrollY , toY);//区间数值递增生成器，只生递增升成数值，与View无关
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
             @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                if(mUserTouch) {
+            public void onAnimationUpdate(ValueAnimator animation) {   //监听数值改变
+                if(mUserTouch) {   //  触摸view时停止移动
                     animator.cancel();
                     return;
                 }
@@ -582,8 +586,9 @@ public class LyricView extends View {
                     position = i;
                     break;
                 }
+
                 if(i == mLineCount - 1) {
-                    position = mLineCount;
+                    position = mLineCount;  //播放到最后一行歌词歌词时停在最后一行，否则播放到最后一行时，position值还是0，会停在第一行
                 }
             }
         }
@@ -685,7 +690,7 @@ public class LyricView extends View {
         long minute = Long.parseLong(str.substring(1, 3));
         long second = Long.parseLong(str.substring(4, 6));
         long millisecond = Long.parseLong(str.substring(7, 9));
-        return millisecond + second * 1000 + minute * 60 * 1000;
+        return millisecond + second * 1000 + minute * 60 * 1000;  //返回毫秒数
     }
 
     /**
@@ -736,7 +741,7 @@ public class LyricView extends View {
             mTextPaint.setTextSize(size);
             measureLineHeight();
             mScrollY = measureCurrentScrollY(mCurrentPlayLine);
-            invalidateView();
+            invalidateView(); //刷新view
         }
     }
 
@@ -748,7 +753,7 @@ public class LyricView extends View {
         } else {
             resources = context.getResources();
         }
-        return TypedValue.applyDimension(unit, size, resources.getDisplayMetrics());
+        return TypedValue.applyDimension(unit, size, resources.getDisplayMetrics()); //这个方法的作用是 把Android系统中的非标准度量尺寸转变为标准度量尺寸 (Android系统中的标准尺寸是px, 即像素)
     }
 
 
@@ -850,7 +855,10 @@ public class LyricView extends View {
      * @param size
      * */
     public void setTextSize(float size) {
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, size);  //getTextSize返回值是以像素(px)为单位的，而setTextSize()是以sp为单位的
+        //TypedValue.COMPLEX_UNIT_PX : Pixels
+       // TypedValue.COMPLEX_UNIT_SP : Scaled Pixels
+       // TypedValue.COMPLEX_UNIT_DIP : Device Independent Pixels
     }
 
     public void setPlayable(boolean playable) {

@@ -20,5 +20,12 @@
     <style name="TitleMaxline">
         <item name="android:textSize">18sp</item>
     </style>
-
+    <style name="popmenu_animation" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/show</item>
+        <item name="android:windowExitAnimation">@anim/hide</item>
+    </style>
+    <style name="popfrombottom">
+        <item name="android:windowEnterAnimation">@anim/enter_from_bottom</item>
+        <item name="android:windowExitAnimation">@anim/exit_from_bottom</item>
+    </style>
 </resources>

@@ -22,7 +22,7 @@
     android:layout_width="match_parent"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent">
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="50dp"
@@ -31,10 +31,10 @@
 
     <ImageView
         android:id="@+id/opendrawermenu"
-        android:background="@drawable/button_ripple"
+        android:background="?android:attr/selectableItemBackground"
         android:scaleType="centerInside"
         android:src="@drawable/ic_menu"
-        android:layout_width="50dp"
+        android:layout_width="40dp"
         android:layout_height="50dp"
         />
     <LinearLayout
@@ -44,47 +44,58 @@
         android:layout_height="50dp">
         <com.vaiyee.hongmusic.ColorTrackView
             android:id="@+id/changeTextColorView"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
+
             android:layout_height="wrap_content"
             zhy:direction="left"
             zhy:progress="0"
-            zhy:text="本机音乐"
+            zhy:text="本地"
             zhy:text_change_color="#ffff0000"
             zhy:text_origin_color="#000000"
-            zhy:text_size="20sp" />
+            zhy:text_size="18sp" />
 
         <com.vaiyee.hongmusic.ColorTrackView
             android:id="@+id/textView2"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
+
             zhy:direction="left"
             zhy:progress="0"
-            zhy:text="排行榜单"
+            zhy:text="排行榜"
             zhy:text_change_color="#ffff0000"
             zhy:text_origin_color="#000000"
-            zhy:text_size="20sp" />
+            zhy:text_size="18sp" />
 
         <com.vaiyee.hongmusic.ColorTrackView
             android:id="@+id/colorTrackView"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
+            android:layout_marginLeft="10dp"
             zhy:direction="left"
             zhy:text="推荐歌单"
-            zhy:text_size="20sp"
+            zhy:text_size="18sp"
+            zhy:text_change_color="#ffff0000"
+            zhy:text_origin_color="#000000"/>
+        <com.vaiyee.hongmusic.ColorTrackView
+            android:id="@+id/mv"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            zhy:direction="left"
+            zhy:text="推荐MV"
+            zhy:text_size="18sp"
             zhy:text_change_color="#ffff0000"
             zhy:text_origin_color="#000000"/>
     </LinearLayout>
 
         <ImageView
             android:id="@+id/music_search"
-            android:layout_width="50dp"
+            android:layout_width="40dp"
             android:layout_height="50dp"
-            android:background="@drawable/button_ripple"
+            android:background="?android:attr/selectableItemBackground"
             android:scaleType="centerInside"
             android:src="@drawable/ic_menu_search" />
 </LinearLayout>
@@ -162,14 +173,14 @@
                 android:id="@+id/play_bar_star"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:background="@drawable/button_ripple"
+                android:background="?android:attr/selectableItemBackground"
                 android:src="@drawable/play_bar_btn_play_pause_selector" />
 
             <ImageView
                 android:id="@+id/play_bar_next"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:background="@drawable/button_ripple"
+                android:background="?android:attr/selectableItemBackground"
                 android:src="@drawable/ic_play_bar_btn_next"
                 />
 

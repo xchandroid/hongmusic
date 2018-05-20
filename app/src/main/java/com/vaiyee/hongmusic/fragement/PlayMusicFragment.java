@@ -73,6 +73,7 @@ import com.vaiyee.hongmusic.bean.OnlineMusic;
 import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.bean.WangyiLrc;
 import com.vaiyee.hongmusic.http.HttpCallback;
+import com.yatoooon.screenadaptation.ScreenAdapterTools;
 
 import org.apache.http.params.HttpParams;
 
@@ -126,6 +127,7 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view= inflater.inflate(R.layout.fragment_play_music, container, false);
+        ScreenAdapterTools.getInstance().loadView((ViewGroup) view);   //拿到布局填充器返回的view后再加上适配语句
         play = view.findViewById(R.id.play_pause);
         pre = view.findViewById(R.id.pre);
         playmode = view.findViewById(R.id.playmode);
@@ -134,9 +136,11 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
         next = view .findViewById(R.id.next);
         seekBar = view.findViewById(R.id.seekbar);
         seekBar.setOnSeekBarChangeListener(this);
+        /*
         yinxiao = view.findViewById(R.id.yinxiao);
         yinxiao.setOnSeekBarChangeListener(this);
         yinxiao.setMax(1000);
+        */
         playmusicibg = view.findViewById(R.id.play_music_bg);
         geming = view.findViewById(R.id.play_fragment_geming);
         geshou = view.findViewById(R.id.play_fragment_geshou);
@@ -444,7 +448,7 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
         popupWindow.setFocusable(true);
         popupWindow.setTouchable(true);
         popupWindow.setOutsideTouchable(true);
-        popupWindow.setAnimationStyle(R.style.popuAnim);
+        popupWindow.setAnimationStyle(R.style.popfrombottom);
         /*
         final WindowManager.LayoutParams params = getActivity().getWindow().getAttributes();
         params.alpha=0.6f;
@@ -630,10 +634,6 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                 playMusic.mediaPlayer.seekTo(seekBar.getProgress());
             }
             break;
-            case R.id.yinxiao:
-                //PlayMusic.setVirtualizer(seekBar.getProgress());
-                PlayMusic.setBassBoost(seekBar.getProgress());
-                break;
         }
     }
 
@@ -710,7 +710,7 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
     //定位歌词文件
     public static void locatetoLrc(String geming)
     {
-        File file = new File("/storage/emulated/0/HonchenMusic/Lrc/" + geming+".lrc");
+        File file = new File(Environment.getExternalStorageDirectory().getPath()+"/HonchenMusic/Lrc/" + geming+".lrc");
         if (file.exists()) {
             lyricView.setLyricFile(file);
             singlelrc.loadLrc(file);

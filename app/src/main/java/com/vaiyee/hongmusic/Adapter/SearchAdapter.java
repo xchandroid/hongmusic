@@ -1,7 +1,11 @@
 package com.vaiyee.hongmusic.Adapter;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -10,6 +14,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
@@ -25,7 +30,11 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.vaiyee.hongmusic.DownloadListener;
+import com.vaiyee.hongmusic.GeShoutypeActivity;
+import com.vaiyee.hongmusic.MainActivity;
 import com.vaiyee.hongmusic.MyApplication;
+import com.vaiyee.hongmusic.PlayMusic;
 import com.vaiyee.hongmusic.R;
 import com.vaiyee.hongmusic.SearchActivity;
 import com.vaiyee.hongmusic.Utils.DownloadTask;
@@ -55,7 +64,7 @@ public class SearchAdapter extends BaseAdapter {
     private int resId;
     private Activity activity;
     private  PopupWindow popupWindow;
-    private Button title,download;
+    private Button title,download,cancel,seeSinger;
     private static String url = null;
 
     public SearchAdapter(Context context, Activity activity, int resId, List<KugouSearchResult.lists> songList) {
@@ -98,7 +107,7 @@ public class SearchAdapter extends BaseAdapter {
         viewHolder.more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-            showPopuwindow(song.getSongName(),song.getSingerName(),song.getAlbumName(),String.valueOf(song.getDuration()*1000),song.getFileHash());
+            showPopuwindow(song.getSongName(), String.valueOf(Html.fromHtml(song.getSingerName())),song.getAlbumName(),String.valueOf(song.getDuration()*1000),song.getFileHash());
             }
         });
         String name = song.getSingerName();
@@ -148,11 +157,28 @@ public class SearchAdapter extends BaseAdapter {
     {
         title = view.findViewById(R.id.pop_xq);
         download = view.findViewById(R.id.pop_xg);
+        seeSinger = view.findViewById(R.id.pop_wx);
+        cancel = view.findViewById(R.id.pop_lol);
+        seeSinger.setText("查看歌手");
+        seeSinger.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                GeShoutypeActivity activity = new GeShoutypeActivity();
+                activity.SearchSinger(geshou,context);
+            }
+        });
         title.setText(String.valueOf(Html.fromHtml(songName)));
         download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
              getdownLoadUrl(hash,songName,geshou,ablumName,time);
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupWindow.dismiss();
             }
         });
     }
@@ -173,8 +199,8 @@ public class SearchAdapter extends BaseAdapter {
                     return;
                 }
                 url = kugouMusic.getData().getPlay_url();
-                DownloadTask task = new DownloadTask();
-                task.execute(url,subname,subgeshou,subablumName,time);
+                DownloadTask task = new DownloadTask(listener);
+                task.execute(url,subname,subgeshou,subablumName,time,String.valueOf(getRandom()));
                 Toast.makeText(MyApplication.getQuanjuContext(),"开始下载",Toast.LENGTH_SHORT).show();
                 popupWindow.dismiss();
             }
@@ -184,6 +210,52 @@ public class SearchAdapter extends BaseAdapter {
 
             }
         });
+    }
+    public DownloadListener listener = new DownloadListener() {
+        @Override
+        public void onProgress(String geming, int progress,int notiID) {
+            getManager().notify(notiID,getNotification(geming,progress));
+        }
+
+
+        @Override
+        public void onSuccess(String geming,int notiID) {
+            Intent intent = new Intent(context, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context,0,intent,0);
+            NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            manager.cancel(notiID);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+            builder.setContentTitle(geming);
+            builder.setContentText("下载完成！");
+            builder.setSmallIcon(R.drawable.xiazai1);
+            builder.setContentIntent(pendingIntent);
+            builder.setAutoCancel(true);//点击后清除通知
+            manager.notify(notiID,builder.build());
+        }
+
+        @Override
+        public void onFail() {
+
+        }
+    };
+    public NotificationManager getManager()
+    {
+        return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+    public Notification getNotification(String geming,int progress)
+    {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        builder.setContentText("《"+geming+"》"+"  正在下载："+progress+"%");
+        builder.setContentTitle("歌曲");
+        builder.setSmallIcon(R.drawable.xiazai1);
+        builder.setProgress(100, progress, false);
+        return builder.build();
+    }
+    private int getRandom()
+    {
+        int size = 200;
+        int randomshu = (int)(Math.random()*size);
+        return randomshu;
     }
 
 }

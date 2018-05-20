@@ -11,7 +11,9 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.vaiyee.hongmusic.DownloadListener;
 import com.vaiyee.hongmusic.MyApplication;
+import com.vaiyee.hongmusic.PlayMusic;
 import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.fragement.fragement1;
 import com.vaiyee.hongmusic.util.ID3TagUtils;
@@ -38,11 +40,22 @@ import okhttp3.Response;
  * Created by Administrator on 2018/2/25.
  */
 
-public class DownloadTask extends AsyncTask<String,Void,Integer> {
-    private static String songName,geshou,path,ablumName;
+public class DownloadTask extends AsyncTask<String,Integer,Integer> {
+    private String songName,geshou,path,ablumName;
     private static int time;
     private static final String ScanIntent = "android.intent.action.MEDIA_SCANNER_SCAN_DIR";
-
+    private DownloadListener listener;
+    private int lastprogress=0;
+    private long filelength =0;
+    private int ID ;
+    public DownloadTask(DownloadListener listener)
+    {
+        this.listener = listener;
+    }
+    public DownloadTask()
+    {
+        //这里需要定义一个空的构造方法
+    }
     @Override
     protected Integer doInBackground(String... strings) {
         String url  = strings[0];
@@ -50,8 +63,10 @@ public class DownloadTask extends AsyncTask<String,Void,Integer> {
          geshou = strings[2];
          ablumName = strings[3];
          time = Integer.parseInt(strings[4]);
-        path = "/storage/emulated/0/HonchenMusic/download/" + songName+".mp3";
+         ID = Integer.parseInt(strings[5]);
+        path = Environment.getExternalStorageDirectory().getPath()+"/HonchenMusic/download/" + songName+".mp3"; //  Environment.getExternalStorageDirectory().getPath() 获取SD卡的路径
          Response response = null;
+         InputStream inputStream = null;      //服务器返回的输入流
         File file = new File(path);
         if (!file.exists())
         {
@@ -79,14 +94,13 @@ public class DownloadTask extends AsyncTask<String,Void,Integer> {
         int total=0;
         if (response!=null)
         {
+
+            /*
             try {
                 byte[] b = response.body().bytes();
-
                 PrintStream printStream = new PrintStream(file);  //用打印流而不用FileoutputStream流是因为后者会导致mp3文件失真
                 printStream.write(b);
                 printStream.close();
-
-
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -96,19 +110,24 @@ public class DownloadTask extends AsyncTask<String,Void,Integer> {
                 response.close();
             }
 
-            /*
+            */
             inputStream = response.body().byteStream();
-            byte[] bytes = new byte[4096];
-            int len=0;
-            int total=0;
+            filelength = response.body().contentLength();  //获取返回的文件字节数总长度
+            FileOutputStream out = null;
             try {
-                while ((len = inputStream.read(bytes))!=-1)
+                out = new FileOutputStream(file);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            byte[] bytes = new byte[1024];
+            try {
+                while ((len = inputStream.read(bytes))!=-1)        //每次读1024个字节，len为每次读取到的实际字节数
                 {
                     try {
-
-                        out.write(bytes);
                         total+= len;
-                        Log.d("文件总长度是",String.valueOf(total));
+                        out.write(bytes,0,len);             //从字节数组索引0开始，写入每次读到的实际字节数（因为不是每次都一定是读满1024）
+                        publishProgress((int)(total*100 / filelength),ID);       //更新实时下载进度,以百分比（整数）显示，所有乘以100再除
+                        //Log.d("百分比",String.valueOf(total*100/filelength));
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
@@ -123,12 +142,21 @@ public class DownloadTask extends AsyncTask<String,Void,Integer> {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            */
+
 
         }
-
-
         return 0;
+    }
+
+
+    @Override
+    protected void onProgressUpdate(Integer... values) {
+        int progress = values[0];
+        int ID = values[1];
+        if (progress>lastprogress) {
+            listener.onProgress(songName, progress,ID);
+            lastprogress = progress;
+        }
     }
 
     @Override
@@ -159,7 +187,8 @@ public class DownloadTask extends AsyncTask<String,Void,Integer> {
                 Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(mMusicFile));       //这个方法也可以刷新媒体库
                 sendBroadcast(intent);
                 */
-                Toast.makeText(MyApplication.getQuanjuContext(),"下载成功",Toast.LENGTH_LONG).show();
+                Toast.makeText(MyApplication.getQuanjuContext(),songName +"  下载成功",Toast.LENGTH_LONG).show();
+                listener.onSuccess(songName,ID);
                 break;
             case 1:
                 Toast.makeText(MyApplication.getQuanjuContext(),"歌曲已下载过啦",Toast.LENGTH_LONG).show();

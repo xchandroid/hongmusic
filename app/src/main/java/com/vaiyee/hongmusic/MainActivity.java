@@ -74,6 +74,7 @@ import com.vaiyee.hongmusic.bean.KugouMusic;
 import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.bean.WangyiLrc;
 import com.vaiyee.hongmusic.fragement.GedanFragment;
+import com.vaiyee.hongmusic.fragement.MVFragment;
 import com.vaiyee.hongmusic.fragement.PlayMusicFragment;
 import com.vaiyee.hongmusic.fragement.WangyiFragment;
 import com.vaiyee.hongmusic.fragement.YinxiaoFragment;
@@ -82,7 +83,11 @@ import com.vaiyee.hongmusic.fragement.fragment2;
 import com.vaiyee.hongmusic.gson.Weather;
 import com.vaiyee.hongmusic.http.HttpCallback;
 import com.vaiyee.hongmusic.service.MyService;
+import com.vaiyee.hongmusic.util.Annotation;
+import com.vaiyee.hongmusic.util.BindOnclick;
+import com.vaiyee.hongmusic.util.BindView;
 import com.vaiyee.hongmusic.util.Utility;
+import com.yatoooon.screenadaptation.ScreenAdapterTools;
 
 import java.sql.BatchUpdateException;
 import java.util.ArrayList;
@@ -95,13 +100,14 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 import static org.litepal.LitePalApplication.getContext;
 
 public class MainActivity extends AppCompatActivity implements View.OnTouchListener,View.OnClickListener,SeekBar.OnSeekBarChangeListener {
-
-    private ImageView opendrawermenu,search;
+    @BindView(R.id.opendrawermenu)
+    private ImageView opendrawermenu;
+    private ImageView search;
     private DrawerLayout drawerLayout;
     private static LinearLayout appBarLayout;
     private NavigationView navigationView;
     private ViewPager viewPager;
-    private ColorTrackView t, tt,ttt;
+    private ColorTrackView t, tt,ttt,tttt;
     private static LinearLayout playbar;
     public static LinearLayout linearLayout;
     private List<ColorTrackView> mTabs = new ArrayList<ColorTrackView>();
@@ -153,7 +159,9 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
         setContentView(R.layout.activity_main);
-
+        Annotation.bind(this);
+        //ScreenAdapterTools.getInstance().reset(this);//如果希望android7.0分屏也适配的话,加上这句
+        ScreenAdapterTools.getInstance().loadView((ViewGroup) getWindow().getDecorView());//在setContentView();后面加上适配语句
          //强制更新媒体库
         MediaScannerConnection.scanFile(this, new String[]{Environment
                 .getExternalStorageDirectory().getAbsolutePath()}, null, null);
@@ -173,27 +181,35 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         t = findViewById(R.id.changeTextColorView);
         tt = findViewById(R.id.textView2);
         ttt = findViewById(R.id.colorTrackView);
+        tttt =findViewById(R.id.mv);
         tt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                viewPager.setCurrentItem(1);
+                viewPager.setCurrentItem(1,true);
             }
         });
         t.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                viewPager.setCurrentItem(0);
+                viewPager.setCurrentItem(0,true);
             }
         });
         ttt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                viewPager.setCurrentItem(2);
+                viewPager.setCurrentItem(2,true);
+            }
+        });
+        tttt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewPager.setCurrentItem(3,true);
             }
         });
         mTabs.add(t);
         mTabs.add(tt);
         mTabs.add(ttt);
+        mTabs.add(tttt);
         linearLayout = findViewById(R.id.play_bar);
         linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -201,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 showfragment();
             }
         });
-        opendrawermenu =  findViewById(R.id.opendrawermenu);
+        //opendrawermenu =  findViewById(R.id.opendrawermenu);
         search = findViewById(R.id.music_search);
         search.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -215,6 +231,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         list.add(new fragement1());
         list.add(new fragment2());
         list.add(new GedanFragment());
+        list.add(new MVFragment());
         viewPager.setAdapter(new fragmentAdapter(getSupportFragmentManager(), list));
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -258,9 +275,9 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_night:
-                        ShowYinxiaoSet();
-                        //Intent intent = new Intent(MainActivity.this,YinxiaoActivity.class);
-                        //startActivity(intent);
+                        //ShowYinxiaoSet();
+                        Intent intent = new Intent(MainActivity.this,LrcActivity.class);
+                        startActivity(intent);
                         break;
                     case R.id.action_timer:
                         View contentview = LayoutInflater.from(MainActivity.this).inflate(R.layout.timerexit,null);
@@ -371,12 +388,16 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 return false;
             }
         });
+
+        /*
         opendrawermenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 drawerLayout.openDrawer(Gravity.RIGHT);
             }
         });
+        */
+
         //生成MediaPlayer实例,为播放界面第一次播放做准备
         playMusic.getInstanse();
         showfragment();
@@ -723,7 +744,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         Intent intent = new Intent(this,MyService.class);
         stopService(intent);
         unbindService(serviceConnection);
-        playMusic.audioFocusManager.abandonAudioFocus();
+        if(playMusic.audioFocusManager!=null)
+        {
+            playMusic.audioFocusManager.abandonAudioFocus();
+        }
         super.onDestroy();
     }
 
@@ -964,6 +988,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+    }
+    @BindOnclick(R.id.opendrawermenu)
+    private void Opendrawermenu()
+    {
+        drawerLayout.openDrawer(Gravity.RIGHT);
     }
 
     //隐藏软键盘

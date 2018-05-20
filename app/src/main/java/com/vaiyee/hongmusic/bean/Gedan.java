@@ -9,18 +9,12 @@ import java.util.List;
  */
 
 public class Gedan {
-    @SerializedName("plist")
-     public Plist plist;
-
-    public class Plist
-    {
-        @SerializedName("list")
-        public Liebiao liebiao;
-    }
-    public class Liebiao
+  @SerializedName("data")
+    public Data data;
+    public class Data
     {
         @SerializedName("info")
-      public List<Info> infoList;
+        public List<Info> infoList;
     }
     public class Info
     {
