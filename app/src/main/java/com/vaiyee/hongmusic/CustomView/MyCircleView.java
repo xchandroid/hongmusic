@@ -11,6 +11,11 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
+
+import com.vaiyee.hongmusic.PlayMvActivity;
+
+import io.vov.vitamio.widget.CenterLayout;
 
 /**
  * Created by Administrator on 2018/3/9.
@@ -35,11 +40,22 @@ public class MyCircleView extends View {
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        /*
+        ViewGroup.LayoutParams params = this.getLayoutParams();
+        params.height = SimpleVideoView.dip2px(getContext(),350);
+        params.width =SimpleVideoView.dip2px(getContext(),350);
+        this.setLayoutParams(params);
+        */
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         int pointX = getWidth()/2;
         int pointY = getHeight()/2;   //XY为画圆的坐标原点，getHeight()方法是获取XML文件中设置的宽高
-        int r = 450;        //半径450 刚好合适
+        int r = 450;       //半径450 刚好合适
 
         LinearGradient mLinearGradient = new LinearGradient(0,0,getMeasuredWidth(),0,new int[]{Color.parseColor("#FFFFFF"),Color.parseColor("#FF3030"),Color.parseColor("#FFFFFF")},new float[]{0,0.5f,1.0f}, Shader.TileMode.CLAMP); //设置外圈颜色渐变
 
@@ -49,7 +65,7 @@ public class MyCircleView extends View {
         paint.setShader(mLinearGradient);
         paint.setStrokeWidth(15); //圆边的宽度
         paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.parseColor("#00F5FF"));
+        paint.setColor(Color.parseColor("#00F5FF")); //不设置颜色会画不出来
         canvas.drawCircle(pointX,pointY,r,paint);
     }
 }

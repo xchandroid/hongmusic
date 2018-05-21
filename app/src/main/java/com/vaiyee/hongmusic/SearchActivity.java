@@ -46,6 +46,7 @@ import com.vaiyee.hongmusic.bean.KugouSearchResult;
 import com.vaiyee.hongmusic.bean.Music;
 import com.vaiyee.hongmusic.bean.OnlineMusic;
 import com.vaiyee.hongmusic.bean.SearchMusic;
+import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.http.HttpCallback;
 
 import org.jsoup.Jsoup;
@@ -82,6 +83,7 @@ public class SearchActivity extends SwipeBackActivity {
     private SharedPreferences.Editor editor;
     private LinearLayout linearLayout;
     private FloatingActionButton geshou_button;
+    private  List<Song> songList = new ArrayList<>();
 
 
     @Override
@@ -208,7 +210,7 @@ public class SearchActivity extends SwipeBackActivity {
                 geming = song.getSongName();
                 geshou = song.getSingerName();
                 endtime = song.getDuration()*1000;
-                getSongUrl(hash);
+                getSongUrl(hash,i);
             }
         });
 
@@ -237,9 +239,10 @@ public class SearchActivity extends SwipeBackActivity {
                 if (kugouSearchResult!=null) {
                     resultList = kugouSearchResult.getResultList();
                 }
-                if (resultList!=null)
+                if (resultList.size()>0)          //双层if判断防止null值导致加载失败
                 {
                     songs.addAll(resultList);
+                    setPlayList(); //每次滑动到底部加载更多数据后，重新设置正在播放列表
                     adapter.notifyDataSetChanged();
                     CloseProgress();
                     listView.setVisibility(View.VISIBLE);
@@ -289,7 +292,7 @@ public class SearchActivity extends SwipeBackActivity {
         }
     };
 
-    private void getSongUrl(final String hash)
+    private void getSongUrl(final String hash,final int position)
     {
         AlertDialog.Builder builder;
         switch (NetUtils.getNetType())
@@ -302,12 +305,13 @@ public class SearchActivity extends SwipeBackActivity {
                         if (path!=null) {
                             Log.d("歌曲地址是", path);
                             PlayMusic playMusic = new PlayMusic();
-                            playMusic.play(path, PlayMusic.playposition);
+                            playMusic.play(path,position);
                             coverUrl = kugouMusic.getData().getImg();
                             lrc = kugouMusic.getData().getLyrics();
                             creatLrc(lrc,geming);
                             MainActivity mainActivity = new MainActivity();
                             mainActivity.tongbuShow(geming,geshou,coverUrl,endtime,MainActivity.ONLINE);
+                           setPlayList(); //设置正在播放列表
                         }
                     }
 
@@ -333,12 +337,13 @@ public class SearchActivity extends SwipeBackActivity {
                                         if (path!=null) {
                                             Log.d("歌曲地址是", path);
                                             PlayMusic playMusic = new PlayMusic();
-                                            playMusic.play(path, PlayMusic.playposition);
+                                            playMusic.play(path,position);
                                             coverUrl = kugouMusic.getData().getImg();
                                             lrc = kugouMusic.getData().getLyrics();
                                             creatLrc(lrc,geming);
                                             MainActivity mainActivity = new MainActivity();
                                             mainActivity.tongbuShow(geming,geshou,coverUrl,endtime,MainActivity.ONLINE);
+                                            setPlayList(); //设置正在播放列表
                                         }
                                     }
 
@@ -375,12 +380,13 @@ public class SearchActivity extends SwipeBackActivity {
                                         if (path!=null) {
                                             Log.d("歌曲地址是", path);
                                             PlayMusic playMusic = new PlayMusic();
-                                            playMusic.play(path,PlayMusic.playposition);
+                                            playMusic.play(path,position);
                                             coverUrl = kugouMusic.getData().getImg();
                                             lrc = kugouMusic.getData().getLyrics();
                                             creatLrc(lrc,geming);
                                             MainActivity mainActivity = new MainActivity();
                                             mainActivity.tongbuShow(geming,geshou,coverUrl,endtime,MainActivity.ONLINE);
+                                            setPlayList(); //设置正在播放列表
                                         }
                                     }
 
@@ -417,12 +423,13 @@ public class SearchActivity extends SwipeBackActivity {
                                         if (path!=null) {
                                             Log.d("歌曲地址是", path);
                                             PlayMusic playMusic = new PlayMusic();
-                                            playMusic.play(path,PlayMusic.playposition);
+                                            playMusic.play(path,position);
                                             coverUrl = kugouMusic.getData().getImg();
                                             lrc = kugouMusic.getData().getLyrics();
                                             creatLrc(lrc,geming);
                                             MainActivity mainActivity = new MainActivity();
                                             mainActivity.tongbuShow(geming,geshou,coverUrl,endtime,MainActivity.ONLINE);
+                                            setPlayList(); //设置正在播放列表
                                         }
                                     }
 
@@ -549,7 +556,22 @@ public class SearchActivity extends SwipeBackActivity {
         }
     }
 
-
+    private void setPlayList()
+    {
+        songList.clear();//防止重复添加
+        for (int j=0;j<songs.size();j++)
+        {
+            Song song = new Song();
+            song.setFileUrl(songs.get(j).getFileHash());
+            song.setTitle(String.valueOf(Html.fromHtml(songs.get(j).getSongName())));
+            song.setSinger(String.valueOf(Html.fromHtml(songs.get(j).getSingerName())));
+            song.setDuration(endtime);
+            songList.add(song);
+        }
+        PlayMusic.PlayList playList = new PlayMusic.PlayList();
+        playList.setPlaylist(songList);
+        playList.setBang(2); //2 表示酷狗榜
+    }
     //显示正在加载数据对话框
     private void ShowProgress()
     {

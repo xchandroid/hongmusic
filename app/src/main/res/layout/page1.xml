@@ -6,15 +6,16 @@
     android:layout_height="match_parent">
     <ImageView
         android:id="@+id/play_bg"
-        android:layout_width="300dp"
+        android:layout_width="260dp"
         android:src="@drawable/music_ic"
         android:layout_gravity="center"
-        android:layout_height="300dp" />
-    <com.vaiyee.hongmusic.CustomView.MyCircleView
-        android:layout_width="310dp"
-        android:layout_height="310dp"
-        android:id="@+id/btm"
-        android:layout_gravity="center"/>
+        android:layout_height="260dp" />
+   <ImageView
+       android:layout_width="280dp"
+       android:layout_height="280dp"
+       android:layout_gravity="center"
+       android:id="@+id/btm"
+       android:src="@drawable/yuanpan"/>
     <me.wcy.lrcview.LrcView
         android:id="@+id/lrc_view_single"
         android:layout_width="match_parent"

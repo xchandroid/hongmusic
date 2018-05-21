@@ -229,7 +229,7 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
         Glide.with(MyApplication.getQuanjuContext())
                 .load(MainActivity.coverurl)
                 .crossFade(1000)
-                .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),25,1))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
+                .bitmapTransform(new BlurTransformation(MyApplication.getQuanjuContext(),25,4))  // “23”：设置模糊度(在0.0到25.0之间)，默认”25";"4":图片缩放比例,默认“1”。
                 .into(playmusicibg);
         locatetoLrc(MainActivity.lastgeming);
         singlelrc.updateTime(lastCurrentposition);
