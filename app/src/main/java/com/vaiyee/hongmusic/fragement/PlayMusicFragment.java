@@ -148,7 +148,7 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
         pre.setOnClickListener(this);
         playmode.setOnClickListener(this);
         next.setOnClickListener(this);
-        view.setOnTouchListener(this);
+        view.setClickable(true);
         startTime = view.findViewById(R.id.star_time);
         endTime = view.findViewById(R.id.end_time);
         initViewpager(view);
@@ -846,7 +846,13 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
         }
     }
 
+    public void setClickNull()
+    {
+        if(!this.isVisible())
+        {
 
+        }
+    }
 
     public void resetLrcview()
     {

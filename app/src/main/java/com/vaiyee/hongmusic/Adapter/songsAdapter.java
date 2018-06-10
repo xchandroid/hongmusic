@@ -235,7 +235,6 @@ public class songsAdapter extends RecyclerView.Adapter<songsAdapter.Viewholder> 
                 final String path = song.getFileUrl();
                 playMusic.play(path,viewholder.getAdapterPosition());
                 fragement1.getLrc(geming,song,viewholder.getAdapterPosition());
-                songList.addAll(songList);
                 PlayMusic.PlayList playList = new PlayMusic.PlayList();
                 playList.setPlaylist(songList);
                 playList.setBang(0);

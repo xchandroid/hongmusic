@@ -18,7 +18,7 @@
         />
 
     <alpha
-        android:interpolator="@android:anim/decelerate_interpolator"
+        android:interpolator="@android:anim/overshoot_interpolator"
 
         android:fromAlpha="0.0"
 

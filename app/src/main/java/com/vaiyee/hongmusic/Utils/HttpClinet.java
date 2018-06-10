@@ -80,6 +80,8 @@ public class HttpClinet {
      private static final String GESHOUMV = "http://mobilecdngz.kugou.com/api/v3/singer/mv?pagesize=300&page=1&with_res_tag=1";
      private static final String AblumSongList = "http://mobilecdngz.kugou.com/api/v3/album/song?version=8948&plat=0&pagesize=-1&area_code=1&page=1&with_res_tag=1";
      private static final String SEARCHSINGER = "http://mobilecdngz.kugou.com/api/v3/search/singer?keyword=";
+
+
  static {
   OkHttpClient okHttpClient = new OkHttpClient.Builder()
           .connectTimeout(10, TimeUnit.SECONDS)
@@ -89,6 +91,7 @@ public class HttpClinet {
           .build();
   OkHttpUtils.initClient(okHttpClient);    //初始化OkHttpClinet
  }
+
  //获取相应Type的在线音乐列表,这是百度在线列表
  public static void getOnlineMusicList(String type,int size,int offset,@NonNull final HttpCallback<OnlineMusiclist>callback)
  {

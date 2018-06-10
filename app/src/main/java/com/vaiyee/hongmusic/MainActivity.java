@@ -65,6 +65,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.vaiyee.hongmusic.Adapter.songsAdapter;
+import com.vaiyee.hongmusic.CustomView.PlaybarLayout;
 import com.vaiyee.hongmusic.Utils.HttpClinet;
 import com.vaiyee.hongmusic.Utils.QuanjuUtils;
 import com.vaiyee.hongmusic.Utils.YinxiaoActivity;
@@ -108,8 +109,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private NavigationView navigationView;
     private ViewPager viewPager;
     private ColorTrackView t, tt,ttt,tttt;
-    private static LinearLayout playbar;
-    public static LinearLayout linearLayout;
+    private LinearLayout playbar;
     private List<ColorTrackView> mTabs = new ArrayList<ColorTrackView>();
     private PlayMusicFragment playMusicFragment;
     private List<Fragment> list = new ArrayList<Fragment>();
@@ -174,6 +174,12 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         next = findViewById(R.id.play_bar_next);
         localbg = findViewById(R.id.local_list_bg);
         playbar = findViewById(R.id.play_bar);
+        playbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showfragment();
+            }
+        });
         appBarLayout = findViewById(R.id.appbar);
         play.setOnClickListener(this);
         next.setOnClickListener(this);
@@ -210,13 +216,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         mTabs.add(tt);
         mTabs.add(ttt);
         mTabs.add(tttt);
-        linearLayout = findViewById(R.id.play_bar);
-        linearLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showfragment();
-            }
-        });
         //opendrawermenu =  findViewById(R.id.opendrawermenu);
         search = findViewById(R.id.music_search);
         search.setOnClickListener(new View.OnClickListener() {
@@ -1005,7 +1004,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS); }
         }
     }
-/*
+
+    /*
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (KeyEvent.KEYCODE_HEADSETHOOK == keyCode) { //按下了耳机键

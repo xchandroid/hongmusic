@@ -4,7 +4,8 @@
         android:duration="300"
         android:fromYDelta="100%p"
         android:toYDelta="0" />
-    <scale android:fromXScale="0.5"
+    <scale
+        android:fromXScale="0.5"
         android:toXScale="1.5"
         android:fromYScale="0.5"
         android:toYScale="1.5"

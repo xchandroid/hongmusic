@@ -117,6 +117,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/play_bar"
             android:orientation="vertical">
             <View
                 android:layout_width="match_parent"
@@ -125,7 +126,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:id="@+id/play_bar"
             android:gravity="center_horizontal|center_vertical"
             android:layout_gravity="bottom">
 
