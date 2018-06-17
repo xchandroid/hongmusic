@@ -145,7 +145,7 @@ public class SimpleVideoView extends FrameLayout implements OnClickListener{
         in = AnimationUtils.loadAnimation(context,R.anim.top_in);
         out = AnimationUtils.loadAnimation(context,R.anim.top_out);
         //设置控制面板初始不可见
-        mControlPanel.setVisibility(View.GONE);
+        mControlPanel.setVisibility(VISIBLE);
         //设置媒体控制器
 //		mMediaController = new MediaController(context);
 //		mMediaController.setVisibility(View.GONE);
@@ -178,7 +178,7 @@ public class SimpleVideoView extends FrameLayout implements OnClickListener{
         //初始化时间和进度条
         mVideoDuration = mVideoView.getDuration();//毫秒数
         int seconds = mVideoDuration/1000;
-        mPlayTime.setText("00:00/"+
+        mPlayTime.setText("00:00/   "+
                 ((seconds/60>9)?(seconds/60):("0"+seconds/60))+":"+
                 ((seconds%60>9)?(seconds%60):("0"+seconds%60)));
         mPlayProgressBar.setMax(mVideoDuration);
@@ -361,7 +361,7 @@ public class SimpleVideoView extends FrameLayout implements OnClickListener{
         String currentTime = ((currentSecond/60>9)?(currentSecond/60+""):("0"+currentSecond/60))+":"+
                 ((currentSecond%60>9)?(currentSecond%60+""):("0"+currentSecond%60));
         StringBuilder text = new StringBuilder(mPlayTime.getText().toString());
-        text.replace(0,  text.indexOf("/"), currentTime);
+        text.replace(0,  text.indexOf("/"), currentTime+"   ");
         mPlayTime.setText(text);
     }
     //设置控件的宽高

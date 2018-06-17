@@ -13,6 +13,7 @@ import com.vaiyee.hongmusic.bean.GeshouMv;
 import com.vaiyee.hongmusic.bean.GeshouMvUrl;
 import com.vaiyee.hongmusic.bean.GeshouType;
 import com.vaiyee.hongmusic.bean.KugouBang;
+import com.vaiyee.hongmusic.bean.KugouMv;
 import com.vaiyee.hongmusic.bean.MvData;
 import com.vaiyee.hongmusic.bean.SearchSinger;
 import com.vaiyee.hongmusic.bean.Sheet;
@@ -31,6 +32,7 @@ import com.vaiyee.hongmusic.bean.WangyiBang;
 import com.vaiyee.hongmusic.http.HttpCallback;
 import com.vaiyee.hongmusic.http.HttpInterceptor;
 import com.vaiyee.hongmusic.http.JsonCallback;
+import com.vaiyee.hongmusic.http.WangyiBangJsoncallBack;
 import com.vaiyee.hongmusic.http.WangyiJsoncallback;
 import com.zhy.http.okhttp.OkHttpUtils;
 
@@ -64,7 +66,7 @@ public class HttpClinet {
      private static final String KUGOUURL = "&page=1&pagesize=";
      private static final String KUGOUEND = "&userid=-1&clientver=&platform=WebFilter&tag=em&filter=2&iscorrection=1&privilege_filter=0&_=1489023388641";
      private static final String  KUGO = "http://www.kugou.com/yy/index.php?r=play/getdata&hash="; //酷狗单曲详情详情
-     private static final String WANGYI = "http://musicapi.leanapp.cn/top/list?idx=";  //网易云排行榜
+     private static final String WANGYI = "http://music.163.com/discover/toplist?id=";  //网易云排行榜
      private static final String WYLRC = "http://musicapi.leanapp.cn/lyric?id=";   //网易云歌词接口
      private static final String KUGOUBANG = "http://m.kugou.com/rank/info/?rankid=";
      private static final String BANNER ="http://kuhaoapigz.kugou.com/api/v1/banner/index?api_ver=2&version=8948&plat=0"; //首页banner接口
@@ -80,6 +82,7 @@ public class HttpClinet {
      private static final String GESHOUMV = "http://mobilecdngz.kugou.com/api/v3/singer/mv?pagesize=300&page=1&with_res_tag=1";
      private static final String AblumSongList = "http://mobilecdngz.kugou.com/api/v3/album/song?version=8948&plat=0&pagesize=-1&area_code=1&page=1&with_res_tag=1";
      private static final String SEARCHSINGER = "http://mobilecdngz.kugou.com/api/v3/search/singer?keyword=";
+     private static final String KUGOUMV = "http://mobilecdngz.kugou.com/api/v5/video/list?version=8948&plat=0&pagesize=20&id=0&short=0 "; //酷狗mv的api,page是页数，sort是分类
 
 
  static {
@@ -219,19 +222,21 @@ public class HttpClinet {
 
     public static void WangyiBang(String type, final HttpCallback<WangyiBang> callback)
     {
+        android.util.Log.d("网易URL是",WANGYI+type+"666");
+
             OkHttpUtils.get().url(WANGYI+type)
                     .build()
-                   .execute(new JsonCallback<WangyiBang>(WangyiBang.class) {
-                       @Override
-                       public void onError(Call call, Exception e, int id) {
-                           callback.onFail(e);
-                       }
+                    .execute(new WangyiBangJsoncallBack<WangyiBang>(WangyiBang.class) {
+                        @Override
+                        public void onError(Call call, Exception e, int id) {
+                            callback.onFail(e);
+                        }
 
-                       @Override
-                       public void onResponse(WangyiBang response, int id) {
-                               callback.onSuccess(response);
-                       }
-                   });
+                        @Override
+                        public void onResponse(WangyiBang response, int id) {
+                              callback.onSuccess(response);
+                        }
+                    });
     }
 
     public static void WangyiLrc(String id, final HttpCallback<WangyiLrc> callback)
@@ -532,6 +537,25 @@ public class HttpClinet {
                     @Override
                     public void onResponse(SearchSinger response, int id) {
                          callback.onSuccess(response);
+                    }
+                });
+    }
+
+    public static void getKugouMv(int page, int type, final HttpCallback<KugouMv>callback)
+    {
+        OkHttpUtils.get().url(KUGOUMV)
+                .addParams("page", String.valueOf(page))
+                .addParams("sort", String.valueOf(type))
+                .build()
+                .execute(new JsonCallback<KugouMv>(KugouMv.class) {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        callback.onFail(e);
+                    }
+
+                    @Override
+                    public void onResponse(KugouMv response, int id) {
+                        callback.onSuccess(response);
                     }
                 });
     }

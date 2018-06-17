@@ -1,5 +1,6 @@
 package com.vaiyee.hongmusic.Adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +17,8 @@ import com.vaiyee.hongmusic.bean.Sheet;
 import com.vaiyee.hongmusic.bean.Tracks;
 import com.vaiyee.hongmusic.bean.WangyiBang;
 import com.vaiyee.hongmusic.http.HttpCallback;
+import com.vaiyee.hongmusic.http.WangyibangBackListener;
+import com.vaiyee.hongmusic.util.HttpUtil;
 
 import java.util.List;
 
@@ -28,11 +31,13 @@ public class WangYiAdapter extends BaseAdapter {
     private List<Sheet> typeList; //明天测试传过来的数据有没有问题
     private int Id;
     private   List<Tracks> tracksList = null;
+    private Activity activity;
 
-    public WangYiAdapter(Context context,int Id, List<Sheet> sheetList) {
+    public WangYiAdapter(Context context,int Id, List<Sheet> sheetList,Activity activity) {
         this.context = context;
         this.Id = Id;
         this.typeList = sheetList;
+        this.activity = activity;
     }
 
     @Override
@@ -75,55 +80,55 @@ public class WangYiAdapter extends BaseAdapter {
         getsongInfo(sheet,holder);
         switch (sheet.getType())
         {
-            case "3":
+            case "19723756":
                 holder.cover.setImageResource(R.drawable.biaosheng);
                 break;
-            case "0":
+            case "3779629":
                 holder.cover.setImageResource(R.drawable.xinge);
                 break;
-            case "2":
+            case "2884035":
                 holder.cover.setImageResource(R.drawable.yuanchuang);
                 break;
-            case "1":
+            case "3778678":
                 holder.cover.setImageResource(R.drawable.rege);
                 break;
-            case "4":
+            case "1978921795":
             holder.cover.setImageResource(R.drawable.dianyin);
                 break;
-            case "23":
+            case "991319590":
                 holder.cover.setImageResource(R.drawable.xiha);
                 break;
-            case "22":
+            case "2250011882":
                 holder.cover.setImageResource(R.drawable.acg);
                 break;
-            case "10":
+            case "60131":
                 holder.cover.setImageResource(R.drawable.oricon);
                 break;
-            case "17":
-                holder.cover.setImageResource(R.drawable.gudian);
+            case "10520166":
+                holder.cover.setImageResource(R.drawable.xindianli);
                 break;
-            case "6":
+            case "60198":
                 holder.cover.setImageResource(R.drawable.meiguo);
                 break;
-            case "8":
+            case "11641012":
                 holder.cover.setImageResource(R.drawable.itunes);
                 break;
-            case "11":
-                holder.cover.setImageResource(R.drawable.nrj);
+            case "71384707":
+                holder.cover.setImageResource(R.drawable.gudian);
                 break;
-            case "7":
+            case "21845217":
                 holder.cover.setImageResource(R.drawable.ktv);
                 break;
-            case "20":
+            case "112463":
                 holder.cover.setImageResource(R.drawable.hito);
                 break;
-            case "14":
+            case "112504":
                 holder.cover.setImageResource(R.drawable.gangtai);
                 break;
-            case "15":
+            case "64016":
                 holder.cover.setImageResource(R.drawable.neidi);
                 break;
-            case "18":
+            case "1899724":
                 holder.cover.setImageResource(R.drawable.chinaxiha);
                 break;
                 default:
@@ -135,20 +140,19 @@ public class WangYiAdapter extends BaseAdapter {
     private void getsongInfo(final Sheet sheet, final MusicviewHolder holder)
     {
         if (sheet.getCoverUrl()==null) {
-            HttpClinet.WangyiBang(sheet.getType(), new HttpCallback<WangyiBang>() {
+            HttpUtil.getWangyiBang(sheet.getType(), new WangyibangBackListener() {
                 @Override
                 public void onSuccess(WangyiBang wangyiBang) {
-                    if (wangyiBang.result.tracksList != null) {
-                        tracksList = wangyiBang.result.tracksList;
-                    } else {
-                        return;
-                    }
-
-                   sheet.setMusic1(tracksList.get(0).songname+" - "+tracksList.get(0).artist.get(0).artistName);        //把歌名存到sheet中,为了不每次都访问网络获取数据浪费流量
-                   sheet.setMusic2(tracksList.get(1).songname+" - "+tracksList.get(1).artist.get(0).artistName);
-                   sheet.setMusic3(tracksList.get(2).songname+" - "+tracksList.get(2).artist.get(0).artistName);
+                    sheet.setMusic1(wangyiBang.getList().get(0).getName()+" - "+wangyiBang.getList().get(0).getArtists().get(0).getName());        //把歌名存到sheet中,为了不每次都访问网络获取数据浪费流量
+                    sheet.setMusic2(wangyiBang.getList().get(1).getName()+" - "+wangyiBang.getList().get(1).getArtists().get(0).getName());
+                    sheet.setMusic3(wangyiBang.getList().get(2).getName()+" - "+wangyiBang.getList().get(2).getArtists().get(0).getName());
                     sheet.setCoverUrl("标志位，防止重复访问网络获取数据");
-                    showData(sheet,holder);
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showData(sheet,holder);
+                        }
+                    });
                 }
 
                 @Override

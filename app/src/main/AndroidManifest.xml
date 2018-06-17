@@ -21,8 +21,7 @@
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait"></activity>
         <activity android:name=".OnlineMusicActivity" />
         <activity android:name=".SearchActivity" />
         <activity
@@ -70,6 +69,13 @@
                 <action android:name="com.vaiyee.playmode" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".brocastReciver.ForceOffline"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.vaiyee.hongmusic.offline" />
+            </intent-filter>
+        </receiver>
 
         <activity android:name=".WangyiBangActivity" />
         <activity android:name=".KugoubangActivity" />
@@ -88,9 +94,11 @@
         <activity android:name=".KaipingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <meta-data
             android:name="designwidth"
             android:value="1080" />
@@ -107,6 +115,7 @@
             android:name="unit"
             android:value="dp" />
         //你的布局里面用的是px这就写px,你的布局里面用的是dp这就写dp,要统一,不要一会儿px一会儿dp,字体也用px或者dp,不要用sp,微信qq用的肯定不是sp.
+        <activity android:name=".BaseActivity"></activity>
     </application>
 
 </manifest>

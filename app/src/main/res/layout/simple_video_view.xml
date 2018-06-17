@@ -48,7 +48,7 @@
         android:layout_alignBottom="@+id/video_view"
         android:orientation="horizontal"
         android:background="#40363636"
-        android:visibility="gone"
+        android:visibility="visible"
         >
         <ImageView
             android:id="@+id/play_button"

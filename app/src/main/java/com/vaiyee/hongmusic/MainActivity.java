@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -24,6 +25,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Process;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -68,6 +71,7 @@ import com.vaiyee.hongmusic.Adapter.songsAdapter;
 import com.vaiyee.hongmusic.CustomView.PlaybarLayout;
 import com.vaiyee.hongmusic.Utils.HttpClinet;
 import com.vaiyee.hongmusic.Utils.QuanjuUtils;
+import com.vaiyee.hongmusic.Utils.ScreenUtils;
 import com.vaiyee.hongmusic.Utils.YinxiaoActivity;
 import com.vaiyee.hongmusic.Utils.getAudio;
 import com.vaiyee.hongmusic.bean.DownloadInfo;
@@ -87,6 +91,7 @@ import com.vaiyee.hongmusic.service.MyService;
 import com.vaiyee.hongmusic.util.Annotation;
 import com.vaiyee.hongmusic.util.BindOnclick;
 import com.vaiyee.hongmusic.util.BindView;
+import com.vaiyee.hongmusic.util.ClientThread;
 import com.vaiyee.hongmusic.util.Utility;
 import com.yatoooon.screenadaptation.ScreenAdapterTools;
 
@@ -274,13 +279,13 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_night:
-                        //ShowYinxiaoSet();
-                        Intent intent = new Intent(MainActivity.this,LrcActivity.class);
-                        startActivity(intent);
+                       ShowYinxiaoSet();
+                        //Intent intent = new Intent(MainActivity.this,LrcActivity.class);
+                        //startActivity(intent);
                         break;
                     case R.id.action_timer:
                         View contentview = LayoutInflater.from(MainActivity.this).inflate(R.layout.timerexit,null);
-                        final PopupWindow popupWindow = new PopupWindow(contentview, 800,ViewGroup.LayoutParams.WRAP_CONTENT);
+                        final PopupWindow popupWindow = new PopupWindow(contentview, ScreenUtils.dpToPx(getContext(),300),ViewGroup.LayoutParams.WRAP_CONTENT);
                         editText = contentview.findViewById(R.id.timeredit);
                         Button sure = contentview.findViewById(R.id.sure);
                         sure.setOnClickListener(new View.OnClickListener() {
@@ -403,7 +408,37 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         hidefragment();
         bindService();   //绑定通知栏播放条服务，此时服务仅被创建未被调用onStartcommand（）
         ShowWeatherInfo();//每次打开程序时显示已保存的天气数据
+
+        new ClientThread(this,handler).start();  //连接我的服务器就进行控制
     }
+
+
+
+    Handler handler = new Handler()
+    {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what)
+            {
+                case 1:
+                    AlertDialog.Builder builder;
+                    builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setCancelable(false);
+                    builder.setMessage("谢昌宏远程关闭了本软件");
+                    builder.setTitle("提示");
+                    builder.setIcon(R.drawable.tip);
+                    builder.setPositiveButton("确定",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                  android.os.Process.killProcess(Process.myPid());
+                                }
+                            });
+                    builder.create().show();
+                    break;
+            }
+        }
+    };
 
 
     //弹出设置音效的fragment
@@ -593,7 +628,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     switch (playList.getBang())
                     {
                         case 0:
-                            final PlayMusic playMusic = new PlayMusic();
+                            //final PlayMusic playMusic = new PlayMusic();
                             final String path = song.getFileUrl();
                             playMusic.play(path,MainActivity.position);
                             playMusic.mediaPlayer.seekTo(PlayMusicFragment.lastCurrentposition);
@@ -605,10 +640,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                             HttpClinet.getMusicUrl(song.getFileUrl(), new HttpCallback<DownloadInfo>() {
                                 @Override
                                 public void onSuccess(DownloadInfo downloadInfo) {
-                                    PlayMusic playMusic1 = new PlayMusic();
-                                    playMusic1.play(downloadInfo.getBitrate().getFile_link(),MainActivity.position);
-                                    playMusic1.mediaPlayer.seekTo(PlayMusicFragment.lastCurrentposition);
-                                    playMusic1.getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
+                                    //PlayMusic playMusic1 = new PlayMusic();
+                                    playMusic.play(downloadInfo.getBitrate().getFile_link(),MainActivity.position);
+                                    playMusic.mediaPlayer.seekTo(PlayMusicFragment.lastCurrentposition);
+                                    playMusic.getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
                                 }
 
                                 @Override
@@ -625,7 +660,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                                     String path = kugouMusic.getData().getPlay_url();
                                     if (path != null) {
                                         Log.d("歌曲地址是", path);
-                                        PlayMusic playMusic = new PlayMusic();
+                                       // PlayMusic playMusic = new PlayMusic();
                                         playMusic.play(path, MainActivity.position);
                                         playMusic.mediaPlayer.seekTo(PlayMusicFragment.lastCurrentposition);
                                         String coverUrl = kugouMusic.getData().getImg();
@@ -643,6 +678,14 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                             });
                             break;
                         case 3:
+                            final String id = song.getFileUrl();
+                            String path1 = Path +id+ ".mp3";
+                            //PlayMusic playMusic1 = new PlayMusic();
+                            playMusic.play(path1,MainActivity.position);
+                            playMusic.mediaPlayer.seekTo(PlayMusicFragment.lastCurrentposition);
+                            playMusic.getLrc(path1,song.getTitle(),song.getSinger(),song.getDuration());
+
+                            /*
                             final String id = song.getFileUrl();
                             HttpClinet.WangyiLrc(id, new HttpCallback<WangyiLrc>() {
                                 @Override
@@ -662,6 +705,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
                                 }
                             });
+
+                            */
 
                     }
 
@@ -729,6 +774,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         }
        // playMusicFragment.ShowLastMusic(lastgeming,lastgeshou);   //之所以在这个方法显示上次退出时方法的音乐，是因为生命周期问题，在这里不会导致fragment中setText（）方法引用为空
         super.onResume();
+
     }
 
     @Override

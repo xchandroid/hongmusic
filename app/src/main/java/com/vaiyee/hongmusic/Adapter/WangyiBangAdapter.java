@@ -34,9 +34,12 @@ import com.vaiyee.hongmusic.Utils.NetUtils;
 import com.vaiyee.hongmusic.Utils.NotiUtil;
 import com.vaiyee.hongmusic.WangyiBangActivity;
 import com.vaiyee.hongmusic.bean.DownloadInfo;
+import com.vaiyee.hongmusic.bean.KugouMusic;
+import com.vaiyee.hongmusic.bean.KugouSearchResult;
 import com.vaiyee.hongmusic.bean.OnlineMusic;
 import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.bean.Tracks;
+import com.vaiyee.hongmusic.bean.WangyiBang;
 import com.vaiyee.hongmusic.bean.WangyiLrc;
 import com.vaiyee.hongmusic.http.HttpCallback;
 
@@ -50,15 +53,15 @@ import java.util.List;
 public class WangyiBangAdapter extends RecyclerView.Adapter<WangyiBangAdapter.ViewHolder> {
 
     private int resId;
-    private List<Tracks> onlineMusics;
+    private List<WangyiBang.ListBean> onlineMusics;
     private Context context;
     private Activity activity;
     private PopupWindow popupWindow;
     private Button title,download;
-    private List<Song> songList;
+    private List<Song> songList = new ArrayList<>();;
     private static String url = null;
     private static final String Path = "http://music.163.com/song/media/outer/url?id=";
-    public WangyiBangAdapter(Context context, int resId, List<Tracks> onlineMusics,Activity activity)
+    public WangyiBangAdapter(Context context, int resId, List<WangyiBang.ListBean> onlineMusics, Activity activity)
     {
         this.context=context;
         this.resId = resId;
@@ -110,11 +113,73 @@ public class WangyiBangAdapter extends RecyclerView.Adapter<WangyiBangAdapter.Vi
     */
 
 
-    private void onItemClick(final int i)
+    private void onItemClick(final int position)
     {
-        final Tracks onlineMusic = onlineMusics.get(i);
-        final String songID = onlineMusic.Id;
-        final String geming = onlineMusic.songname;
+        final WangyiBang.ListBean onlineMusic = onlineMusics.get(position);
+        final String songID = String.valueOf(onlineMusic.getId());
+        final String geming = onlineMusic.getName();
+        final String coverurl = onlineMusic.getAlbum().getPicUrl();
+        final String geshou = onlineMusic.getArtists().get(0).getName();
+        final int time = onlineMusic.getDuration();
+        final PlayMusic playMusic = new PlayMusic();
+        switch (NetUtils.getNetType())
+        {
+            case NET_WIFI:
+                playMusic.play(Path+songID,position);
+                getLrc(coverurl,geming,geshou,time);
+                //加入当前播放列表
+                for (int i=0;i<onlineMusics.size();i++)
+                {
+                    Song song = new Song();
+                    song.setTitle(onlineMusics.get(i).getName());
+                    song.setSinger(onlineMusics.get(i).getArtists().get(0).getName());
+                    song.setFileUrl(String.valueOf(onlineMusics.get(i).getId()));
+                    song.setDuration(onlineMusics.get(i).getDuration());
+                    songList.add(song);
+                }
+                PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                playList.setPlaylist(songList);
+                playList.setBang(3);  //3表示网易音乐列表
+                break;
+            default:
+                AlertDialog.Builder builder;
+                builder = new AlertDialog.Builder(context);
+                builder.setMessage("当前正在使用移动网络，是否使用数据流量播放在线音乐？");
+                builder.setTitle("提示");
+                builder.setIcon(R.drawable.tip);
+                builder.setPositiveButton("流量多",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                playMusic.play(Path+songID,position);
+                                getLrc(coverurl,geming,geshou,time);
+                                //加入当前播放列表
+                                for (int i=0;i<onlineMusics.size();i++)
+                                {
+                                    Song song = new Song();
+                                    song.setTitle(onlineMusics.get(i).getName());
+                                    song.setSinger(onlineMusics.get(i).getArtists().get(0).getName());
+                                    song.setFileUrl(String.valueOf(onlineMusics.get(i).getId()));
+                                    song.setDuration(onlineMusics.get(i).getDuration());
+                                    songList.add(song);
+                                }
+                                PlayMusic.PlayList playList = new PlayMusic.PlayList();
+                                playList.setPlaylist(songList);
+                                playList.setBang(3);  //3表示网易音乐列表
+                            }
+                        });
+
+                builder.setNegativeButton("伤不起",
+                        new android.content.DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                builder.create().show();
+                break;
+        }
+
+        /*
         HttpClinet.WangyiLrc(songID, new HttpCallback<WangyiLrc>() {
             @Override
             public void onSuccess(WangyiLrc wangyiLrc) {
@@ -130,11 +195,11 @@ public class WangyiBangAdapter extends RecyclerView.Adapter<WangyiBangAdapter.Vi
                         String path = Path + songID + ".mp3";
                         PlayMusic playMusic =new PlayMusic();
                         playMusic.play(path,i);
-                        String songname = onlineMusic.songname;
-                        String geshou = onlineMusic.artist.get(0).artistName;
-                        String coverUrl = onlineMusic.abulum.pic;
+                        String songname = onlineMusic.getName();
+                        String geshou = onlineMusic.getArtists().get(0).getName();
+                        String coverUrl = onlineMusic.getAlbum().getPicUrl();
                         Log.d("路径是",path);
-                        int time = onlineMusic.duration;
+                        int time = onlineMusic.getDuration();
                         MainActivity mainActivity = new MainActivity();
                         mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
 
@@ -142,10 +207,10 @@ public class WangyiBangAdapter extends RecyclerView.Adapter<WangyiBangAdapter.Vi
                         for (int i=0;i<onlineMusics.size();i++)
                         {
                             Song song = new Song();
-                            song.setTitle(onlineMusics.get(i).songname);
-                            song.setSinger(onlineMusics.get(i).artist.get(0).artistName);
-                            song.setFileUrl(onlineMusics.get(i).Id);
-                            song.setDuration(onlineMusics.get(i).duration);
+                            song.setTitle(onlineMusics.get(i).getName());
+                            song.setSinger(onlineMusics.get(i).getArtists().get(0).getName());
+                            song.setFileUrl(String.valueOf(onlineMusics.get(i).getId()));
+                            song.setDuration(onlineMusics.get(i).getDuration());
                             songList.add(song);
                         }
                         PlayMusic.PlayList playList = new PlayMusic.PlayList();
@@ -164,21 +229,21 @@ public class WangyiBangAdapter extends RecyclerView.Adapter<WangyiBangAdapter.Vi
                                         String path = Path + songID + ".mp3";
                                         PlayMusic playMusic =new PlayMusic();
                                         playMusic.play(path,i);
-                                        String songname = onlineMusic.songname;
-                                        String geshou = onlineMusic.artist.get(0).artistName;
-                                        String coverUrl = onlineMusic.abulum.pic;
+                                        String songname = onlineMusic.getName();
+                                        String geshou = onlineMusic.getArtists().get(0).getName();
+                                        String coverUrl = onlineMusic.getAlbum().getPicUrl();
                                         Log.d("路径是",path);
-                                        int time = onlineMusic.duration;
+                                        int time = onlineMusic.getDuration();
                                         MainActivity mainActivity = new MainActivity();
                                         mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
                                         //加入当前播放列表
                                         for (int i=0;i<onlineMusics.size();i++)
                                         {
                                             Song song = new Song();
-                                            song.setTitle(onlineMusics.get(i).songname);
-                                            song.setSinger(onlineMusics.get(i).artist.get(0).artistName);
-                                            song.setFileUrl(onlineMusics.get(i).Id);
-                                            song.setDuration(onlineMusics.get(i).duration);
+                                            song.setTitle(onlineMusics.get(i).getName());
+                                            song.setSinger(onlineMusics.get(i).getArtists().get(0).getName());
+                                            song.setFileUrl(String.valueOf(onlineMusics.get(i).getId()));
+                                            song.setDuration(onlineMusics.get(i).getDuration());
                                             songList.add(song);
                                         }
                                         PlayMusic.PlayList playList = new PlayMusic.PlayList();
@@ -209,11 +274,11 @@ public class WangyiBangAdapter extends RecyclerView.Adapter<WangyiBangAdapter.Vi
                                         String path = Path + songID + ".mp3";
                                         PlayMusic playMusic =new PlayMusic();
                                         playMusic.play(path,i);
-                                        String songname = onlineMusic.songname;
-                                        String geshou = onlineMusic.artist.get(0).artistName;
-                                        String coverUrl = onlineMusic.abulum.pic;
+                                        String songname = onlineMusic.getName();
+                                        String geshou = onlineMusic.getArtists().get(0).getName();
+                                        String coverUrl = onlineMusic.getAlbum().getPicUrl();
                                         Log.d("路径是",path);
-                                        int time = onlineMusic.duration;
+                                        int time = onlineMusic.getDuration();
                                         MainActivity mainActivity = new MainActivity();
                                         mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
 
@@ -221,10 +286,10 @@ public class WangyiBangAdapter extends RecyclerView.Adapter<WangyiBangAdapter.Vi
                                         for (int i=0;i<onlineMusics.size();i++)
                                         {
                                             Song song = new Song();
-                                            song.setTitle(onlineMusics.get(i).songname);
-                                            song.setSinger(onlineMusics.get(i).artist.get(0).artistName);
-                                            song.setFileUrl(onlineMusics.get(i).Id);
-                                            song.setDuration(onlineMusics.get(i).duration);
+                                            song.setTitle(onlineMusics.get(i).getName());
+                                            song.setSinger(onlineMusics.get(i).getArtists().get(0).getName());
+                                            song.setFileUrl(String.valueOf(onlineMusics.get(i).getId()));
+                                            song.setDuration(onlineMusics.get(i).getDuration());
                                             songList.add(song);
                                         }
                                         PlayMusic.PlayList playList = new PlayMusic.PlayList();
@@ -256,21 +321,21 @@ public class WangyiBangAdapter extends RecyclerView.Adapter<WangyiBangAdapter.Vi
                                         String path = Path + songID + ".mp3";
                                         PlayMusic playMusic =new PlayMusic();
                                         playMusic.play(path,i);
-                                        String songname = onlineMusic.songname;
-                                        String geshou = onlineMusic.artist.get(0).artistName;
-                                        String coverUrl = onlineMusic.abulum.pic;
+                                        String songname = onlineMusic.getName();
+                                        String geshou = onlineMusic.getArtists().get(0).getName();
+                                        String coverUrl = onlineMusic.getAlbum().getPicUrl();
                                         Log.d("路径是",path);
-                                        int time = onlineMusic.duration;
+                                        int time = onlineMusic.getDuration();
                                         MainActivity mainActivity = new MainActivity();
                                         mainActivity.tongbuShow(songname,geshou,coverUrl,time,MainActivity.ONLINE);
                                         //加入当前播放列表
                                         for (int i=0;i<onlineMusics.size();i++)
                                         {
                                             Song song = new Song();
-                                            song.setTitle(onlineMusics.get(i).songname);
-                                            song.setSinger(onlineMusics.get(i).artist.get(0).artistName);
-                                            song.setFileUrl(onlineMusics.get(i).Id);
-                                            song.setDuration(onlineMusics.get(i).duration);
+                                            song.setTitle(onlineMusics.get(i).getName());
+                                            song.setSinger(onlineMusics.get(i).getArtists().get(0).getName());
+                                            song.setFileUrl(String.valueOf(onlineMusics.get(i).getId()));
+                                            song.setDuration(onlineMusics.get(i).getDuration());
                                             songList.add(song);
                                         }
                                         PlayMusic.PlayList playList = new PlayMusic.PlayList();
@@ -300,6 +365,52 @@ public class WangyiBangAdapter extends RecyclerView.Adapter<WangyiBangAdapter.Vi
                 Toast.makeText(context,"获取歌词失败了哦",Toast.LENGTH_LONG).show();
             }
         });
+        */
+
+    }
+
+    public void getLrc(final String path, final String geming, final String geshou, final int endtime)
+    {
+
+        HttpClinet.KugouSearch(geming, 5, new HttpCallback<KugouSearchResult>() {
+            @Override
+            public void onSuccess(KugouSearchResult kugouSearchResult) {
+                if (kugouSearchResult==null)
+                {
+                    MainActivity mainActivity = new MainActivity();
+                    mainActivity.tongbuShow(geming,geshou,path,endtime,MainActivity.LOCAL);
+                    Toast.makeText(MyApplication.getQuanjuContext(),"获取歌词失败，请检查网络再试",Toast.LENGTH_LONG).show();
+                    return;
+                }
+                List<KugouSearchResult.lists> lists = kugouSearchResult.getResultList();
+                String hash = lists.get(0).getFileHash();
+                HttpClinet.KugouUrl(hash, new HttpCallback<KugouMusic>() {
+                    @Override
+                    public void onSuccess(KugouMusic kugouMusic) {
+                        String coverUrl = kugouMusic.getData().getImg();
+                        String Lrc = kugouMusic.getData().getLyrics();
+                        SearchActivity.creatLrc(Lrc,geming);  //创建歌词文件，为了在Playmusicfragemet中能够定位歌词显示到Lrcview中
+                        // play(path,playposition);
+                        MainActivity mainActivity = new MainActivity();
+                        mainActivity.tongbuShow(geming,geshou,coverUrl,endtime,MainActivity.LOCAL);
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        MainActivity mainActivity = new MainActivity();
+                        mainActivity.tongbuShow(geming,geshou,path,endtime,MainActivity.LOCAL);
+                        Toast.makeText(MyApplication.getQuanjuContext(),"获取歌词失败，请检查网络再试",Toast.LENGTH_LONG).show();
+                    }
+                });
+
+            }
+
+            @Override
+            public void onFail(Exception e) {
+
+            }
+        });
+
     }
 
     private void showPopupwindow(String songName,String geshou,String ablumName,String songId,final String duration) {
@@ -367,19 +478,19 @@ public class WangyiBangAdapter extends RecyclerView.Adapter<WangyiBangAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-        final Tracks onlineMusic = onlineMusics.get(position);
+        final WangyiBang.ListBean onlineMusic = onlineMusics.get(position);
         Glide.with(context)
-                .load(onlineMusic.abulum.pic)
+                .load(onlineMusic.getAlbum().getPicUrl())
                 .placeholder(R.drawable.music_ic)
                 .error(R.drawable.music_ic)
                 .into(holder.ablumCover);
-        holder.songaName.setText(1+position+"."+onlineMusic.songname);
-        holder.singger.setText(onlineMusic.artist.get(0).artistName);
-        holder.ablum.setText("《"+onlineMusic.abulum.ablumName+"》");
+        holder.songaName.setText(1+position+"."+onlineMusic.getName());
+        holder.singger.setText(onlineMusic.getArtists().get(0).getName());
+        holder.ablum.setText("《"+onlineMusic.getAlbum().getName()+"》");
         holder.more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showPopupwindow(onlineMusic.songname,onlineMusic.artist.get(0).artistName,onlineMusic.abulum.ablumName,onlineMusic.Id,String.valueOf(onlineMusic.duration));
+                showPopupwindow(onlineMusic.getName(),onlineMusic.getArtists().get(0).getName(),onlineMusic.getAlbum().getName(), String.valueOf(onlineMusic.getId()),String.valueOf(onlineMusic.getDuration()));
             }
         });
         holder.iview.setOnClickListener(new View.OnClickListener() {

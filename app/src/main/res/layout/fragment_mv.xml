@@ -4,17 +4,72 @@
     android:layout_height="match_parent"
     tools:context="com.vaiyee.hongmusic.fragement.MVFragment">
 
-<android.support.v7.widget.RecyclerView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/mv_recycleview">
-
-</android.support.v7.widget.RecyclerView>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/loading"
+        android:orientation="vertical"
         android:layout_gravity="center">
     <include layout="@layout/loading_footer"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/red"
+            android:textSize="20sp"
+            android:text="下拉刷新"/>
     </LinearLayout>
+<android.support.v4.widget.SwipeRefreshLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/swipe_refresh">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/mv_recycleview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="40dp">
+    </android.support.v7.widget.RecyclerView>
+</android.support.v4.widget.SwipeRefreshLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:gravity="center_vertical"
+        android:background="@color/white"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="20dp"
+            android:layout_centerVertical="true"
+            android:text="最热"
+            android:textColor="#FF010101"
+            android:textSize="20dp"
+            android:id="@+id/zuire" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="20dp"
+            android:layout_toStartOf="@+id/zuire"
+            android:text="最新"
+            android:textColor="#FF010101"
+            android:textSize="20dp"
+            android:id="@+id/zuixin" />
+
+        <TextView
+            android:id="@+id/tuijian"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/zuixin"
+            android:layout_alignBottom="@+id/zuixin"
+            android:layout_marginEnd="20dp"
+            android:layout_toStartOf="@+id/zuixin"
+            android:text="推荐"
+            android:textColor="#00f5ff"
+            android:textSize="20dp" />
+    </RelativeLayout>
 </FrameLayout>

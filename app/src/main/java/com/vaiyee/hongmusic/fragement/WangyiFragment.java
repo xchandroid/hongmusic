@@ -46,8 +46,8 @@ public class WangyiFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        String[] titles = new String[]{ "网易飙升榜", "网易新歌榜", "网易原创榜", "网易热歌榜", "网易电音榜", "网易嘻哈榜", "ACG榜", "日本Oricon榜", "华语金曲榜", "美国Billboard榜单", "iTunes榜", "韩国Melon排行榜周榜", "KTV嗨榜", "台湾Hito榜","中国港台榜","中国内地榜","中国嘻哈榜"};
-        String[]type = new String[]{"3", "0", "2", "1", "4", "23", "22", "10", "17", "6", "8", "11", "7","20", "14", "15", "18"};
+        final String[] titles = new String[]{ "网易飙升榜", "网易新歌榜", "网易原创榜", "网易热歌榜", "网易电音榜", "网易嘻哈榜", "抖音榜", "日本Oricon榜", "新电力榜", "美国Billboard榜单", "iTunes榜", "古典音乐榜", "KTV嗨榜", "台湾Hito榜","中国港台榜","中国内地榜","中国嘻哈榜"};
+        final String[]type = new String[]{"19723756", "3779629", "2884035", "3778678", "1978921795", "991319590", "2250011882", "60131", "10520166", "60198", "11641012", "71384707", "21845217","112463", "112504", "64016", "1899724"};
         for (int i =0;i<titles.length;i++)
         {
             Sheet sheet = new Sheet();
@@ -55,13 +55,15 @@ public class WangyiFragment extends Fragment {
             sheet.setType(type[i]);
             sheetList.add(sheet);
         }
-        wyListview.setAdapter( new WangYiAdapter(getContext(),R.layout.view_holder_sheet,sheetList));
+        wyListview.setAdapter( new WangYiAdapter(getContext(),R.layout.view_holder_sheet,sheetList,getActivity()));
         wyListview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Sheet sheet = sheetList.get(i);
                 Intent intent = new Intent(getContext(), WangyiBangActivity.class);
                 intent.putExtra("WY",sheet);
+                intent.putExtra("img","R.drawable."+type[i]);
+                intent.putExtra("name",titles[i]);
                 startActivity(intent);
             }
         });

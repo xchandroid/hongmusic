@@ -28,6 +28,7 @@ public class WebActivity extends AppCompatActivity {
         });
         WebView webView = findViewById(R.id.webview);
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setDomStorageEnabled(true);//设置适应Html5,重点是这个设置
         webView.setWebViewClient(new WebViewClient());   //当跳到新的网页时任然使用当前Webview显示
         String url = getIntent().getStringExtra("URL");
         title.setText(getIntent().getStringExtra("title"));

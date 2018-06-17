@@ -101,9 +101,16 @@ public class PlayMvActivity extends SwipeBackActivity {
                 break;
             case "kg":
                 String path = getIntent().getStringExtra("mvid");
+                Log.d("mv路径是",path);
                 HttpClinet.getGeshouMvUrl(path, new HttpCallback<GeshouMvUrl>() {
                     @Override
                     public void onSuccess(GeshouMvUrl geshouMvUrl) {
+                        if (geshouMvUrl.getStatus()==0)
+                        {
+                            Toast.makeText(getBaseContext(),"播放MV失败，可能是该MV不存在",Toast.LENGTH_LONG).show();
+                            finish();
+                            return;
+                        }
                         if (geshouMvUrl.getMvdata() != null) {
                             if (!TextUtils.isEmpty(geshouMvUrl.getMvdata().getHd().getDownurl()))
                             {
@@ -122,15 +129,33 @@ public class PlayMvActivity extends SwipeBackActivity {
                                 paths[3] = geshouMvUrl.getMvdata().getRq().getDownurl();
                                 q += 1;
                             }
+                            videoView.setVideoUri(Uri.parse(paths[1]));
 
-
+                            /*
                             if (!TextUtils.isEmpty(geshouMvUrl.getMvdata().getHd().getDownurl())) {
                                 videoView.setVideoUri(Uri.parse(geshouMvUrl.getMvdata().getHd().getDownurl()));
+                                Log.d("视频URL是hd",geshouMvUrl.getMvdata().getHd().getDownurl());
+                            }
+                            else if (!TextUtils.isEmpty(geshouMvUrl.getMvdata().getSd().getDownurl()))
+                            {
+                                videoView.setVideoUri(Uri.parse(geshouMvUrl.getMvdata().getSd().getDownurl()));
+                                Log.d("视频URL是sd",geshouMvUrl.getMvdata().getSq().getDownurl());
+                            }
+                            else if (!TextUtils.isEmpty(geshouMvUrl.getMvdata().getSq().getDownurl()))
+                            {
+                                videoView.setVideoUri(Uri.parse(geshouMvUrl.getMvdata().getSq().getDownurl()));
+                                Log.d("视频URL是sq",geshouMvUrl.getMvdata().getSq().getDownurl());
+                            }
+                            else if (!TextUtils.isEmpty(geshouMvUrl.getMvdata().getRq().getDownurl()))
+                            {
+                                videoView.setVideoUri(Uri.parse(geshouMvUrl.getMvdata().getRq().getDownurl()));
+                                Log.d("视频URL是rq",geshouMvUrl.getMvdata().getRq().getDownurl());
                             }
                             else
                             {
-                                videoView.setVideoUri(Uri.parse(geshouMvUrl.getMvdata().getSd().getDownurl()));
+                                Toast.makeText(getBaseContext(),"该视频暂时无法播放哦",Toast.LENGTH_LONG).show();
                             }
+                            */
                         }
                     }
 

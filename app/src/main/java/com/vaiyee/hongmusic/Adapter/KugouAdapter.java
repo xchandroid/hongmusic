@@ -100,6 +100,10 @@ public class KugouAdapter extends RecyclerView.Adapter<KugouAdapter.ViewHolder> 
                         return;
                     }
                     kugouBang = mkugouBang;
+                    if(kugouBang.song==null)
+                    {
+                        return;
+                    }
                     if (kugouBang.song.kugouBangList.size()==0)
                     {
                         return;

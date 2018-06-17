@@ -20,6 +20,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextPaint;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -47,6 +48,8 @@ import com.vaiyee.hongmusic.bean.Tracks;
 import com.vaiyee.hongmusic.bean.WangyiBang;
 import com.vaiyee.hongmusic.bean.WangyiLrc;
 import com.vaiyee.hongmusic.http.HttpCallback;
+import com.vaiyee.hongmusic.http.WangyibangBackListener;
+import com.vaiyee.hongmusic.util.HttpUtil;
 
 import net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout;
 
@@ -67,7 +70,7 @@ public class WangyiBangActivity extends SwipeBackActivity{
     private RecyclerView onlineMusicList;
     private Sheet sheet;//榜单列表
     private int offset = 0;
-    private  List<Tracks> onlineMusics = new ArrayList<>();
+    private  List<WangyiBang.ListBean> onlineMusics = new ArrayList<>();
     private WangyiBang wangyiBang;
     private WangyiBangAdapter onlineMusicAdapter;
     private ProgressDialog progressDialog;
@@ -75,6 +78,7 @@ public class WangyiBangActivity extends SwipeBackActivity{
     private List<Song> songList;
     private TextView updateTime;
     private GradualTextView content;
+    private String cover,name;
     private net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout collapsingToolbarLayout;
 
     @Override
@@ -88,6 +92,8 @@ public class WangyiBangActivity extends SwipeBackActivity{
         }
         setContentView(R.layout.activity_gedan);
         Intent intent =getIntent();
+        cover = intent.getStringExtra("img");
+        name = intent.getStringExtra("name");
         sheet = (Sheet) intent.getSerializableExtra("WY");    //获取传过来的intent中的Sheet对象
         Cover = (ImageView) findViewById(R.id.gedan_bg);
         updateTime = (TextView) findViewById(R.id.publish_time);
@@ -342,16 +348,16 @@ public class WangyiBangActivity extends SwipeBackActivity{
     {
 
         Glide.with(WangyiBangActivity.this)
-                .load(wangyiBang.result.coverImgUrl)
+                .load(cover)
                 .placeholder(R.drawable.default_cover)
                 .error(R.drawable.default_cover)
                 .crossFade(1000)
                 .bitmapTransform(new BlurTransformation(WangyiBangActivity.this,20,3))
                 .into(Cover);
-        String time = getMilliToDate(wangyiBang.result.updatatime);
-        updateTime.setText("更新时间："+time+ "\n"+"播放次数："+wangyiBang.result.playCount);
-        content.setText("数据来源：网易云音乐"+"\n"+wangyiBang.result.description);
-        collapsingToolbarLayout.setTitle(wangyiBang.result.bangName);
+        //String time = getMilliToDate(wangyiBang.result.updatatime);
+        updateTime.setText("更新时间："+getTime()+ "\n"+"播放次数：99999");
+        content.setText("数据来源：网易云音乐");
+        collapsingToolbarLayout.setTitle(name);
 
     }
 
@@ -362,16 +368,56 @@ public class WangyiBangActivity extends SwipeBackActivity{
         return formatter.format(date);
     }
 
+
+    public static String getTime()
+    {
+        Time t=new Time(); // or Time t=new Time("GMT+8"); 加上Time Zone资料。
+        t.setToNow(); // 取得系统时间。
+        int year = t.year;
+        int month = t.month;
+        int date = t.monthDay;
+        int hour = t.hour; // 0-23
+        int minute = t.minute;
+        //int second = t.second;
+        return String.valueOf(year)+"/"+String.valueOf(month)+"/"+String.valueOf(date)+"/  "+String.valueOf(hour)+":"+String.valueOf(minute);
+    }
+
+
     //根据传过来的sheet对象相应的Type获取在线音乐列表
     private void getOnlineMusiclist(Sheet sheet)
     {
+
+        HttpUtil.getWangyiBang(sheet.getType(), new WangyibangBackListener() {
+            @Override
+            public void onSuccess(final WangyiBang mwangyiBang) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() { wangyiBang = mwangyiBang;
+                        onlineMusics.addAll( wangyiBang.getList());
+                        onlineMusicAdapter = new WangyiBangAdapter(WangyiBangActivity.this,R.layout.localmusi_listitem,onlineMusics,WangyiBangActivity.this);
+                        LinearLayoutManager manager = new LinearLayoutManager(WangyiBangActivity.this);
+                        onlineMusicList.setLayoutManager(manager);
+                        onlineMusicList.setAdapter(onlineMusicAdapter);
+                        InitHeader();
+                        CloseProgress();
+                    }
+                });
+            }
+
+            @Override
+            public void onFail(Exception e) {
+                Toast.makeText(WangyiBangActivity.this,"获取网易云榜单失败,请稍后再试",Toast.LENGTH_LONG).show();
+                CloseProgress();
+            }
+        });
+
+        /*
         HttpClinet.WangyiBang(sheet.getType(), new HttpCallback<WangyiBang>() {
             @Override
             public void onSuccess(WangyiBang mwangyiBang) {
-
                 wangyiBang = mwangyiBang;
                 InitHeader();
-                onlineMusics.addAll( wangyiBang.result.tracksList);
+                onlineMusics.addAll( wangyiBang.getList());
                 onlineMusicAdapter = new WangyiBangAdapter(WangyiBangActivity.this,R.layout.localmusi_listitem,onlineMusics,WangyiBangActivity.this);
                 LinearLayoutManager manager = new LinearLayoutManager(WangyiBangActivity.this);
                 onlineMusicList.setLayoutManager(manager);
@@ -381,10 +427,9 @@ public class WangyiBangActivity extends SwipeBackActivity{
 
             @Override
             public void onFail(Exception e) {
-                Toast.makeText(WangyiBangActivity.this,"获取网易云榜单失败,请稍后再试",Toast.LENGTH_LONG).show();
-                CloseProgress();
             }
         });
+        */
     }
 
 

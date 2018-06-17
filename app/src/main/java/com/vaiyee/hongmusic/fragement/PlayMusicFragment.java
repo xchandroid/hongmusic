@@ -249,7 +249,6 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
         switch (view.getId())
         {
             case R.id.play_pause:
-
                     if (!playMusic.mediaPlayer.isPlaying()&&firstplay)
                     {
                         PlayMusic.PlayList playList = new PlayMusic.PlayList();
@@ -260,7 +259,6 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                         switch (playList.getBang())
                         {
                             case 0:
-                                final PlayMusic playMusic = new PlayMusic();
                                 final String path = song.getFileUrl();
                                 playMusic.play(path,MainActivity.position);
                                 playMusic.mediaPlayer.seekTo(lastCurrentposition);
@@ -272,10 +270,9 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                                 HttpClinet.getMusicUrl(song.getFileUrl(), new HttpCallback<DownloadInfo>() {
                                     @Override
                                     public void onSuccess(DownloadInfo downloadInfo) {
-                                        PlayMusic playMusic1 = new PlayMusic();
-                                        playMusic1.play(downloadInfo.getBitrate().getFile_link(),MainActivity.position);
-                                        playMusic1.mediaPlayer.seekTo(lastCurrentposition);
-                                        playMusic1.getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
+                                        playMusic.play(downloadInfo.getBitrate().getFile_link(),MainActivity.position);
+                                        playMusic.mediaPlayer.seekTo(lastCurrentposition);
+                                        playMusic.getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
                                     }
 
                                     @Override
@@ -292,7 +289,6 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                                         String path = kugouMusic.getData().getPlay_url();
                                         if (path != null) {
                                             Log.d("歌曲地址是", path);
-                                            PlayMusic playMusic = new PlayMusic();
                                             playMusic.play(path, MainActivity.position);
                                             playMusic.mediaPlayer.seekTo(lastCurrentposition);
                                             coverUrl = kugouMusic.getData().getImg();
@@ -311,6 +307,11 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                                 break;
                             case 3:
                                 final String id = song.getFileUrl();
+                                String path1 = Path +id+ ".mp3";
+                                playMusic.play(path1,MainActivity.position);
+                                playMusic.mediaPlayer.seekTo(lastCurrentposition);
+                                playMusic.getLrc(path1,song.getTitle(),song.getSinger(),song.getDuration());
+                                /*
                                 HttpClinet.WangyiLrc(id, new HttpCallback<WangyiLrc>() {
                                     @Override
                                     public void onSuccess(WangyiLrc wangyiLrc) {
@@ -330,6 +331,8 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                                     }
                                 });
 
+                                */
+                                break;
                         }
 
                         firstplay = false;
@@ -485,10 +488,10 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                 final Song song = list.get(i);
                 songname = song.getTitle();
                 singger = song.getSinger();
+                final PlayMusic playMusic = new PlayMusic();
                 switch (playList.getBang())
                 {
                     case 0:
-                        final PlayMusic playMusic = new PlayMusic();
                         final String path = song.getFileUrl();
                         playMusic.play(path,i);
                         adapter.notifyDataSetChanged();
@@ -500,9 +503,8 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                         HttpClinet.getMusicUrl(song.getFileUrl(), new HttpCallback<DownloadInfo>() {
                             @Override
                             public void onSuccess(DownloadInfo downloadInfo) {
-                                PlayMusic playMusic1 = new PlayMusic();
-                                playMusic1.play(downloadInfo.getBitrate().getFile_link(),i);
-                                playMusic1.getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
+                                playMusic.play(downloadInfo.getBitrate().getFile_link(),i);
+                                playMusic.getLrc(downloadInfo.getBitrate().getFile_link(),geming,geshou,downloadInfo.getBitrate().getFile_duration()*1000);
                             }
 
                             @Override
@@ -519,7 +521,6 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                                 String path = kugouMusic.getData().getPlay_url();
                                 if (path != null) {
                                     Log.d("歌曲地址是", path);
-                                    PlayMusic playMusic = new PlayMusic();
                                     playMusic.play(path, i);
                                     adapter.notifyDataSetChanged();
                                     coverUrl = kugouMusic.getData().getImg();
@@ -538,9 +539,16 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                         break;
                     case 3:
                         final String id = song.getFileUrl();
+                        String path1 = Path +id+ ".mp3";
+                        playMusic.play(path1,i);
+                        adapter.notifyDataSetChanged();
+                        playMusic.getLrc(path1,song.getTitle(),song.getSinger(),song.getDuration());
+
+                        /*
                         HttpClinet.WangyiLrc(id, new HttpCallback<WangyiLrc>() {
                             @Override
                             public void onSuccess(WangyiLrc wangyiLrc) {
+
                                 String lrcContent = wangyiLrc.lrc.lyric;
                                 SearchActivity.creatLrc(lrcContent,songname);
                                 String path = Path +id+ ".mp3";
@@ -556,7 +564,7 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
 
                             }
                         });
-
+                        */
                 }
 
 

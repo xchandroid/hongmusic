@@ -43,6 +43,7 @@ import com.vaiyee.hongmusic.ColorTrackView;
 import com.vaiyee.hongmusic.MainActivity;
 import com.vaiyee.hongmusic.MyApplication;
 import com.vaiyee.hongmusic.PlayMusic;
+import com.vaiyee.hongmusic.PlayMvActivity;
 import com.vaiyee.hongmusic.R;
 import com.vaiyee.hongmusic.SearchActivity;
 import com.vaiyee.hongmusic.Utils.HttpClinet;
@@ -57,6 +58,8 @@ import com.vaiyee.hongmusic.Adapter.songsAdapter;
 import com.vaiyee.hongmusic.http.HttpCallback;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +73,7 @@ public class fragement1 extends Fragment {
     public static String coverUrl,geming,geshou;
     public static songsAdapter adapter;
     private List<Song> songList;
-    private TextView tips;
+    private TextView tips,nomp3;
     private RollPagerView rollPagerView;
     private  String[]imgs = new String[8];
 
@@ -86,6 +89,7 @@ public class fragement1 extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment1_layout,null);
         tips = view.findViewById(R.id.tips);
+        nomp3 = view.findViewById(R.id.nomp3);
         //hearder = LayoutInflater.from(getContext()).inflate(R.layout.roll_pager_view,null);  //这里不要把ViewGroup container作为参数，否则造成布局参数错误导致崩溃
         recyclerView = view.findViewById(R.id.localmusic_list);
         //listView.addHeaderView(hearder);
@@ -273,6 +277,14 @@ public class fragement1 extends Fragment {
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
+        if (songs.size()==0)
+        {
+            nomp3.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            nomp3.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -305,10 +317,23 @@ public class fragement1 extends Fragment {
                     @Override
                     public void onItemClick(int position) {
 
-                        Intent intent = new Intent(getContext(), WebActivity.class);
-                        intent.putExtra("URL",bannerlist.get(position).getExtra().getUrl());
-                        intent.putExtra("title",bannerlist.get(position).getTitle());
-                        startActivity(intent);
+                        if (bannerlist.get(position).getType()==2)
+                        {
+                            Intent intent = new Intent(getContext(), PlayMvActivity.class);
+                            String Bighash =bannerlist.get(position).getExtra().getVideo_hash().toUpperCase();
+                            String key = getMD5(Bighash+"kugoumvcloud");
+                            intent.putExtra("mvid","http://trackermv.kugou.com/interface/index/cmd=100&hash="+Bighash+"&key="+key+"&pid=6&ext=mp4&ismp3=0");
+                            intent.putExtra("type","kg");
+                            intent.putExtra("title",bannerlist.get(position).getTitle());
+                            startActivity(intent);
+                        }
+                        else
+                        {
+                            Intent intent = new Intent(getContext(),WebActivity.class);
+                            intent.putExtra("URL",bannerlist.get(position).getExtra().getUrl());
+                            intent.putExtra("title",bannerlist.get(position).getTitle());
+                            startActivity(intent);
+                        }
                     }
                 });
 
@@ -316,7 +341,7 @@ public class fragement1 extends Fragment {
 
             @Override
             public void onFail(Exception e) {
-                Toast.makeText(getContext(),"获取首页推荐失败",Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(),"获取首页推荐失败，请检查网络是否畅通",Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -349,5 +374,21 @@ public class fragement1 extends Fragment {
         }
     }
 
+
+    //加密MV的hash值作为网址参数访问服务器获取MV的播放地址
+    public static String getMD5(String str) {
+        try {
+            // 生成一个MD5加密计算摘要
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            // 计算md5函数
+            md.update(str.getBytes());
+            // digest()最后确定返回md5 hash值，返回值为8为字符串。因为md5 hash值是16位的hex值，实际上就是8位的字符
+            // BigInteger函数则将8位的字符串转换成16位hex值，用字符串来表示；得到字符串形式的hash值
+            return new BigInteger(1, md.digest()).toString(16);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }

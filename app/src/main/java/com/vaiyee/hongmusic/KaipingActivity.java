@@ -44,7 +44,7 @@ public class KaipingActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Glide.with(KaipingActivity.this).load(imgurl).crossFade(1000).into(img);
+                        Glide.with(MyApplication.getQuanjuContext()).load(imgurl).crossFade(1000).into(img);
                     }
                 });
             }
@@ -56,6 +56,7 @@ public class KaipingActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+
                         Intent intent = new Intent(KaipingActivity.this,MainActivity.class);
                         startActivity(intent);
                         finish();
@@ -63,6 +64,6 @@ public class KaipingActivity extends AppCompatActivity {
                     }
                 });
             }
-        },3000);
+        },4000);
     }
 }

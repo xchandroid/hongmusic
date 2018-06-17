@@ -159,8 +159,8 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                  final String responseText = response.body().string();
-                Log.d("返回的天气数据是",responseText);
-                createjson(responseText);
+                //Log.d("返回的天气数据是",responseText);
+                SearchActivity.creatLrc(responseText,"天气数据");
                 final Weather weather = Utility.handleWeatherResponse(responseText);
                 runOnUiThread(new Runnable() {
                     @Override
@@ -243,7 +243,7 @@ public class WeatherActivity extends AppCompatActivity {
         String filePath = null;
         boolean hasSDCard = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);//是否有外置SD卡
         if (hasSDCard) {
-            filePath =Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator+"HonchenWeather"+File.separator+"weatherjson.txt";
+            filePath =Environment.getExternalStorageDirectory().getPath() + File.separator+"HonchenWeather"+File.separator+"weatherjson.txt";
         } else
             filePath =Environment.getDownloadCacheDirectory().toString() + File.separator +"weatherjson.txt";
 

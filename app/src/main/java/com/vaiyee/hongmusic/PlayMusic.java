@@ -65,86 +65,86 @@ public class PlayMusic {
             PlayMusicFragment.timerTask.cancel();  //取消定时任务，不然每次点击列表播放音乐会跳播
             PlayMusicFragment.timer.cancel();
         }
-       // mediaSessionManager = new MediaSessionManager(this);
+        // mediaSessionManager = new MediaSessionManager(this);
         audioFocusManager = new AudioFocusManager(this);
         if (audioFocusManager.requestAudioFocus())
         {
 
-        if (mainActivity == null) {
-            mainActivity = new MainActivity();
-        }
-        mainActivity.sendNotification();
-       editor = MyApplication.getQuanjuContext().getSharedPreferences("p",0).edit();
-       editor.putInt("i",position);
-       editor.apply();
-        // MyService.noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_pause);
-        MainActivity.setplayButtonpause();
-        p.zhuanquanuqna();
-        PlayMusicFragment.play.setImageResource(R.drawable.play_btn_pause_selector);
-        MainActivity.play.setImageResource(R.drawable.ic_play_bar_btn_pause);
-        MainActivity.firstplay = false;
-        PlayMusicFragment.firstplay = false;
-        if (mediaPlayer == null) {
-            mediaPlayer = new MediaPlayer();
-            try {
-                mediaPlayer.setDataSource(path);
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-                //isRest = false;
-                playposition = position;
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (mainActivity == null) {
+                mainActivity = new MainActivity();
             }
-        } else {
-            if (mediaPlayer.isPlaying() || isPause) {
-                mediaPlayer.stop();
-                mediaPlayer.reset();
-                //isRest = true;
-
-            }
-            try {
-                mediaPlayer.setDataSource(path);
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-               // isRest = false;
-                playposition = position;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                if (PlayMusicFragment.timerTask!=null)
-                {
-                    PlayMusicFragment.timerTask.cancel();
-                    PlayMusicFragment.timer.cancel();
+            mainActivity.sendNotification();
+            editor = MyApplication.getQuanjuContext().getSharedPreferences("p",0).edit();
+            editor.putInt("i",position);
+            editor.apply();
+            // MyService.noti.setImageViewResource(R.id.noti_play, R.drawable.ic_play_btn_pause);
+            MainActivity.setplayButtonpause();
+            p.zhuanquanuqna();
+            PlayMusicFragment.play.setImageResource(R.drawable.play_btn_pause_selector);
+            MainActivity.play.setImageResource(R.drawable.ic_play_bar_btn_pause);
+            MainActivity.firstplay = false;
+            PlayMusicFragment.firstplay = false;
+            if (mediaPlayer == null) {
+                mediaPlayer = new MediaPlayer();
+                try {
+                    mediaPlayer.setDataSource(path);
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                    //isRest = false;
+                    playposition = position;
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                p.resetLrcview();
-                PlayMusicFragment.singlelrc.setLabel("暂无歌词");
-                mediaPlayer.reset();
-                playMode playMode = new playMode();
-                switch (playMode.getMode()) {
-                    case 0:
-                        playnext();
-                        break;
-                    case 1:
-                        SuijiPlay();
-                        break;
-                    case 2:
-                        danqu();
-                        break;
-                    case 3:
-                        xunhuanplay();
+            } else {
+                if (mediaPlayer.isPlaying() || isPause) {
+                    mediaPlayer.stop();
+                    mediaPlayer.reset();
+                    //isRest = true;
+
                 }
-
-
+                try {
+                    mediaPlayer.setDataSource(path);
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                    // isRest = false;
+                    playposition = position;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        });
 
-    }
+
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    if (PlayMusicFragment.timerTask!=null)
+                    {
+                        PlayMusicFragment.timerTask.cancel();
+                        PlayMusicFragment.timer.cancel();
+                    }
+                    p.resetLrcview();
+                    PlayMusicFragment.singlelrc.setLabel("暂无歌词");
+                    mediaPlayer.reset();
+                    playMode playMode = new playMode();
+                    switch (playMode.getMode()) {
+                        case 0:
+                            playnext();
+                            break;
+                        case 1:
+                            SuijiPlay();
+                            break;
+                        case 2:
+                            danqu();
+                            break;
+                        case 3:
+                            xunhuanplay();
+                    }
+
+
+                }
+            });
+
+        }
     }
 
     public void pause()
@@ -205,17 +205,17 @@ public class PlayMusic {
         switch (playList.getBang())
         {
             case 0:     //表示本地音乐列表
-            String path = song.getFileUrl();
-            geming = song.getTitle();
-            geshou = song.getSinger();
-            // String coverUrl = song.getFileUrl();
-            int endtime = song.getDuration();
-            if (isPause) {
-                mediaPlayer.reset();
-            }
-            play(path, playposition);
-            getLrc(path, geming, geshou, endtime);
-            break;
+                String path = song.getFileUrl();
+                geming = song.getTitle();
+                geshou = song.getSinger();
+                // String coverUrl = song.getFileUrl();
+                int endtime = song.getDuration();
+                if (isPause) {
+                    mediaPlayer.reset();
+                }
+                play(path, playposition);
+                getLrc(path, geming, geshou, endtime);
+                break;
             case 1:    //表示百度音乐列表
                 geming = song.getTitle();
                 geshou = song.getSinger();
@@ -273,7 +273,7 @@ public class PlayMusic {
         songList = playList.getPlaylist();
         if (playposition>=songList.size()-1)
         {
-           playposition = -1;
+            playposition = -1;
         }
         final Song song = songList.get(playposition+1);
         playposition = playposition+1;
@@ -425,11 +425,11 @@ public class PlayMusic {
 
     public void SuijiPlay()
     {
-          //songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
+        //songList = getAudio.getAllSongs(MyApplication.getQuanjuContext());
         PlayList playList = new PlayList();
         songList = playList.getPlaylist();
-          playposition = getRandom();
-          final Song song = songList.get(playposition);
+        playposition = getRandom();
+        final Song song = songList.get(playposition);
         switch (playList.getBang())
         {
             case 0:
@@ -643,17 +643,17 @@ public class PlayMusic {
     //设置重低音音效
     public static void setBassBoost(int value)
     {
-            if (bassBoost==null)
-            {
-                bassBoost = new BassBoost(0,mediaPlayer.getAudioSessionId());
-            }
-            bassBoost.setEnabled(true);
-            if (bassBoost.getStrengthSupported()) //这里应该是获取修改音效的权限
-            {
-                  mbassBoostStrength = bassBoost.getRoundedStrength();   //保存没改变之前的值
-                  bassBoost.setStrength((short) value);
-                Toast.makeText(MyApplication.getQuanjuContext(),"设置重低音成功",Toast.LENGTH_LONG).show();
-            }
+        if (bassBoost==null)
+        {
+            bassBoost = new BassBoost(0,mediaPlayer.getAudioSessionId());
+        }
+        bassBoost.setEnabled(true);
+        if (bassBoost.getStrengthSupported()) //这里应该是获取修改音效的权限
+        {
+            mbassBoostStrength = bassBoost.getRoundedStrength();   //保存没改变之前的值
+            bassBoost.setStrength((short) value);
+            Toast.makeText(MyApplication.getQuanjuContext(),"设置重低音成功",Toast.LENGTH_LONG).show();
+        }
     }
     //设置环绕音音效
     public static void setVirtualizer(int value)
@@ -696,7 +696,7 @@ public class PlayMusic {
 
     public static class playMode
     {
-       static int mode=3;
+        static int mode=3;
 
         public int getMode() {
             return mode;
@@ -734,8 +734,8 @@ public class PlayMusic {
 
         public void setPlaylist(List<Song> playlist) {
             this.playlist = playlist;
-           ListDataSave save = new ListDataSave(MyApplication.getQuanjuContext(),"Playlist");
-           save.setDataList("Playlist",playlist);
+            ListDataSave save = new ListDataSave(MyApplication.getQuanjuContext(),"Playlist");
+            save.setDataList("Playlist",playlist);
         }
     }
 }

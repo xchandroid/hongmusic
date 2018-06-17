@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -38,6 +39,8 @@ import com.vaiyee.hongmusic.util.BindOnclick;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -49,10 +52,12 @@ public class GedanFragment extends Fragment {
     private static List<Gedan.Info> infoList = new ArrayList<>();
     private int page = 1;
     private boolean loading = false;   //是否正在加载的标志位，防止内存泄漏程序崩溃
+    private boolean isfirst = true;
     private GridLayoutManager manager;
     private boolean isSuccess = false; //用于第一次加载成功后隐藏掉正在加载的提示
     private GedanAdapter adapter;
     private FloatingActionButton shoucang;
+    private SwipeRefreshLayout swipeRefreshLayout;
     public GedanFragment() {
         // Required empty public constructor
     }
@@ -60,19 +65,20 @@ public class GedanFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        adapter = new GedanAdapter(getContext(),infoList);    // adpter要在这里new，不然无网络的时候不能下拉刷新
         HttpClinet.getKugouGedan(page, new HttpCallback<Gedan>() {
             @Override
             public void onSuccess(Gedan response) {
                 infoList.addAll(response.data.infoList);
-                adapter = new GedanAdapter(getContext(),infoList);
                 recyclerView.setAdapter(adapter);  //这里给你recycleview 设置适配器并不会导致recycleview为null，因为这里是在网络get成功后在执行的，而onCreateView（）方法会紧跟onCreat()方法执行
                 loadingfooterCenter.setVisibility(View.GONE);
                 isSuccess = true;
+                isfirst = false;
             }
 
             @Override
             public void onFail(Exception e) {
-                Toast.makeText(getContext(),"获取歌单失败",Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(),"获取歌单失败,请检查网络是否畅通",Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -80,8 +86,16 @@ public class GedanFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-       View view = inflater.inflate(R.layout.fragment_gedan,container,false);
-       recyclerView = view.findViewById(R.id.gedan_recview);
+        View view = inflater.inflate(R.layout.fragment_gedan,container,false);
+        recyclerView = view.findViewById(R.id.gedan_recview);
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
+        swipeRefreshLayout.setColorSchemeResources(R.color.blue);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Refresh();
+            }
+        });
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),2);
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setAdapter(adapter);  //这里再设置一次是因为当这个碎片由不见变为可见时会执行这个方法,不再设置一次适配器的话数据将不能显示
@@ -122,6 +136,26 @@ public class GedanFragment extends Fragment {
         return view;
     }
 
+
+    private void Refresh() {
+        HttpClinet.getKugouGedan(page, new HttpCallback<Gedan>() {
+            @Override
+            public void onSuccess(Gedan response) {
+                infoList.addAll(response.data.infoList);
+                adapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
+                loadingfooter.setVisibility(View.GONE);
+                Toast.makeText(getContext(),"刷新成功！！",Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFail(Exception e) {
+                swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(getContext(),"获取歌单失败,请检查网络是否畅通",Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     private void loadMoreDate() {
         HttpClinet.getKugouGedan(page, new HttpCallback<Gedan>() {
             @Override
@@ -134,7 +168,7 @@ public class GedanFragment extends Fragment {
 
             @Override
             public void onFail(Exception e) {
-                Toast.makeText(getContext(),"获取歌单失败",Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(),"获取歌单失败,请检查网络是否畅通",Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -151,7 +185,14 @@ public class GedanFragment extends Fragment {
         {
             loadingfooterCenter.setVisibility(View.GONE);
         }
+        else
+        {
+            if (!isfirst) {
+                Toast.makeText(getContext(), "获取歌单失败,请检查网络是否畅通", Toast.LENGTH_LONG).show();
+            }
+        }
     }
+
 
 
     @BindOnclick(R.id.wodeshoucang)
@@ -159,6 +200,11 @@ public class GedanFragment extends Fragment {
     {
         GedanShouCangUtil gedanShouCangUtil = new GedanShouCangUtil(getContext());
         final List<ShouCangGeDan> shouCangGeDanList = gedanShouCangUtil.getGedanList();  //读取Sharepreference中保存的歌单列表
+        if (shouCangGeDanList.size()==0)
+        {
+            Toast.makeText(getContext(),"你还没用收藏过歌单哦",Toast.LENGTH_LONG).show();
+            return;
+        }
         View contentView = LayoutInflater.from(getContext()).inflate(R.layout.play_list_layout,null);
         TextView title = contentView.findViewById(R.id.title);
         title.setText("收藏的歌单列表");

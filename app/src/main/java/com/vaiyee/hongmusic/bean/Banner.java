@@ -41,6 +41,15 @@ public class Banner {
             private int id;
             private String img;
             private ExtraBean extra;
+            private int type;
+
+            public int getType() {
+                return type;
+            }
+
+            public void setType(int type) {
+                this.type = type;
+            }
 
             public String getTitle() {
                 return title;
@@ -80,6 +89,15 @@ public class Banner {
                  */
 
                 private String url;
+                private String video_hash;
+
+                public String getVideo_hash() {
+                    return video_hash;
+                }
+
+                public void setVideo_hash(String video_hash) {
+                    this.video_hash = video_hash;
+                }
 
                 public String getUrl() {
                     return url;
