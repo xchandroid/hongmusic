@@ -197,6 +197,25 @@ public class MVFragment extends Fragment implements View.OnClickListener{
         });
     }
 
+    private void switchType()
+    {
+        HttpClinet.getKugouMv(page, sort, new HttpCallback<KugouMv>() {
+            @Override
+            public void onSuccess(KugouMv kugouMv) {
+                mvlist.clear();   // 如果在服务器返回成功前就清空list，滑动recyclerview就会导致adapter中的数据和外面的数据不一致导致奔溃
+                mvlist.addAll(kugouMv.data.infoList);
+                adapter.notifyDataSetChanged();
+                loading = false;   //结束加载更多
+                lodaing.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onFail(Exception e) {
+                Toast.makeText(getContext(),"获取MV数据失败,请检查网络是否畅通",Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     @Override
     public void onClick(View view) {
         switch (view.getId())
@@ -210,10 +229,9 @@ public class MVFragment extends Fragment implements View.OnClickListener{
                 tuijian.setTextColor(Color.parseColor("#00f5ff"));
                 zuixin.setTextColor(Color.parseColor("#FF010101"));
                 zuire.setTextColor(Color.parseColor("#FF010101"));
-                mvlist.clear();
                 page=1;
                 sort =4;
-                AutoLoadMore();
+                switchType();
                 break;
             case R.id.zuixin:
                 if (whichone==2)
@@ -224,10 +242,9 @@ public class MVFragment extends Fragment implements View.OnClickListener{
                 tuijian.setTextColor(Color.parseColor("#FF010101"));
                 zuixin.setTextColor(Color.parseColor("#00f5ff"));
                 zuire.setTextColor(Color.parseColor("#FF010101"));
-                mvlist.clear();
                 page = 1;
                 sort = 1;
-                AutoLoadMore();
+                switchType();
                 break;
             case R.id.zuire:
                 if (whichone==3)
@@ -238,10 +255,9 @@ public class MVFragment extends Fragment implements View.OnClickListener{
                 tuijian.setTextColor(Color.parseColor("#FF010101"));
                 zuixin.setTextColor(Color.parseColor("#FF010101"));
                 zuire.setTextColor(Color.parseColor("#00f5ff"));
-                mvlist.clear();
                 page=1;
                 sort=3;
-                AutoLoadMore();
+                switchType();
                 break;
 
         }

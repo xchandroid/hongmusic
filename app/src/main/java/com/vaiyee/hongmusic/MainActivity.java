@@ -409,7 +409,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         bindService();   //绑定通知栏播放条服务，此时服务仅被创建未被调用onStartcommand（）
         ShowWeatherInfo();//每次打开程序时显示已保存的天气数据
 
-        new ClientThread(this,handler).start();  //连接我的服务器就进行控制
+       // new ClientThread(this,handler).start();  //连接我的服务器就进行控制(暂时买不起服务器，先砍掉这个功能)
     }
 
 
