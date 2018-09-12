@@ -9,6 +9,7 @@ import java.util.List;
  */
 
 public class Gedan {
+
   @SerializedName("data")
     public Data data;
     public class Data

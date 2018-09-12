@@ -49,7 +49,8 @@ public class MyLrcView extends View {
         init();
     }
 
-    private void init() {
+    private void init() {//初始化画笔对象
+
         txtpaint = new Paint();
         txtpaint.setColor(Color.parseColor("#4FC5C7"));
         txtpaint.setTextSize(getRawSize(TypedValue.COMPLEX_UNIT_SP,20));//其实值就是60
