@@ -1,5 +1,5 @@
 # hongmusic
-我自己写的音乐播放器(毕业设计作品)
+我自己写的音乐播放器(毕业设计作品)<br/>
 以下是本APP的部分截图
 ![image](https://github.com/xchandroid/hongmusic/blob/master/images/Screenshot_20180912-224441.png)
 ![image](https://github.com/xchandroid/hongmusic/blob/master/images/Screenshot_20180912-224450.png)
@@ -15,7 +15,7 @@
 ![image](https://github.com/xchandroid/hongmusic/blob/master/images/Screenshot_20180912-224811.png)
 ![image](https://github.com/xchandroid/hongmusic/blob/master/images/Screenshot_20180912-225006.png)
 ![image](https://github.com/xchandroid/hongmusic/blob/master/images/Screenshot_20180912-225032.png)
-![image](https://github.com/xchandroid/hongmusic/blob/master/images/Screenshot_20180912-220007.png)
-![image](https://github.com/xchandroid/hongmusic/blob/master/images/Screenshot_20180912-220011.png)
-![image](https://github.com/xchandroid/hongmusic/blob/master/images/Screenshot_20180912-220030.png)
-![image](https://github.com/xchandroid/hongmusic/blob/master/images/Screenshot_20180912-220034.png)
+![image](https://github.com/xchandroid/hongmusic/blob/master/images/Screenshot_20180912-230007.png)
+![image](https://github.com/xchandroid/hongmusic/blob/master/images/Screenshot_20180912-230011.png)
+![image](https://github.com/xchandroid/hongmusic/blob/master/images/Screenshot_20180912-230030.png)
+![image](https://github.com/xchandroid/hongmusic/blob/master/images/Screenshot_20180912-230034.png)
