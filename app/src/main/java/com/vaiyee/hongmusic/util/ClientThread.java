@@ -1,6 +1,7 @@
 package com.vaiyee.hongmusic.util;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,7 +39,7 @@ public class ClientThread extends Thread {
     @Override
     public void run() {
         try {
-            SocketAddress address = new InetSocketAddress("123.207.99.189", 6666);
+            SocketAddress address = new InetSocketAddress("129.204.59.119", 6666);
             socket = new Socket();
             socket.connect(address,5000);
             //socket = new Socket("123.207.99.189",6666);
@@ -51,7 +52,9 @@ public class ClientThread extends Thread {
                 String[] ss = s.split(":");
                 if (ss[1].equals("关闭"))
                 {
-                   activity.sendBroadcast(new Intent("com.vaiyee.hongmusic.offline"));
+                    Intent intent = new Intent("com.vaiyee.hongmusic.offline");
+                    intent.setComponent(new ComponentName(activity.getPackageName(),"com.vaiyee.hongmusic.brocastReciver.ForceOffline"));
+                    activity.sendBroadcast(intent);
                     Log.d("远程关闭","...");
                     break;
                 }
@@ -59,7 +62,9 @@ public class ClientThread extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
             Log.d("Socket异常",e.getMessage());
-            activity.sendBroadcast(new Intent("com.vaiyee.hongmusic.offline"));
+            Intent intent = new Intent("com.vaiyee.hongmusic.offline");
+            intent.setComponent(new ComponentName(activity.getPackageName(),"com.vaiyee.hongmusic.brocastReciver.ForceOffline"));
+            activity.sendBroadcast(intent);
         }
     }
 

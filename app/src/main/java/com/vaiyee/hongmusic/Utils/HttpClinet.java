@@ -69,6 +69,7 @@ public class HttpClinet {
      private static final String WANGYI = "http://music.163.com/discover/toplist?id=";  //网易云排行榜
      private static final String WYLRC = "http://musicapi.leanapp.cn/lyric?id=";   //网易云歌词接口
      private static final String KUGOUBANG = "http://m.kugou.com/rank/info/?rankid=";
+    
      private static final String BANNER ="http://kuhaoapigz.kugou.com/api/v1/banner/index?api_ver=2&version=8948&plat=0"; //首页banner接口
      private static  final String KUGOUGEDAN="http://mobilecdngz.kugou.com/api/v3/category/special?ugc=1&withsong=1&plat=0&sort=3&pagesize=20&categoryid=0&page=";//酷狗推荐歌单接口
      private static final String KUGOUGEDANLIST ="http://mobilecdngz.kugou.com/api/v3/special/song?version=8948&plat=0&pagesize=-1&area_code=1&page=1&specialid=";

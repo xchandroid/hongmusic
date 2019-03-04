@@ -1,6 +1,9 @@
 package com.vaiyee.hongmusic.fragement;
 
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,12 +15,14 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
@@ -352,6 +357,7 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                 switch (mode) {
                     case 0:
                         Intent intent = new Intent("com.vaiyee.playmode");
+                        intent.setComponent(new ComponentName(getContext().getPackageName(),"com.vaiyee.hongmusic.brocastReciver.PlayModeReeceiver"));
                         intent.putExtra("mode",1); //随机播放
                         getActivity().sendBroadcast(intent);
                         playmode.setImageResource(R.drawable.play_btn_shuffle_selector);
@@ -359,6 +365,7 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                         break;
                     case 1:
                         Intent intent1 = new Intent("com.vaiyee.playmode");
+                        intent1.setComponent(new ComponentName(getContext().getPackageName(),"com.vaiyee.hongmusic.brocastReciver.PlayModeReeceiver"));
                         intent1.putExtra("mode",0); //顺序播放
                         getActivity().sendBroadcast(intent1);
                         playmode.setImageResource(R.drawable.shunxu);
@@ -366,6 +373,7 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                         break;
                     case 2:
                         Intent intent2 = new Intent("com.vaiyee.playmode");
+                        intent2.setComponent(new ComponentName(getContext().getPackageName(),"com.vaiyee.hongmusic.brocastReciver.PlayModeReeceiver"));
                         intent2.putExtra("mode",2); //单曲循环
                         getActivity().sendBroadcast(intent2);
                         playmode.setImageResource(R.drawable.play_btn_one_selector);
@@ -373,6 +381,7 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                         break;
                     case 3:
                         Intent intent3 = new Intent("com.vaiyee.playmode");
+                        intent3.setComponent(new ComponentName(getContext().getPackageName(),"com.vaiyee.hongmusic.brocastReciver.PlayModeReeceiver"));
                         intent3.putExtra("mode",3); //列表循环
                         getActivity().sendBroadcast(intent3);
                         playmode.setImageResource(R.drawable.play_btn_loop_selector);
@@ -766,28 +775,61 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
             return super.cancel();
         }
     }
+    private static ObjectAnimator objectAnimator1,objectAnimator2 ;
+    private int RORATE_STATE=0; //未旋转
+    private static boolean isInit = false; //只初始化一次ObjectAnimator
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void zhuanquanuqna()
     {
-       Animation animation1 = AnimationUtils.loadAnimation(MyApplication.getQuanjuContext(),R.anim.zhuanqunaquan); //这里是加载anim文件夹中的动画
-        int pivotType = Animation.RELATIVE_TO_SELF; // 相对于自身
-        float pivotX = 0.5f; // 取自身区域在X轴上的中心点
-        float pivotY = 0.5f; // 取自身区域在Y轴上的中心点
-        Animation animation = new RotateAnimation(0,360,pivotType, pivotX, pivotType, pivotY);  // 围绕自身的中心点进行旋转
-        animation.setDuration(30000);
-        animation.setRepeatCount(-1);  //表示一直旋转
-        animation.setRepeatMode(Animation.RESTART);
-        LinearInterpolator interpolator = new LinearInterpolator();//匀速旋转
-        animation.setInterpolator(interpolator);
-        animation1.setInterpolator(interpolator);  //设置拦截器，使其匀速旋转
-        bantouming.startAnimation(animation);
-        playbg.startAnimation(animation1);
+        if (!isInit) {
+            objectAnimator1 = ObjectAnimator.ofFloat(playbg, "rotation", 0f, 360f);
+            objectAnimator1.setDuration(30000);
+            objectAnimator1.setRepeatCount(ValueAnimator.INFINITE);
+            objectAnimator1.setRepeatMode(ValueAnimator.RESTART);
+            objectAnimator1.setInterpolator(new LinearInterpolator());
+            objectAnimator2 = ObjectAnimator.ofFloat(playbg, "rotation", 0f, 360f);
+            objectAnimator2.setDuration(30000);
+            objectAnimator2.setRepeatCount(ValueAnimator.INFINITE);
+            objectAnimator2.setRepeatMode(ValueAnimator.RESTART);
+            objectAnimator2.setInterpolator(new LinearInterpolator());
+            isInit = true;
+        }
+        if (RORATE_STATE==0)
+        {
+            objectAnimator1.start();
+            objectAnimator2.start();
+        }
+        else if (RORATE_STATE==1)
+        {
+            objectAnimator1.resume();
+            objectAnimator2.resume();
+        }
+//       Animation animation1 = AnimationUtils.loadAnimation(MyApplication.getQuanjuContext(),R.anim.zhuanqunaquan); //这里是加载anim文件夹中的动画
+//        int pivotType = Animation.RELATIVE_TO_SELF; // 相对于自身
+//        float pivotX = 0.5f; // 取自身区域在X轴上的中心点
+//        float pivotY = 0.5f; // 取自身区域在Y轴上的中心点
+//        Animation animation = new RotateAnimation(0,360,pivotType, pivotX, pivotType, pivotY);  // 围绕自身的中心点进行旋转
+//        animation.setDuration(30000);
+//        animation.setRepeatCount(-1);  //表示一直旋转
+//        animation.setFillAfter(true);
+//        animation.setFillBefore(false);
+//        animation.setRepeatMode(Animation.RESTART);
+//        LinearInterpolator interpolator = new LinearInterpolator();//匀速旋转
+//        animation.setInterpolator(interpolator);
+//        animation1.setInterpolator(interpolator);  //设置拦截器，使其匀速旋转
+//        bantouming.startAnimation(animation);
+//        playbg.startAnimation(animation1);
 
 
     }
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void stop()
     {
-        bantouming.clearAnimation();
-        playbg.clearAnimation();
+        objectAnimator1.pause();
+        objectAnimator2.pause();
+        RORATE_STATE = 1;//表示暂停状态
+//        bantouming.clearAnimation();
+//        playbg.clearAnimation();
 
     }
 

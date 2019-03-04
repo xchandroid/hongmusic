@@ -98,6 +98,7 @@ public class GeshouInfoActivity extends SwipeBackActivity implements View.OnClic
         if (actionBar!=null)
         {
             actionBar.setDisplayHomeAsUpEnabled(true); //显示返回按钮
+            actionBar.setHomeButtonEnabled(true);  //设置点击返回
         }
         collapsingToolbarLayout.setExpandedTitleColor(Color.parseColor("#00F5FF"));
         collapsingToolbarLayout.setCollapsedTitleTextColor(Color.BLACK);
@@ -371,6 +372,9 @@ public class GeshouInfoActivity extends SwipeBackActivity implements View.OnClic
             return mTitleList.get(position);//页卡标题
         }
     }
+
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

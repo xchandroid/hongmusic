@@ -10,7 +10,9 @@ import android.media.audiofx.BassBoost;
 import android.media.audiofx.EnvironmentalReverb;
 import android.media.audiofx.Equalizer;
 import android.media.audiofx.Virtualizer;
+import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.widget.MediaController;
 import android.widget.Toast;
@@ -37,7 +39,9 @@ import java.util.List;
 
 /**
  * Created by Administrator on 2018/2/7.
+ * MediaPlayer并没有提供设置播放速度相关的API，可以使用SoundPool 调用setRate (int streamID, float rate) rate在0.5和2之间
  */
+
 
 public class PlayMusic {
     public static MediaPlayer mediaPlayer;
@@ -59,6 +63,7 @@ public class PlayMusic {
     {
         mediaPlayer = new MediaPlayer();
     }
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public  void play(String path, final int position) {
 
         if (PlayMusicFragment.timerTask != null) {
@@ -88,8 +93,14 @@ public class PlayMusic {
                 mediaPlayer = new MediaPlayer();
                 try {
                     mediaPlayer.setDataSource(path);
-                    mediaPlayer.prepare();
-                    mediaPlayer.start();
+                    mediaPlayer.prepareAsync();
+                    mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                        @Override
+                        public void onPrepared(MediaPlayer mp) {
+                            mp.start();
+                        }
+                    });
+                    //mediaPlayer.start();
                     //isRest = false;
                     playposition = position;
                 } catch (IOException e) {
@@ -104,8 +115,15 @@ public class PlayMusic {
                 }
                 try {
                     mediaPlayer.setDataSource(path);
-                    mediaPlayer.prepare();
-                    mediaPlayer.start();
+                    mediaPlayer.prepareAsync();
+                    mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                        @Override
+                        public void onPrepared(MediaPlayer mp) {
+                            mp.start();
+                        }
+                    });
+                    //mediaPlayer.prepare();
+                    //mediaPlayer.start();
                     // isRest = false;
                     playposition = position;
                 } catch (IOException e) {

@@ -2,6 +2,7 @@ package com.vaiyee.hongmusic.Adapter;
 
 import android.app.Activity;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -12,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -59,6 +61,12 @@ import java.util.regex.PatternSyntaxException;
  */
 
 public class SearchAdapter extends BaseAdapter {
+    private static NotificationChannel channel;
+    static {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            channel =new NotificationChannel("6","通知栏播放条", NotificationManager.IMPORTANCE_DEFAULT);
+        }
+    }
     private List<KugouSearchResult.lists> songList;
     private Context context;
     private int resId;
@@ -224,12 +232,16 @@ public class SearchAdapter extends BaseAdapter {
             PendingIntent pendingIntent = PendingIntent.getActivity(context,0,intent,0);
             NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             manager.cancel(notiID);
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context,"6");
             builder.setContentTitle(geming);
             builder.setContentText("下载完成！");
             builder.setSmallIcon(R.drawable.xiazai1);
             builder.setContentIntent(pendingIntent);
             builder.setAutoCancel(true);//点击后清除通知
+           // 向系统注册通知渠道，注册后不能改变重要性以及其他通知行为
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+               manager.createNotificationChannel(channel);
+            }
             manager.notify(notiID,builder.build());
         }
 
@@ -240,15 +252,21 @@ public class SearchAdapter extends BaseAdapter {
     };
     public NotificationManager getManager()
     {
-        return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        // 向系统注册通知渠道，注册后不能改变重要性以及其他通知行为
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            manager.createNotificationChannel(channel);
+        }
+        return manager;
     }
     public Notification getNotification(String geming,int progress)
     {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context,"6");
         builder.setContentText("《"+geming+"》"+"  正在下载："+progress+"%");
         builder.setContentTitle("歌曲");
         builder.setSmallIcon(R.drawable.xiazai1);
         builder.setProgress(100, progress, false);
+
         return builder.build();
     }
     private int getRandom()

@@ -61,14 +61,6 @@
                 <action android:name="com.vaiyee.asynbutton" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".brocastReciver.playModeReceiver"
-            android:directBootAware="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.vaiyee.playmode" />
-            </intent-filter>
-        </receiver>
         <receiver android:name=".brocastReciver.ForceOffline"
             android:exported="true"
             android:enabled="true">
@@ -76,7 +68,13 @@
                 <action android:name="com.vaiyee.hongmusic.offline" />
             </intent-filter>
         </receiver>
-
+        <receiver android:name=".brocastReciver.PlayModeReeceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.vaiyee.playmode"/>
+            </intent-filter>
+        </receiver>
         <activity android:name=".WangyiBangActivity" />
         <activity android:name=".KugoubangActivity" />
         <activity android:name=".Utils.YinxiaoActivity" />

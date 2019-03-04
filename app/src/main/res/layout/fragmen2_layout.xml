@@ -60,7 +60,7 @@
         android:scaleType="center"
         android:id="@+id/open_geshou"
         android:background="@drawable/button_ripple"
-        android:backgroundTint="#FFC125"
+        app:backgroundTint="#FFC125"
         android:src="@drawable/geshou"/>
 
 </FrameLayout>

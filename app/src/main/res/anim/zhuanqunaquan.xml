@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<set xmlns:android="http://schemas.android.com/apk/res/android" >
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fillAfter="true"
+    android:fillBefore="false">
 
     <rotate
         android:duration="30000"
@@ -8,6 +10,7 @@
         android:pivotY="50%"
         android:repeatCount="-1"
         android:repeatMode="restart"
-        android:toDegrees="360" />
+        android:toDegrees="360"
+        />
 
 </set>
