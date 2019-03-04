@@ -73,6 +73,7 @@ public class NotiUtil {
         builder.setContentTitle("歌曲");
         builder.setSmallIcon(R.drawable.xiazai1);
         builder.setProgress(100, progress, false);
+        builder.setPriority(Notification.PRIORITY_LOW);
         return builder.build();
     }
     public static int getRandom()
