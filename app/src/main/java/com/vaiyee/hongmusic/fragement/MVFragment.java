@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MVFragment extends Fragment implements View.OnClickListener{
+public class MVFragment extends BaseFragment implements View.OnClickListener{
 
     private RecyclerView mvlistview;
     private List<KugouMv.Info> mvlist = new ArrayList<>();
@@ -87,15 +87,28 @@ public class MVFragment extends Fragment implements View.OnClickListener{
         });
         */
     }
+    @Override
+    protected View createView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_mv,container,false);
+        return view;
+    }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_mv,container,false);
+    protected void initView(View view) {
         mvlistview = view.findViewById(R.id.mv_recycleview);
         lodaing = view.findViewById(R.id.loading);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setColorSchemeResources(R.color.blue);
+        tuijian = view.findViewById(R.id.tuijian);
+        zuixin = view.findViewById(R.id.zuixin);
+        zuire = view.findViewById(R.id.zuire);
+    }
+
+    @Override
+    protected void initListener() {
+        tuijian.setOnClickListener(this);
+        zuixin.setOnClickListener(this);
+        zuire.setOnClickListener(this);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -103,14 +116,6 @@ public class MVFragment extends Fragment implements View.OnClickListener{
                 Refresh();
             }
         });
-        tuijian = view.findViewById(R.id.tuijian);
-        tuijian.setOnClickListener(this);
-        zuixin = view.findViewById(R.id.zuixin);
-        zuixin.setOnClickListener(this);
-        zuire = view.findViewById(R.id.zuire);
-        zuire.setOnClickListener(this);
-        mvlistview.setLayoutManager(new MyContentLinearLayoutManager(getContext()));
-        mvlistview.setAdapter(adapter);
         mvlistview.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -120,6 +125,7 @@ public class MVFragment extends Fragment implements View.OnClickListener{
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+                KugouMvAdapter.isAnimation =true; //播放动画
                 if (dy > 0) //向下滚动
                 {
                     linearLayoutManager2 = (LinearLayoutManager) recyclerView.getLayoutManager();
@@ -136,7 +142,12 @@ public class MVFragment extends Fragment implements View.OnClickListener{
                 }
             }
         });
-        return view;
+    }
+
+    @Override
+    protected void lazyLoad() {
+        mvlistview.setLayoutManager(new MyContentLinearLayoutManager(getContext()));
+        mvlistview.setAdapter(adapter);
     }
 
     @Override
@@ -185,6 +196,7 @@ public class MVFragment extends Fragment implements View.OnClickListener{
             @Override
             public void onSuccess(KugouMv kugouMv) {
                 mvlist.addAll(kugouMv.data.infoList);
+                KugouMvAdapter.isAnimation = false; //加载更多不播放动画
                 adapter.notifyDataSetChanged();
                 loading = false;   //结束加载更多
                 lodaing.setVisibility(View.GONE);

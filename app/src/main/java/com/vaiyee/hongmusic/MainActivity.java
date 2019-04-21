@@ -78,6 +78,7 @@ import com.vaiyee.hongmusic.bean.DownloadInfo;
 import com.vaiyee.hongmusic.bean.KugouMusic;
 import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.bean.WangyiLrc;
+import com.vaiyee.hongmusic.fragement.BaseFragment;
 import com.vaiyee.hongmusic.fragement.GedanFragment;
 import com.vaiyee.hongmusic.fragement.MVFragment;
 import com.vaiyee.hongmusic.fragement.PlayMusicFragment;
@@ -117,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private LinearLayout playbar;
     private List<ColorTrackView> mTabs = new ArrayList<ColorTrackView>();
     private PlayMusicFragment playMusicFragment;
-    private List<Fragment> list = new ArrayList<Fragment>();
+    private List<Fragment> list = new ArrayList<>();
     private Boolean isShowfragment =false;
     public static boolean firstopen = false;
     public static ImageView cover,play;

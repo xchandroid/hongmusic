@@ -105,17 +105,6 @@ public class SearchActivity extends SwipeBackActivity {
         DuquSousuoLishi();
         ShowHistory();
         super.onResume();
-        HttpUtil.sendOkhttpRequest("http://music.163.com/discover/toplist?id=19723756", new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Toast.makeText(SearchActivity.this,"获取数据失败，请检查网络设置重试",Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                creatLrc(response.body().string(),"HTML内容");
-            }
-        });
     }
 
     private void initView()

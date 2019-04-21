@@ -1,5 +1,7 @@
 package com.vaiyee.hongmusic.Adapter;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -39,10 +41,12 @@ import com.vaiyee.hongmusic.R;
 import com.vaiyee.hongmusic.Utils.DownloadTask;
 import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.fragement.fragement1;
+import com.vaiyee.hongmusic.util.CacheLoadImageUtil;
 
 import org.w3c.dom.Text;
 
 import java.io.File;
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,6 +68,33 @@ public class songsAdapter extends RecyclerView.Adapter<songsAdapter.Viewholder> 
         songList = objects;
         this.activity = activity;
         this.context = context;
+        LoadImg(); //预加载所有歌曲封面
+    }
+   private static CacheLoadImageUtil cacheLoadImageUtil = new CacheLoadImageUtil((int) (Runtime.getRuntime().maxMemory()/8));//缓存区域的最大内存为本进程运行内存的1/8
+    private void LoadImg() {
+        for (Song song:songList)
+        {
+            String url = song.getFileUrl();
+            byte [] imgByte = getArtwork(context,url);
+            if (imgByte!=null) {  //有专辑封面才存入
+                cacheLoadImageUtil.put(url, BitmapFactory.decodeByteArray(imgByte, 0, imgByte.length));
+            }
+        }
+    }
+    private Bitmap getfengmian(String url) //从Lru集合或软引用集合中获取歌曲封面的Bitmap
+    {
+        Bitmap bitmap = cacheLoadImageUtil.get(url);
+        if (bitmap!=null) //如果强引用中有就返回
+        {
+            return bitmap;
+        }
+        SoftReference<Bitmap> softReference = cacheLoadImageUtil.softReferenceMap.get(url);
+        if (softReference!=null) //如果软引用中有返回
+        {
+            cacheLoadImageUtil.put(url,softReference.get());//将Bitmap重新放回运行内存中（强引用）
+            return softReference.get();
+        }
+        return null; //没有封面就返回null
     }
 
     public void setScrollState(boolean scrollState) {
@@ -85,12 +116,11 @@ public class songsAdapter extends RecyclerView.Adapter<songsAdapter.Viewholder> 
         byte[] artwork;
 
         artwork = myRetriever.getEmbeddedPicture();
-
-        if (artwork != null) {
-
+        if (artwork!=null) {
             return artwork;
-        } else {
-
+        }
+        else
+        {
             return null;
         }
     }
@@ -245,8 +275,8 @@ public class songsAdapter extends RecyclerView.Adapter<songsAdapter.Viewholder> 
 
     @Override
     public void onBindViewHolder(Viewholder holder, final int position) {
-            final  Song song = songList.get(position);
-              String url = song.getFileUrl();
+        final Song song = songList.get(position);
+        String url = song.getFileUrl();
         holder.ablum.setText("《" + song.getAlbum() + "》");
         holder.geshou.setText(song.getSinger());
         holder.geming.setText(1 + position + "." + song.getTitle());
@@ -254,16 +284,20 @@ public class songsAdapter extends RecyclerView.Adapter<songsAdapter.Viewholder> 
             @Override
             public void onClick(View view) {
 
-                Showpopwindow(song.getTitle(), song.getFileUrl(),position);
+                Showpopwindow(song.getTitle(), song.getFileUrl(), position);
             }
         });
-            Glide.with(context)
-                    .load(getArtwork(context, url))
-                    .placeholder(R.drawable.music_ic)
-                    .error(R.drawable.music_ic)
-                    .into(holder.zjview);
-
-        //holder.zjview.setImageBitmap(getArtwork(context, url));
+        Bitmap bitmap = getfengmian(url);
+           if (bitmap!=null)
+           {
+               holder.zjview.setImageBitmap(bitmap);
+           }
+           else
+           {
+               holder.zjview.setImageResource(R.drawable.music_ic);
+           }
+        Animator animator = ObjectAnimator.ofFloat(holder.itemView,"alpha",0f,0.5f,1.0f);
+        animator.setDuration(500).start();
 
     }
 

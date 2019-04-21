@@ -45,7 +45,7 @@ import java.util.TimerTask;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class GedanFragment extends Fragment {
+public class GedanFragment extends BaseFragment {
 
     private RecyclerView recyclerView;
     private LinearLayout loadingfooter,loadingfooterCenter;
@@ -84,23 +84,29 @@ public class GedanFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    protected View createView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_gedan,container,false);
+        return view;
+    }
+
+    @Override
+    protected void initView(View view) {
         recyclerView = view.findViewById(R.id.gedan_recview);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setColorSchemeResources(R.color.blue);
+        loadingfooter = view.findViewById(R.id.loading_view);
+        loadingfooterCenter = view.findViewById(R.id.loading_center);
+        shoucang = view.findViewById(R.id.wodeshoucang);
+    }
+
+    @Override
+    protected void initListener() {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 Refresh();
             }
         });
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),2);
-        recyclerView.setLayoutManager(gridLayoutManager);
-        recyclerView.setAdapter(adapter);  //这里再设置一次是因为当这个碎片由不见变为可见时会执行这个方法,不再设置一次适配器的话数据将不能显示
-        loadingfooter = view.findViewById(R.id.loading_view);
-        loadingfooterCenter = view.findViewById(R.id.loading_center);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -110,6 +116,7 @@ public class GedanFragment extends Fragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+                GedanAdapter.isAnimation = true;//列表滑动就开始播放动画
                 if (dy > 0) //向下滚动
                 {
                     manager = (GridLayoutManager) recyclerView.getLayoutManager();
@@ -126,14 +133,19 @@ public class GedanFragment extends Fragment {
                 }
             }
         });
-        shoucang = view.findViewById(R.id.wodeshoucang);
         shoucang.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showWodeShouCang();
             }
         });
-        return view;
+    }
+
+    @Override
+    protected void lazyLoad() {
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),2);
+        recyclerView.setLayoutManager(gridLayoutManager);
+        recyclerView.setAdapter(adapter);  //这里再设置一次是因为当这个碎片由不见变为可见时会执行这个方法,不再设置一次适配器的话数据将不能显示
     }
 
 
@@ -161,6 +173,7 @@ public class GedanFragment extends Fragment {
             @Override
             public void onSuccess(Gedan response) {
                 infoList.addAll(response.data.infoList);
+                GedanAdapter.isAnimation = false; //加载更多时停止播放动画，视觉效果不好
                 adapter.notifyDataSetChanged();
                 loading = false;
                 loadingfooter.setVisibility(View.GONE);

@@ -67,7 +67,7 @@ import java.util.List;
  * Created by Administrator on 2018/1/29.
  */
 
-public class fragement1 extends Fragment {
+public class fragement1 extends BaseFragment {
     private static RecyclerView recyclerView;
     public static List<Song> songs;
     public static String coverUrl,geming,geshou;
@@ -75,7 +75,7 @@ public class fragement1 extends Fragment {
     private List<Song> songList;
     private TextView tips,nomp3;
     private RollPagerView rollPagerView;
-    private  String[]imgs = new String[8];
+    private  String[]imgs = new String[7];
 
 
     @Override
@@ -83,113 +83,93 @@ public class fragement1 extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
+    @Override
+    protected View createView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment1_layout,null);
-        tips = view.findViewById(R.id.tips);
-        nomp3 = view.findViewById(R.id.nomp3);
-        //hearder = LayoutInflater.from(getContext()).inflate(R.layout.roll_pager_view,null);  //这里不要把ViewGroup container作为参数，否则造成布局参数错误导致崩溃
-        recyclerView = view.findViewById(R.id.localmusic_list);
-        //listView.addHeaderView(hearder);
-        rollPagerView = view.findViewById(R.id.rollview);
-        // 申请权限
+        return view;
+    }
+
+    @Override
+    protected void initView(View root) {
+        tips = root.findViewById(R.id.tips);
+        nomp3 = root.findViewById(R.id.nomp3);
+        recyclerView = root.findViewById(R.id.localmusic_list);
+        rollPagerView = root.findViewById(R.id.rollview);
+    }
+
+    @Override
+    protected void initListener() {
+
+    }
+
+    @Override
+    protected void lazyLoad() {
+// 申请权限
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
         }
         else
         {
-           updateSonglist();  //已授过权了直接扫描音乐
+            updateSonglist();  //已授过权了直接扫描音乐
         }
 
-/*
-        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+
+        HttpClinet.getBanner(new HttpCallback<Banner>() {
             @Override
-            public void onScrollStateChanged(AbsListView absListView, int i) {
-
-
-                switch (i)
+            public void onSuccess(Banner banner) {
+                final List<Banner.DataBean.InfoBean> bannerlist = banner.bean.getInfo();
+                for (int i=0;i<bannerlist.size();i++)
                 {
-                    case AbsListView.OnScrollListener.SCROLL_STATE_IDLE: //滑动停止
-                        // MainActivity.linearLayout.setVisibility(View.VISIBLE);
-                     adapter.setScrollState(false);
-                        //当前屏幕中listview的子项的个数
-                        int count = absListView.getChildCount();
-                        for (int j = 0; j < count; j++) {
-                            //获取到item的图片显示的Imageview控件
-                            ImageView iv_show = (ImageView) absListView.getChildAt(j).findViewById(R.id.zj_id);
-                            if (iv_show != null)
-                            {
-                                if (!iv_show.getTag().equals("1")) {//如果等于1说明图片资源已加载过，不等于说明没有去getTag()的图片url
-
-                                    //直接从Tag中取出我们存储的数据image——url
-                                    String image_url = iv_show.getTag().toString();
-                                    if (image_url != null) {//这个判断是防止图片的url是否为空，为空的话给默认图片。
-                                        iv_show.setImageBitmap(songsAdapter.setArtwork(getContext(), image_url));
-                                        //设置为已加载过数据
-                                        iv_show.setTag("1");
-                                    } else {
-                                        iv_show.setImageResource(R.drawable.music_ic);
-                                        iv_show.setTag("1");
-                                    }
-
-                                }
-                        }
-                        }
-
-                    break;
-
-                    //滚动做出了抛的动作
-                    case AbsListView.OnScrollListener.SCROLL_STATE_FLING:
-                    {
-                        //设置为正在滚动
-                        adapter.setScrollState(true);
-                        //MainActivity.linearLayout.setVisibility(View.GONE);
-                        break;
-                    }
-                    //正在滚动
-                    case AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
-                    {
-                        //设置为正在滚动
-                        adapter.setScrollState(true);
-                        //MainActivity.linearLayout.setVisibility(View.GONE);
-                        break;
-                    }
-                    default:
-                        break;
+                    imgs[i] = bannerlist.get(i).getImg();
                 }
+
+                //设置每个图片的切换时间
+                rollPagerView.setPlayDelay(3000);
+                //设置图片切换动画时间
+                rollPagerView.setAnimationDurtion(500);
+                //设置指示器:
+                //rollPV.setHintView(new IconHintView());
+                //rollPV.setHintView(new IconHintView(this,R.mipmap.ic_launcher,R.mipmap.ic_launcher));
+                rollPagerView.setHintView(new ColorPointHintView(getContext(),
+                        getResources().getColor(R.color.blue),
+                        Color.WHITE));
+                //设置适配器
+                rollPagerView.setAdapter(new RollPagerAdapter());            //获取图片url成功后再设置Adapter，防止空对象引用
+
+                //设置每一个图片的点击事件
+                rollPagerView.setOnItemClickListener(new OnItemClickListener() {
+                    @Override
+                    public void onItemClick(int position) {
+
+                        if (bannerlist.get(position).getType()==2)
+                        {
+                            Intent intent = new Intent(getContext(), PlayMvActivity.class);
+                            String Bighash =bannerlist.get(position).getExtra().getVideo_hash().toUpperCase();
+                            String key = getMD5(Bighash+"kugoumvcloud");
+                            intent.putExtra("mvid","http://trackermv.kugou.com/interface/index/cmd=100&hash="+Bighash+"&key="+key+"&pid=6&ext=mp4&ismp3=0");
+                            intent.putExtra("type","kg");
+                            intent.putExtra("title",bannerlist.get(position).getTitle());
+                            startActivity(intent);
+                        }
+                        else
+                        {
+                            Intent intent = new Intent(getContext(),WebActivity.class);
+                            intent.putExtra("URL",bannerlist.get(position).getExtra().getUrl());
+                            intent.putExtra("title",bannerlist.get(position).getTitle());
+                            startActivity(intent);
+                        }
+                    }
+                });
+
             }
 
             @Override
-            public void onScroll(AbsListView absListView, int i, int i1, int i2) {
-
+            public void onFail(Exception e) {
+                Toast.makeText(getContext(),"获取首页推荐失败，请检查网络是否畅通",Toast.LENGTH_LONG).show();
             }
         });
-        *
-        *
-        *
-        *
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
-                final Song song = songs.get(i);
-                geming = song.getTitle().toString();
-                geshou = song.getSinger().toString();
-                PlayMusic playMusic = new PlayMusic();
-                final String path = song.getFileUrl();
-                playMusic.play(path,i);
-                getLrc(geming,song,i);
-                songList = new ArrayList<>();
-                songList.addAll(songs);
-                PlayMusic.PlayList playList = new PlayMusic.PlayList();
-                playList.setPlaylist(songList);
-                playList.setBang(0);
-            }
-        });
-        */
-        return view;
     }
 
     @Override
@@ -290,60 +270,6 @@ public class fragement1 extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        HttpClinet.getBanner(new HttpCallback<Banner>() {
-            @Override
-            public void onSuccess(Banner banner) {
-                final List<Banner.DataBean.InfoBean> bannerlist = banner.bean.getInfo();
-                for (int i=0;i<bannerlist.size();i++)
-                {
-                    imgs[i] = bannerlist.get(i).getImg();
-                }
-
-                //设置每个图片的切换时间
-                rollPagerView.setPlayDelay(3000);
-                //设置图片切换动画时间
-                rollPagerView.setAnimationDurtion(500);
-                //设置指示器:
-                //rollPV.setHintView(new IconHintView());
-                //rollPV.setHintView(new IconHintView(this,R.mipmap.ic_launcher,R.mipmap.ic_launcher));
-                rollPagerView.setHintView(new ColorPointHintView(getContext(),
-                        getResources().getColor(R.color.blue),
-                        Color.WHITE));
-                //设置适配器
-                rollPagerView.setAdapter(new RollPagerAdapter());            //获取图片url成功后再设置Adapter，防止空对象引用
-
-                //设置每一个图片的点击事件
-                rollPagerView.setOnItemClickListener(new OnItemClickListener() {
-                    @Override
-                    public void onItemClick(int position) {
-
-                        if (bannerlist.get(position).getType()==2)
-                        {
-                            Intent intent = new Intent(getContext(), PlayMvActivity.class);
-                            String Bighash =bannerlist.get(position).getExtra().getVideo_hash().toUpperCase();
-                            String key = getMD5(Bighash+"kugoumvcloud");
-                            intent.putExtra("mvid","http://trackermv.kugou.com/interface/index/cmd=100&hash="+Bighash+"&key="+key+"&pid=6&ext=mp4&ismp3=0");
-                            intent.putExtra("type","kg");
-                            intent.putExtra("title",bannerlist.get(position).getTitle());
-                            startActivity(intent);
-                        }
-                        else
-                        {
-                            Intent intent = new Intent(getContext(),WebActivity.class);
-                            intent.putExtra("URL",bannerlist.get(position).getExtra().getUrl());
-                            intent.putExtra("title",bannerlist.get(position).getTitle());
-                            startActivity(intent);
-                        }
-                    }
-                });
-
-            }
-
-            @Override
-            public void onFail(Exception e) {
-                Toast.makeText(getContext(),"获取首页推荐失败，请检查网络是否畅通",Toast.LENGTH_LONG).show();
-            }
-        });
     }
 
 

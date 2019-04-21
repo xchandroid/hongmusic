@@ -1,5 +1,8 @@
 package com.vaiyee.hongmusic.Adapter;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +30,7 @@ public class KugouMvAdapter extends RecyclerView.Adapter<KugouMvAdapter.ViewHold
     private Context context;
     private List<KugouMv.Info> infoList;
     private Activity activity;
+    public static boolean isAnimation = true; //控制滑动到底部时加载更多时，重复播放动画的bug
 
     public KugouMvAdapter(Context context,List<KugouMv.Info> infoList,Activity activity)
     {
@@ -57,6 +61,14 @@ public class KugouMvAdapter extends RecyclerView.Adapter<KugouMvAdapter.ViewHold
                 context.startActivity(intent);
             }
         });
+        if (isAnimation) {
+            AnimatorSet animatorSet = new AnimatorSet();
+            Animator animator = ObjectAnimator.ofFloat(holder.itemView, "translationX", 1000, 500, -200, 0);
+            Animator animator1 = ObjectAnimator.ofFloat(holder.itemView, "scaleX", 0f, 0.5f, 1f);
+            Animator animator2 = ObjectAnimator.ofFloat(holder.itemView, "scaleY", 0f, 0.5f, 1f);
+            animatorSet.playTogether(animator, animator1);
+            animatorSet.setDuration(500).start();
+        }
     }
 
     @Override

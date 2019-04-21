@@ -1,5 +1,6 @@
 package com.vaiyee.hongmusic.Adapter;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.CardView;
@@ -15,6 +16,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.vaiyee.hongmusic.GedanActivity;
 import com.vaiyee.hongmusic.R;
 import com.vaiyee.hongmusic.bean.Gedan;
+import com.vaiyee.hongmusic.util.Animation;
 
 import java.util.List;
 
@@ -25,7 +27,7 @@ import java.util.List;
 public class GedanAdapter extends RecyclerView.Adapter<GedanAdapter.ViewHolder> {
     private Context context;
     private List<Gedan.Info> gedanList;
-
+    public static boolean isAnimation = true;
 
     public GedanAdapter(Context context,List<Gedan.Info>gedanList)
     {
@@ -63,6 +65,12 @@ public class GedanAdapter extends RecyclerView.Adapter<GedanAdapter.ViewHolder> 
                 context.startActivity(intent);
             }
         });
+        if (isAnimation) {
+            for (Animator animator : Animation.getAnimators(holder.itemView)) {
+                animator.setDuration(500).start();
+            }
+        }
+
     }
 
 

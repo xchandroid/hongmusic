@@ -78,31 +78,33 @@ public abstract class CategoryAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        for (Category category:categories) {
-            switch (getItemViewType(position)) {
-                case 0:
-                //如果是第一个，则显示分类的名称
-
-                    if (category.getmAdapter().getCount() + 1 >= 2) {       //如果当前分类下面没有内容则不显示标题
-                        return getTitleView(category.getmTitle(), convertView, parent);
-                    }
-                    break;
-                case 1:
-                //否则显示该分类下的数据
-                //每个分类加上其子类的数量
-                int size = category.getmAdapter().getCount()+1;
-                if (size >= 2) {                                          //当前分类下面有内容才显示
-                    if (position < size) {
-                        return category.getmAdapter().getView(position - 1, convertView, parent);
-                    }
-                    //当position为0时，说明一个分类的数据已经展示完毕，紧接着展示下一个分类的数据
-                    position = position - size;          //重置position的值为0，加载下一个分类的内容
-
-                }
-                break;
-            }
-
-        }
+        int i=0;
+        System.out.println("当前position的值是"+position);
+       for(Category category:categories)  //显示到第n个类别,for循环就循环n次
+       {
+           i++;
+           System.out.println("for循环运行了"+i+"次");
+           switch (getItemViewType(position))
+           {
+               case 0:
+                   System.out.println("返回了标题view");
+                   return getTitleView(category.getmTitle(),convertView,parent);
+               case 1:
+                   int size = category.getmAdapter().getCount()+1;//获取当前要显示的类别加上标题总共长度，因为在所有为0的位置返回了标题view
+                   if (size>=2) //判断当前类别下至少有一个项目才显示
+                   {
+                       if (position<size) //position==size时的索引位置就是下一个类别的标题，因为索引是从0开始的，当position==9时在列表中其实已经是第十个位置了
+                       {
+                           return category.getmAdapter().getView(position-1,convertView,parent);
+                       }
+                       else
+                       {
+                           position = position-size; //当position==size时，减去上一个类别的数量，显示下一个类别的条目
+                           System.out.println("里面position的值是"+position);
+                       }
+                   }
+           }
+       }
         return null;
     }
 

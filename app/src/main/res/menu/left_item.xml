@@ -20,7 +20,7 @@
         <item
             android:id="@+id/action_about"
             android:icon="@drawable/ic_menu_about"
-            android:title="关于宏晨音乐" />
+            android:title="关于趣听音乐" />
         <item
             android:id="@+id/myqq"
             android:icon="@drawable/ic_qq"

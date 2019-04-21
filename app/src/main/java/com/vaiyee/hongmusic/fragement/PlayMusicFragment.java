@@ -684,7 +684,8 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                         .dontAnimate()//防止设置placeholder导致第一次不显示网络图片,只显示默认图片的问题
                         .error(R.drawable.music_ic)
                         .placeholder(R.drawable.music_ic)
-                        .transform(new GlideRoundTransform(getContext(),100)).into(playbg);
+                        .centerCrop()
+                        .transform(new GlideRoundTransform(getContext(),500)).into(playbg);
 
 
                 Glide.with(MyApplication.getQuanjuContext())
@@ -709,7 +710,8 @@ public class PlayMusicFragment extends Fragment implements View.OnClickListener,
                         .dontAnimate()//防止设置placeholder导致第一次不显示网络图片,只显示默认图片的问题
                         .error(R.drawable.music_ic)
                         .placeholder(R.drawable.music_ic)
-                        .transform(new GlideRoundTransform(getContext(),300)).into(playbg);
+                        .centerCrop()
+                        .transform(new GlideRoundTransform(getContext(),500)).into(playbg);
 
 
 

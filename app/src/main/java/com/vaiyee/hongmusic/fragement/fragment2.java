@@ -35,7 +35,7 @@ import io.vov.vitamio.utils.Log;
  * Created by Administrator on 2018/1/29.
  */
 
-public class fragment2 extends Fragment {
+public class fragment2 extends BaseFragment {
     private ListView onlineList;
     private List<Sheet> sheetList;
     private TextView wangyi,baidu,kugou;
@@ -60,14 +60,24 @@ public class fragment2 extends Fragment {
         }
     }
 
+
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    protected View createView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragmen2_layout, null);
+        return view;
+    }
+
+    @Override
+    protected void initView(View view) {
         onlineList = view.findViewById(R.id.online_sheetlist);
         wangyi = view.findViewById(R.id.wangyi);
         baidu = view.findViewById(R.id.baidu);
         kugou = view.findViewById(R.id.kugou);
         open = view.findViewById(R.id.open_geshou);
+    }
+
+    @Override
+    protected void initListener() {
         open.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -154,18 +164,20 @@ public class fragment2 extends Fragment {
 
             }
         });
-            onlineList.setAdapter(new Onlinesheet(getContext(), sheetList));
-            onlineList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    Sheet sheet = sheetList.get(i);
-                    Intent intent = new Intent(getContext(), OnlineMusicActivity.class);
-                    intent.putExtra("ABC",sheet);
-                    startActivity(intent);
-                }
-            });
+    }
 
-        return view;
+    @Override
+    protected void lazyLoad() {
+        onlineList.setAdapter(new Onlinesheet(getContext(), sheetList));
+        onlineList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Sheet sheet = sheetList.get(i);
+                Intent intent = new Intent(getContext(), OnlineMusicActivity.class);
+                intent.putExtra("ABC",sheet);
+                startActivity(intent);
+            }
+        });
     }
 
 

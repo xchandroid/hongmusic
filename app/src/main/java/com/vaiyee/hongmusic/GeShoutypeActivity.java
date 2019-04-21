@@ -97,9 +97,9 @@ public class GeShoutypeActivity extends SwipeBackActivity {
                 for (int i = 0;i<geshouType.infoList.size();i++)
                 {
                     //singerList.addAll(geshouType.infoList.get(i).singerList);
-                    singerList1 = geshouType.infoList.get(i).singerList;
-                    titleList.add(geshouType.infoList.get(i).title);
-                    infoList.addAll(geshouType.infoList);
+                   singerList1 = geshouType.infoList.get(i).singerList;
+//                    titleList.add(geshouType.infoList.get(i).title);
+//                    infoList.addAll(geshouType.infoList);
                     adapter.addCategery(geshouType.infoList.get(i).title,new GeshouTypeAdapter(GeShoutypeActivity.this,singerList1));
 
                 }
