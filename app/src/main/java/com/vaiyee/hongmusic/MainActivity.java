@@ -1,14 +1,8 @@
 package com.vaiyee.hongmusic;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -29,14 +23,9 @@ import android.os.Message;
 import android.os.Process;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.os.Bundle;
@@ -45,7 +34,6 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -55,34 +43,25 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.RemoteViews;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
-import com.vaiyee.hongmusic.Adapter.songsAdapter;
-import com.vaiyee.hongmusic.CustomView.PlaybarLayout;
+import com.vaiyee.hongmusic.TransformerLibs.AccordionTransformer;
 import com.vaiyee.hongmusic.Utils.HttpClinet;
 import com.vaiyee.hongmusic.Utils.QuanjuUtils;
 import com.vaiyee.hongmusic.Utils.ScreenUtils;
-import com.vaiyee.hongmusic.Utils.YinxiaoActivity;
-import com.vaiyee.hongmusic.Utils.getAudio;
 import com.vaiyee.hongmusic.bean.DownloadInfo;
 import com.vaiyee.hongmusic.bean.KugouMusic;
 import com.vaiyee.hongmusic.bean.Song;
-import com.vaiyee.hongmusic.bean.WangyiLrc;
-import com.vaiyee.hongmusic.fragement.BaseFragment;
 import com.vaiyee.hongmusic.fragement.GedanFragment;
 import com.vaiyee.hongmusic.fragement.MVFragment;
 import com.vaiyee.hongmusic.fragement.PlayMusicFragment;
-import com.vaiyee.hongmusic.fragement.WangyiFragment;
 import com.vaiyee.hongmusic.fragement.YinxiaoFragment;
 import com.vaiyee.hongmusic.fragement.fragement1;
 import com.vaiyee.hongmusic.fragement.fragment2;
@@ -92,11 +71,9 @@ import com.vaiyee.hongmusic.service.MyService;
 import com.vaiyee.hongmusic.util.Annotation;
 import com.vaiyee.hongmusic.util.BindOnclick;
 import com.vaiyee.hongmusic.util.BindView;
-import com.vaiyee.hongmusic.util.ClientThread;
 import com.vaiyee.hongmusic.util.Utility;
 import com.yatoooon.screenadaptation.ScreenAdapterTools;
 
-import java.sql.BatchUpdateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -237,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         list.add(new fragment2());
         list.add(new GedanFragment());
         list.add(new MVFragment());
+        viewPager.setPageTransformer(true,new AccordionTransformer());
         viewPager.setAdapter(new fragmentAdapter(getSupportFragmentManager(), list));
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -255,23 +233,81 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
             @Override
             public void onPageSelected(int position) {
-              /*
-                switch (position)
-                {
-                    case 1:
-                        tt.setTextColor(R.color.txtcolor);
-                        t.setTextColor(R.color.txtcoler);
-                        break;
-                    case 0:
-                        tt.setTextColor(R.color.txtcoler);
-                        t.setTextColor(R.color.txtcolor);
-                        break;
-                }*/
+//                int n = (int)(Math.random()*16+1);
+//                switch (n)
+//                {
+//                    case 1:
+//                        viewPager.setPageTransformer(true,
+//                                new AccordionTransformer());
+//                        break;
+//                    case 2:
+//                        viewPager.setPageTransformer(true,
+//                                new BackgroundToForegroundTransformer());
+//                        break;
+//                    case 3:
+//                        viewPager.setPageTransformer(true,
+//                                new CubeInTransformer());
+//                        break;
+//                    case 4:
+//                        viewPager.setPageTransformer(true,
+//                                new CubeOutTransformer());
+//                        break;
+//                    case 5:
+//                        viewPager.setPageTransformer(true,
+//                                new DepthPageTransformer());
+//                        break;
+//                    case 6:
+//                        viewPager.setPageTransformer(true,
+//                                new FlipHorizontalTransformer());
+//                        break;
+//                    case 7:
+//                        viewPager.setPageTransformer(true,
+//                                new FlipVerticalTransformer());
+//                        break;
+//                    case 8:
+//                        viewPager.setPageTransformer(true,
+//                                new ForegroundToBackgroundTransformer());
+//                        break;
+//                    case 9:
+//                        viewPager.setPageTransformer(true,
+//                                new RotateDownTransformer());
+//                        break;
+//                    case 11:
+//                        viewPager.setPageTransformer(true,
+//                                new ScaleInOutTransformer());
+//                        break;
+//                    case 12:
+//                        viewPager.setPageTransformer(true,
+//                                new StackTransformer());
+//                        break;
+//                    case 13:
+//                        viewPager.setPageTransformer(true,
+//                                new TabletTransformer());
+//                        break;
+//                    case 14:
+//                        viewPager.setPageTransformer(true,
+//                                new ZoomInTransformer());
+//                        break;
+//                    case 15:
+//                        viewPager.setPageTransformer(true,
+//                                new ZoomOutSlideTransformer());
+//                        break;
+//                    case 16:
+//                        viewPager.setPageTransformer(true,
+//                                new ZoomOutTranformer());
+//                        break;
+//                    default:
+//                        break;
+//                }
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
-
+            public void onPageScrollStateChanged(int scrollState) {
+                if (scrollState != ViewPager.SCROLL_STATE_IDLE) {
+                    final int childCount = viewPager.getChildCount();
+                    for (int i = 0; i < childCount; i++)
+                        viewPager.getChildAt(i).setLayerType(View.LAYER_TYPE_NONE, null);
+                }
             }
         });
         navigationView = findViewById(R.id.navigation_view);
@@ -410,7 +446,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         bindService();   //绑定通知栏播放条服务，此时服务仅被创建未被调用onStartcommand（）
         ShowWeatherInfo();//每次打开程序时显示已保存的天气数据
 
-       new ClientThread(this,handler).start();  //连接我的服务器就进行控制(暂时买不起服务器，先砍掉这个功能)
+      // new ClientThread(this,handler).start();  //连接我的服务器就进行控制(暂时买不起服务器，先砍掉这个功能)
     }
 
 

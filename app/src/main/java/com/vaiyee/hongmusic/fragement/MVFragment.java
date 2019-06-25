@@ -51,43 +51,6 @@ public class MVFragment extends BaseFragment implements View.OnClickListener{
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        adapter = new KugouMvAdapter(getActivity(),mvlist,getActivity());
-        HttpClinet.getKugouMv(page, sort, new HttpCallback<KugouMv>() {
-            @Override
-            public void onSuccess(KugouMv kugouMv) {
-                mvlist.addAll(kugouMv.data.infoList);
-                mvlistview.setLayoutManager(new MyContentLinearLayoutManager(getContext()));
-                mvlistview.setAdapter(adapter);
-                isSuccess = true;
-                isfirst = false;
-                lodaing.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onFail(Exception e) {
-                Toast.makeText(getContext(),"获取MV数据失败，请检查网络是否畅通",Toast.LENGTH_LONG).show();
-            }
-        });
-        /*
-        HttpClinet.getWangyiMV(new HttpCallback<WangYiMv>() {
-            @Override
-            public void onSuccess(WangYiMv wangYiMv) {
-                mvlist.addAll(wangYiMv.mvlist);
-                mvlistview.setAdapter(adapter);
-                isSuccess = true;
-                lodaing.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onFail(Exception e) {
-
-            }
-        });
-        */
-    }
-    @Override
     protected View createView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_mv,container,false);
         return view;
@@ -147,7 +110,24 @@ public class MVFragment extends BaseFragment implements View.OnClickListener{
     @Override
     protected void lazyLoad() {
         mvlistview.setLayoutManager(new MyContentLinearLayoutManager(getContext()));
+        adapter = new KugouMvAdapter(getActivity(),mvlist,getActivity());
         mvlistview.setAdapter(adapter);
+        HttpClinet.getKugouMv(page, sort, new HttpCallback<KugouMv>() {
+            @Override
+            public void onSuccess(KugouMv kugouMv) {
+                mvlist.addAll(kugouMv.data.infoList);
+                adapter.notifyDataSetChanged();
+                isSuccess = true;
+                isfirst = false;
+                lodaing.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onFail(Exception e) {
+                Toast.makeText(getContext(),"获取MV数据失败，请检查网络是否畅通",Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
     @Override

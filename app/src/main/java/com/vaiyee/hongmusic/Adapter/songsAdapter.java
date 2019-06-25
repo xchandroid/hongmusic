@@ -38,9 +38,15 @@ import com.vaiyee.hongmusic.MainActivity;
 import com.vaiyee.hongmusic.MyApplication;
 import com.vaiyee.hongmusic.PlayMusic;
 import com.vaiyee.hongmusic.R;
+import com.vaiyee.hongmusic.SearchActivity;
 import com.vaiyee.hongmusic.Utils.DownloadTask;
+import com.vaiyee.hongmusic.Utils.HttpClinet;
+import com.vaiyee.hongmusic.Utils.NetUtils;
+import com.vaiyee.hongmusic.bean.KugouMusic;
+import com.vaiyee.hongmusic.bean.KugouSearchResult;
 import com.vaiyee.hongmusic.bean.Song;
 import com.vaiyee.hongmusic.fragement.fragement1;
+import com.vaiyee.hongmusic.http.HttpCallback;
 import com.vaiyee.hongmusic.util.CacheLoadImageUtil;
 
 import org.w3c.dom.Text;
@@ -49,6 +55,8 @@ import java.io.File;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -62,24 +70,38 @@ public class songsAdapter extends RecyclerView.Adapter<songsAdapter.Viewholder> 
     private boolean scrollState = false;//Listview是否滑动状态,默认没在滑动
     private Activity activity;
     private Context context;
+    private int index =0;//标记位，当获取完所有歌曲的封面后刷新列表显示图片
 
     public songsAdapter(@NonNull Context context, int resource, @NonNull List<Song> objects,Activity activity) {
         resourLayout = resource;
         songList = objects;
         this.activity = activity;
         this.context = context;
-        LoadImg(); //预加载所有歌曲封面
+        //LoadImg(); //预加载所有歌曲封面
+
     }
    private static CacheLoadImageUtil cacheLoadImageUtil = new CacheLoadImageUtil((int) (Runtime.getRuntime().maxMemory()/8));//缓存区域的最大内存为本进程运行内存的1/8
+    private ExecutorService executorService =  Executors.newCachedThreadPool();//初始化线程池
     private void LoadImg() {
-        for (Song song:songList)
+//        for (Song song:songList)
+//        {
+//            String url = song.getFileUrl();
+//            byte [] imgByte = getArtwork(context,url);    //这里是获取本地图片的
+//            if (imgByte!=null) {  //有专辑封面才存入
+//                cacheLoadImageUtil.put(url, BitmapFactory.decodeByteArray(imgByte, 0, imgByte.length));
+//            }
+//        }
+        switch (NetUtils.getNetType())
         {
-            String url = song.getFileUrl();
-            byte [] imgByte = getArtwork(context,url);
-            if (imgByte!=null) {  //有专辑封面才存入
-                cacheLoadImageUtil.put(url, BitmapFactory.decodeByteArray(imgByte, 0, imgByte.length));
-            }
+            case NET_NONE:
+                Toast.makeText(MyApplication.getQuanjuContext(),"当前无网络，获取歌手写真失败",Toast.LENGTH_LONG).show();
+                return;
         }
+        for (int i =0;i<songList.size();i++)
+        {
+           getCoverUrl(songList.get(i).getTitle(),i);
+        }
+        notifyDataSetChanged();//获取完所有新在线音乐的封面后刷新列表显示图片
     }
     private Bitmap getfengmian(String url) //从Lru集合或软引用集合中获取歌曲封面的Bitmap
     {
@@ -287,15 +309,20 @@ public class songsAdapter extends RecyclerView.Adapter<songsAdapter.Viewholder> 
                 Showpopwindow(song.getTitle(), song.getFileUrl(), position);
             }
         });
-        Bitmap bitmap = getfengmian(url);
-           if (bitmap!=null)
-           {
-               holder.zjview.setImageBitmap(bitmap);
-           }
-           else
-           {
-               holder.zjview.setImageResource(R.drawable.music_ic);
-           }
+//        Bitmap bitmap = getfengmian(url);
+//           if (bitmap!=null)
+//           {
+//               holder.zjview.setImageBitmap(bitmap);  //加载本地封面时的方法
+//           }
+//           else
+//           {
+//               holder.zjview.setImageResource(R.drawable.music_ic);
+//           }
+        Glide.with(context).load(song.getFileName())
+                .placeholder(R.drawable.music_ic)
+                .error(R.drawable.music_ic)
+                .override(100,100)//图片压缩
+                .into(holder.zjview);
         Animator animator = ObjectAnimator.ofFloat(holder.itemView,"alpha",0f,0.5f,1.0f);
         animator.setDuration(500).start();
 
@@ -322,6 +349,50 @@ public class songsAdapter extends RecyclerView.Adapter<songsAdapter.Viewholder> 
             geshou = itemView.findViewById(R.id.geshou);
             ablum = itemView.findViewById(R.id.ablum);
         }
+    }
+
+
+    public void getCoverUrl(String geming, final int position)
+    {
+
+        HttpClinet.KugouSearch(geming, 5, new HttpCallback<KugouSearchResult>() {
+            @Override
+            public void onSuccess(KugouSearchResult kugouSearchResult) {
+                index++;//搜索过加+1
+                if (kugouSearchResult==null)
+                {
+                    index++;//就是搜不到这首歌也+1，表示已搜索过
+                    Toast.makeText(MyApplication.getQuanjuContext(),"获取封面失败，请检查网络再试",Toast.LENGTH_LONG).show();
+                    return;
+                }
+                List<KugouSearchResult.lists> lists = kugouSearchResult.getResultList();
+                String hash = lists.get(0).getFileHash();
+                HttpClinet.KugouUrl(hash, new HttpCallback<KugouMusic>() {
+                    @Override
+                    public void onSuccess(KugouMusic kugouMusic) {
+                        String coverUrl = kugouMusic.getData().getImg();
+                        songList.get(position).setFileName(coverUrl);//图片的url
+                        if (index==songList.size()-1)
+                        {
+                            notifyDataSetChanged();//搜索过全部歌曲封面后刷新列表
+                        }
+                    }
+
+                    @Override
+                    public void onFail(Exception e) {
+                        Toast.makeText(MyApplication.getQuanjuContext(),"获取封面失败，请检查网络再试",Toast.LENGTH_LONG).show();
+                    }
+                });
+
+            }
+
+            @Override
+            public void onFail(Exception e) {
+                index++;//搜索失败也加+1
+                Toast.makeText(MyApplication.getQuanjuContext(),"获取封面失败，请检查网络再试",Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
 }

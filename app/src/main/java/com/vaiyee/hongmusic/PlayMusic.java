@@ -86,7 +86,7 @@ public class PlayMusic {
             MainActivity.setplayButtonpause();
             p.zhuanquanuqna();
             PlayMusicFragment.play.setImageResource(R.drawable.play_btn_pause_selector);
-            MainActivity.play.setImageResource(R.drawable.ic_play_bar_btn_pause);
+            MainActivity.play.setImageResource(R.drawable.play_btn_pause_selector);
             MainActivity.firstplay = false;
             PlayMusicFragment.firstplay = false;
             if (mediaPlayer == null) {
@@ -176,7 +176,7 @@ public class PlayMusic {
             mediaPlayer.pause();
             p.stop();
             PlayMusicFragment. play.setImageResource(R.drawable.play_btn_play_pause_selector);
-            MainActivity.play.setImageResource(R.drawable.play_bar_btn_play_pause_selector);
+            MainActivity.play.setImageResource(R.drawable.play_btn_play_pause_selector);
             if (mainActivity ==null) {
                 mainActivity = new MainActivity();
             }
@@ -191,7 +191,7 @@ public class PlayMusic {
             mediaPlayer.start();
             p.zhuanquanuqna();
             PlayMusicFragment.play.setImageResource(R.drawable.play_btn_pause_selector);
-            MainActivity.play.setImageResource(R.drawable.ic_play_bar_btn_pause);
+            MainActivity.play.setImageResource(R.drawable.play_btn_pause_selector);
             if (mainActivity ==null) {
                 mainActivity = new MainActivity();
             }

@@ -28,4 +28,13 @@
         <item name="android:windowEnterAnimation">@anim/enter_from_bottom</item>
         <item name="android:windowExitAnimation">@anim/exit_from_bottom</item>
     </style>
+
+    <style name="SplashTheme" parent="AppTheme">
+        <item name="android:windowIsTranslucent">true</item>  <!-- 透明背景 -->
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">@drawable/s9</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
 </resources>

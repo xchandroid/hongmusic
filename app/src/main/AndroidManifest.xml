@@ -89,7 +89,8 @@
         <activity android:name=".FenleiListActivity" />
         <activity android:name=".GeshouInfoActivity" />
         <activity android:name=".LrcActivity" />
-        <activity android:name=".KaipingActivity">
+        <activity android:name=".KaipingActivity"
+          android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

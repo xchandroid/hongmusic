@@ -1,5 +1,6 @@
 package com.vaiyee.hongmusic;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
@@ -30,25 +31,25 @@ public class KaipingActivity extends AppCompatActivity {
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_kaiping);
-        img = findViewById(R.id.kaipingimg);
-        HttpUtil.sendOkhttpRequest("http://guolin.tech/api/bing_pic", new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                imgurl = response.body().string();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Glide.with(MyApplication.getQuanjuContext()).load(imgurl).crossFade(1000).into(img);
-                    }
-                });
-            }
-        });
+//        setContentView(R.layout.activity_kaiping);
+//        img = findViewById(R.id.kaipingimg);
+//        HttpUtil.sendOkhttpRequest("http://guolin.tech/api/bing_pic", new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                imgurl = response.body().string();
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        Glide.with(MyApplication.getQuanjuContext()).load(imgurl).crossFade(1000).into(img);
+//                    }
+//                });
+//            }
+//        });
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -64,6 +65,6 @@ public class KaipingActivity extends AppCompatActivity {
                     }
                 });
             }
-        },4000);
+        },500);
     }
 }

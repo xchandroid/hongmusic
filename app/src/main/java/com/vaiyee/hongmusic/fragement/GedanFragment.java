@@ -62,26 +62,6 @@ public class GedanFragment extends BaseFragment {
         // Required empty public constructor
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        adapter = new GedanAdapter(getContext(),infoList);    // adpter要在这里new，不然无网络的时候不能下拉刷新
-        HttpClinet.getKugouGedan(page, new HttpCallback<Gedan>() {
-            @Override
-            public void onSuccess(Gedan response) {
-                infoList.addAll(response.data.infoList);
-                recyclerView.setAdapter(adapter);  //这里给你recycleview 设置适配器并不会导致recycleview为null，因为这里是在网络get成功后在执行的，而onCreateView（）方法会紧跟onCreat()方法执行
-                loadingfooterCenter.setVisibility(View.GONE);
-                isSuccess = true;
-                isfirst = false;
-            }
-
-            @Override
-            public void onFail(Exception e) {
-                Toast.makeText(getContext(),"获取歌单失败,请检查网络是否畅通",Toast.LENGTH_LONG).show();
-            }
-        });
-    }
 
     @Override
     protected View createView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -145,7 +125,24 @@ public class GedanFragment extends BaseFragment {
     protected void lazyLoad() {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),2);
         recyclerView.setLayoutManager(gridLayoutManager);
-        recyclerView.setAdapter(adapter);  //这里再设置一次是因为当这个碎片由不见变为可见时会执行这个方法,不再设置一次适配器的话数据将不能显示
+        adapter = new GedanAdapter(getContext(),infoList);
+        recyclerView.setAdapter(adapter);
+        HttpClinet.getKugouGedan(page, new HttpCallback<Gedan>() {
+            @Override
+            public void onSuccess(Gedan response) {
+                infoList.addAll(response.data.infoList);
+                adapter.notifyDataSetChanged();
+                //recyclerView.setAdapter(adapter);  //这里给你recycleview 设置适配器并不会导致recycleview为null，因为这里是在网络get成功后在执行的，而onCreateView（）方法会紧跟onCreat()方法执行
+                loadingfooterCenter.setVisibility(View.GONE);
+                isSuccess = true;
+                isfirst = false;
+            }
+
+            @Override
+            public void onFail(Exception e) {
+                Toast.makeText(getContext(),"获取歌单失败,请检查网络是否畅通",Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
 

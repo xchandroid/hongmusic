@@ -6,7 +6,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:id="@+id/show_yinxiao_set"
-    android:background="@drawable/button_style"
     android:layout_height="match_parent"
     >
     <ImageView
@@ -32,9 +31,9 @@
     <ImageView
         android:id="@+id/opendrawermenu"
         android:background="?android:attr/selectableItemBackground"
-        android:scaleType="centerInside"
         android:src="@drawable/ic_menu"
-        android:layout_width="40dp"
+        android:padding="12dp"
+        android:layout_width="50dp"
         android:layout_height="50dp"
         />
     <LinearLayout
@@ -93,8 +92,9 @@
 
         <ImageView
             android:id="@+id/music_search"
-            android:layout_width="40dp"
+            android:layout_width="50dp"
             android:layout_height="50dp"
+            android:padding="12dp"
             android:background="?android:attr/selectableItemBackground"
             android:scaleType="centerInside"
             android:src="@drawable/ic_menu_search" />
@@ -174,14 +174,14 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="?android:attr/selectableItemBackground"
-                android:src="@drawable/play_bar_btn_play_pause_selector" />
+                android:src="@drawable/play_btn_play_pause_selector" />
 
             <ImageView
                 android:id="@+id/play_bar_next"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="?android:attr/selectableItemBackground"
-                android:src="@drawable/ic_play_bar_btn_next"
+                android:src="@drawable/play_btn_next_selector"
                 />
 
         </LinearLayout>
@@ -189,7 +189,6 @@
     </LinearLayout>
 </LinearLayout>
 <android.support.design.widget.NavigationView
-    android:background="@drawable/button_style"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/navigation_view"

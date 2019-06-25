@@ -109,6 +109,7 @@ public class fragment2 extends BaseFragment {
                 {
                     transaction.hide(wangyiFragment);
                 }
+                onlineList.setVisibility(View.GONE); //将百度排行榜列表隐藏
                 transaction.commit();
                 baidu.setTextColor(Color.parseColor("#8B8989"));
                 wangyi.setTextColor(Color.parseColor("#8B8989"));
@@ -126,6 +127,7 @@ public class fragment2 extends BaseFragment {
                 if (wangyiFragment!=null)
                     transaction.hide(wangyiFragment);
                 transaction.commitAllowingStateLoss();
+                onlineList.setVisibility(View.VISIBLE); //显示百度排行榜列表
                 baidu.setTextColor(Color.parseColor("#FFC125"));
                 wangyi.setTextColor(Color.parseColor("#8B8989"));
                 kugou.setTextColor(Color.parseColor("#8B8989"));
@@ -156,6 +158,7 @@ public class fragment2 extends BaseFragment {
                 {
                     transaction.hide(kugouFragment);
                 }
+                onlineList.setVisibility(View.GONE); //将百度排行榜列表隐藏
                 transaction.commitAllowingStateLoss();
                 wangyi.setTextColor(Color.parseColor("#FFC125"));
                 baidu.setTextColor(Color.parseColor("#8B8989"));
